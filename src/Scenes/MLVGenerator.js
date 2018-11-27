@@ -1,30 +1,42 @@
 import React, { Component } from 'react';
-import ConnectionCreation from './Components/ConnectionCreation'
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+import { MultiSelect } from '@progress/kendo-react-dropdowns';
+export default class MLVGenerator extends Component {
 
-export default class MLVGenerator extends Component{
-
-	constructor(props){
+	constructor(props) {
 
 		super(props);
 
+		this.state={
+
+			value:[]
+		}
+
 	}
 
-	render(){
+	onChange(event){
 
-		return(
-			<div className = "container-fluid">
-			<nav className="navbar navbar-expand-lg navbar-light bg-light">
-			
-				
-					<ConnectionCreation />
+		this.setState({
 
-				
-			
+			value : [...event.target.value]
+		})
+	}
 
-			</nav>
-			
-			</div>
-			)
+	render() {
+		var sports = [ "Baseball", "Basketball", "Cricket", "Field Hockey", "Football", "Table Tennis", "Tennis", "Volleyball" ];
+		return (
+				<div className="d-flex flex-row justify-content-center">
+					<form className="form-inline" style={{width : "50%"}}>
+					 <MultiSelect
+                       placeholder = "Select Sources"
+                       data={sports}
+                       onChange={this.onChange.bind(this)}
+                       value={this.state.value}
+                       filterable={true}
+                    />
+					</form>
+				</div>
+		)
 	}
 
 }

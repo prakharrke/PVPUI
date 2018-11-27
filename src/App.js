@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import MLVGenerator from './Scenes/MLVGenerator'
+import PVPUI from "./Scenes/PVPUI"
 import '@progress/kendo-theme-default/dist/all.css';
 
 class App extends Component {
@@ -7,7 +7,7 @@ class App extends Component {
     return (
       <div className="App">
 
-        <MLVGenerator />
+        <PVPUI />
 
       </div>
     );

@@ -18,6 +18,8 @@ export default class ConnectionCreation extends Component{
 
 	componentWillMount(){
 
+		//	this.props.isLoading();
+
 		    axios.post('http://localhost:9090/PVPUI/GetPlugins',{p :'1'},{
       headers :{
 
@@ -29,7 +31,8 @@ export default class ConnectionCreation extends Component{
 
 
     }).then((response)=>{
-
+			
+			this.props.isNotLoading();
     		var pluginList = new Array();
     		pluginList = response.data.split(",")
 
@@ -55,15 +58,15 @@ export default class ConnectionCreation extends Component{
 	connectionTest(event){
 		event.preventDefault();
 		var selectedPlugin = this.state.selectedPlugin;
-
+		this.props.isLoading();
 		  axios.post('http://localhost:9090/PVPUI/TestConnection',`selectedPlugin=${this.state.selectedPlugin}`,{
       headers :{
       }
 
 
     }).then((response)=>{
-
-    		if(response.data.status == 'true'){
+			this.props.isNotLoading();
+    		if(response.data.status === 'true'){
 
     			alert('Connection Successful')
     		}else{
