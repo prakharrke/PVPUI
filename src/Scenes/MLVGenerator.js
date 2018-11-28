@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
-import { MultiSelect } from '@progress/kendo-react-dropdowns';
+import { MultiSelect, AutoComplete } from '@progress/kendo-react-dropdowns';
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import { filterBy } from '@progress/kendo-data-query';
 import LoadingPanel from './Components/LoadingPanel'
 import axios from 'axios';
+import * as helpers from '../MLVObject'
 const delay = 50;
 
 export default class MLVGenerator extends Component {
@@ -64,11 +65,17 @@ export default class MLVGenerator extends Component {
 				selectedObject: "Selected Sources"
 			})
 		}
+
+		var totalAttributesElement = document.getElementById("totalAttributes");
+		var selectedAttributesElement = document.getElementById("selectedAttributes");
+
+
+
 	}
 
 
 	addSelectedObject(event) {
-
+		helpers.updateObjectList(event.target.value)
 		this.setState({
 
 			selectedObjectList: [...event.target.value]
@@ -93,6 +100,7 @@ export default class MLVGenerator extends Component {
 	//* METHOD TO SELECT AN OBJECT FROM SELECTED_OBJECT_LIST
 
 	selectedObject(event) {
+
 
 		this.setState({
 			selectedObject: event.target.value
@@ -125,6 +133,14 @@ export default class MLVGenerator extends Component {
 
 
 	render() {
+		var opt = ['Fireeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeeeeeeeeest', 'Seeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeecond', 'Th3333333333333333333333333333333ird']
+		var options = opt.map((attribute) => {
+
+			return (
+				<option value="attribute">{attribute}</option>
+
+			)
+		})
 
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 
@@ -138,7 +154,7 @@ export default class MLVGenerator extends Component {
 
 						<MultiSelect
 							placeholder="Select Sources"
-							data={this.state.objectList}
+							data={[1, 2, 3, 4, 5, 6]}
 							onChange={this.addSelectedObject.bind(this)}
 							value={this.state.selectedObjectList}
 							filterable={true}
@@ -157,18 +173,34 @@ export default class MLVGenerator extends Component {
 
 					</form>
 				</div>
+				<div className="row" style={{ marginTop: "2em" }}>
+					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "75%", margin: "0 auto" }}>
 
-				<div className="row justify-content-center" style={{width : "100%"}}>
+						<PanelBar >
+							<PanelBarItem title="Select Attributes" >
 
-					<PanelBar style={{width : "100%"}}>
-						<PanelBarItem title="Select Attributes" >
+								<div className="row" >
 
-							<p>dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd</p>
+									<div className="col-lg-6 form-group" >
+										<select className="form-control" size={6} id="totalAttributes" style={{overflowX: "scroll"}}>
+											{options}
+										</select>
+										<br/>
+										<AutoComplete data={opt}  style={{width: "100%"}}/>
+										
+									</div>
+									<div className="col-lg-6 form-group">
+										<select className="form-control" size={6} id="selectedAttributes">
+
+										</select>
+									</div>
+								</div>
 
 
-						</PanelBarItem>
-					</PanelBar>
+							</PanelBarItem>
+						</PanelBar>
 
+					</div>
 				</div>
 			</div>
 		)

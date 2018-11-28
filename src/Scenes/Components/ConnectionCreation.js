@@ -18,7 +18,7 @@ export default class ConnectionCreation extends Component{
 
 	componentWillMount(){
 
-			this.props.isLoading();
+			//this.props.isLoading();
 
 		    axios.post('http://localhost:9090/PVPUI/GetPlugins',{p :'1'},{
       headers :{

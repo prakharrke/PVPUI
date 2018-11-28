@@ -11,7 +11,7 @@ export default class PVPUI extends Component {
 
 			isLoading: false,
 			objectList: [],
-			isModelCreated: ""
+			isModelCreated: true
 
 		}
 
