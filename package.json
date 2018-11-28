@@ -3,15 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@progress/kendo-data-query": "^1.5.0",
     "@progress/kendo-drawing": "^1.5.7",
     "@progress/kendo-react-buttons": "^2.4.0",
     "@progress/kendo-react-dropdowns": "^2.4.0",
     "@progress/kendo-react-gauges": "^2.4.0",
     "@progress/kendo-react-inputs": "^2.4.0",
     "@progress/kendo-react-intl": "^2.4.0",
+    "@progress/kendo-react-layout": "^2.4.0",
     "@progress/kendo-theme-default": "^2.61.0",
     "axios": "^0.18.0",
     "react": "^16.6.3",
+    "react-addons-css-transition-group": "^15.6.2",
     "react-dom": "^16.6.3",
     "react-scripts": "2.1.1"
   },

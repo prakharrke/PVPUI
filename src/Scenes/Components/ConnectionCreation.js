@@ -18,7 +18,7 @@ export default class ConnectionCreation extends Component{
 
 	componentWillMount(){
 
-		//	this.props.isLoading();
+			this.props.isLoading();
 
 		    axios.post('http://localhost:9090/PVPUI/GetPlugins',{p :'1'},{
       headers :{
@@ -80,7 +80,7 @@ export default class ConnectionCreation extends Component{
 
 		event.preventDefault();
 		var selectedPlugin = this.state.selectedPlugin
-
+		this.props.modelNotCreated();
 		axios.post('http://localhost:9090/PVPUI/CreateModel',`selectedPlugin=${this.state.selectedPlugin}`,{
       headers :{
       }
@@ -89,7 +89,11 @@ export default class ConnectionCreation extends Component{
     }).then((response)=>{
 
     	var parsedJson = JSON.parse(atob(response.data))
-    	console.log(parsedJson.objectList)
+    	var objectList = new Array();
+    	objectList = parsedJson.objectList;
+    	
+    	this.props.setObjectList(objectList);
+    	this.props.modelCreated();
 
     })
 

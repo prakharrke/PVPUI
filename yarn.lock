@@ -804,6 +804,13 @@
   resolved "https://registry.yarnpkg.com/@progress/kendo-charts/-/kendo-charts-1.12.1.tgz#f161f4b4cddaa1a3b711bd7eec14b121f256d619"
   integrity sha512-fEQH1qpJcEXUUa3HIVThQGQJ+pi6n+6d9gXXC+gqY5fxRpQWHFw4apBCDw9dgNh/so7GW9JG/Y7WIuIS/ipVkQ==
 
+"@progress/kendo-data-query@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-data-query/-/kendo-data-query-1.5.0.tgz#d3d4b098ce7beb1011c77194bd9a43b2d66d3545"
+  integrity sha512-/uEE+5FUjQ/NGnGPZSr+7lLHN/5QAf9E/tWjLyVuNM/UyLfc9Q8QlLQmEL16ML8FiE0JssgIwbnOtkrSUO6O7Q==
+  dependencies:
+    tslib "^1.7.0"
+
 "@progress/kendo-drawing@^1.5.7":
   version "1.5.7"
   resolved "https://registry.yarnpkg.com/@progress/kendo-drawing/-/kendo-drawing-1.5.7.tgz#03c8edadf85a7880234657e87599106b76fbc88e"
@@ -874,6 +881,17 @@
   integrity sha512-LRTCOmTmhkGsgDJERg+vQ1tOa9NvQ4UgumD5+bLrfMfThy3Z36zIZfXODaEcHjee6QLsNnrSaFviVJahVMPS0g==
   dependencies:
     "@telerik/kendo-intl" "^1.3.0"
+    prop-types "^15.6.0"
+
+"@progress/kendo-react-layout@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-react-layout/-/kendo-react-layout-2.4.0.tgz#01cbcfd78e374dfed2bd61f74bde9e090ad2e82e"
+  integrity sha512-5u5ljGRkGi371csKZo+obBTRcrLJkBUALcXAcfoAsVUitSyoj54gWOxhqTE8/qXjJGuxxtxyzBMGPVY/371S6Q==
+  dependencies:
+    "@progress/kendo-react-animation" "2.4.0"
+    "@progress/kendo-react-common" "2.4.0"
+    "@progress/kendo-react-popup" "2.4.0"
+    "@telerik/kendo-draggable" "^1.9.0"
     prop-types "^15.6.0"
 
 "@progress/kendo-react-popup@2.4.0":
@@ -2115,6 +2133,11 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
+chain-function@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/chain-function/-/chain-function-1.0.1.tgz#c63045e5b4b663fb86f1c6e186adaf1de402a1cc"
+  integrity sha512-SxltgMwL9uCko5/ZCLiyG2B7R9fY4pDZUw7hJ4MhirdjBLosoDqkWABi3XMucddHdLiFJMb7PD2MZifZriuMTg==
+
 chalk@2.4.1, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.1.tgz#18c49ab16a037b6eb0152cc83e3471338215b66e"
@@ -3035,7 +3058,7 @@ dom-converter@~0.2:
   dependencies:
     utila "~0.4"
 
-dom-helpers@^3.3.1:
+dom-helpers@^3.2.0, dom-helpers@^3.3.1:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/dom-helpers/-/dom-helpers-3.4.0.tgz#e9b369700f959f62ecde5a6babde4bccd9169af8"
   integrity sha512-LnuPJ+dwqKDIyotW1VzmOZ5TONUN7CwkCR5hrgawTUbkBGYdeoNLZo6nNfGkCrjtE1nXXaj7iMMpDa8/d9WoIA==
@@ -7631,7 +7654,7 @@ prompts@^0.1.9:
     kleur "^2.0.1"
     sisteransi "^0.1.1"
 
-prop-types@^15.6.0, prop-types@^15.6.2:
+prop-types@^15.5.6, prop-types@^15.6.0, prop-types@^15.6.2:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   integrity sha512-3pboPvLiWD7dkI3qf3KbUe6hKFKa52w+AE0VCqECtf+QHAKgOL37tTaNCnuX1nAAQ4ZhyP+kYVKf8rLmJ/feDQ==
@@ -7795,6 +7818,13 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-addons-css-transition-group@^15.6.2:
+  version "15.6.2"
+  resolved "https://registry.yarnpkg.com/react-addons-css-transition-group/-/react-addons-css-transition-group-15.6.2.tgz#9e4376bcf40b5217d14ec68553081cee4b08a6d6"
+  integrity sha1-nkN2vPQLUhfRTsaFUwgc7ksIptY=
+  dependencies:
+    react-transition-group "^1.2.0"
+
 react-app-polyfill@^0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/react-app-polyfill/-/react-app-polyfill-0.1.3.tgz#e57bb50f3751dac0e6b3ac27673812c68c679a1d"
@@ -7910,6 +7940,17 @@ react-scripts@2.1.1:
     workbox-webpack-plugin "3.6.3"
   optionalDependencies:
     fsevents "1.2.4"
+
+react-transition-group@^1.2.0:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-1.2.1.tgz#e11f72b257f921b213229a774df46612346c7ca6"
+  integrity sha512-CWaL3laCmgAFdxdKbhhps+c0HRGF4c+hdM4H23+FI1QBNUyx/AMeIJGWorehPNSaKnQNOAxL7PQmqMu78CDj3Q==
+  dependencies:
+    chain-function "^1.0.0"
+    dom-helpers "^3.2.0"
+    loose-envify "^1.3.1"
+    prop-types "^15.5.6"
+    warning "^3.0.0"
 
 react-transition-group@^2.2.0:
   version "2.5.0"
@@ -9175,7 +9216,7 @@ tryer@^1.0.0:
   resolved "https://registry.yarnpkg.com/tryer/-/tryer-1.0.1.tgz#f2c85406800b9b0f74c9f7465b81eaad241252f8"
   integrity sha512-c3zayb8/kWWpycWYg87P71E1S1ZL6b6IJxfb5fvsUgsf0S2MVGaDhDXXjDMpdCpfWXqptc+4mXwmiy1ypXqRAA==
 
-tslib@^1.9.0:
+tslib@^1.7.0, tslib@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
   integrity sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
@@ -9477,6 +9518,13 @@ walker@~1.0.5:
   integrity sha1-L3+bj9ENZ3JisYqITijRlhjgKPs=
   dependencies:
     makeerror "1.0.x"
+
+warning@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/warning/-/warning-3.0.0.tgz#32e5377cb572de4ab04753bdf8821c01ed605b7c"
+  integrity sha1-MuU3fLVy3kqwR1O9+IIcAe1gW3w=
+  dependencies:
+    loose-envify "^1.0.0"
 
 watch@~0.18.0:
   version "0.18.0"
