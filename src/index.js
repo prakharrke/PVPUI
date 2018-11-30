@@ -5,6 +5,8 @@ import * as serviceWorker from './serviceWorker';
 import './css/bootstrap.min.css'
 import './css/bootstrap.css'
 import './css/transition.css'
+import './css/all.css'
+import './css/variables.scss'
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

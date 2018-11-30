@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import {DropDownList} from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
+import * as Constants from '../../Constants.js'
 export default class ConnectionCreation extends Component{
 
 	constructor(props){
@@ -18,7 +19,7 @@ export default class ConnectionCreation extends Component{
 
 	componentWillMount(){
 
-			//this.props.isLoading();
+			this.props.isLoading();
 
 		    axios.post('http://localhost:9090/PVPUI/GetPlugins',{p :'1'},{
       headers :{
@@ -33,8 +34,12 @@ export default class ConnectionCreation extends Component{
     }).then((response)=>{
 			
 			this.props.isNotLoading();
+			var parsedJson = response.data;
+			Constants.Constants.MLVFunctions = parsedJson.MLVFunctions;
+			Constants.Constants.MLVWhereClauseFunctions = parsedJson.MLVWhereClauseFunctions;
+			Constants.Constants.MLVOperators = parsedJson.MLVOperators;
     		var pluginList = new Array();
-    		pluginList = response.data.split(",")
+    		pluginList = parsedJson.pluginList.split(",")
 
     		this.setState({
 
