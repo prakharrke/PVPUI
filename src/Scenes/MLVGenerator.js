@@ -8,6 +8,7 @@ import LoadingPanel from './Components/LoadingPanel'
 import axios from 'axios';
 import * as helpers from '../MLVObject'
 import * as Constants from '../Constants.js'
+import * as helper from '../helper'
 
 const delay = 50;
 
@@ -251,9 +252,9 @@ export default class MLVGenerator extends Component {
 		attributes = this.state[selectedObject].attributes;
 		var attributesLength = attributes.length
 		attributes.push({
-			columnName: `level_${this.state[selectedObject].level}_${selectedObject}_${event.target.value}_${attributesLength}`,
+			columnName: helper.generateColumnName(`level_${this.state[selectedObject].level}_${selectedObject}_${event.target.value}_${attributesLength}`),
 			attributeName: event.target.value,
-			ID: `level_${this.state[selectedObject].level}_${selectedObject}_${event.target.value}_${attributesLength}`
+			ID: helper.generateColumnName(`level_${this.state[selectedObject].level}_${selectedObject}_${event.target.value}_${attributesLength}`)
 		})
 		this.setState({
 			customAttribute: "",
@@ -280,7 +281,7 @@ export default class MLVGenerator extends Component {
 
 			if (attribute.ID === event.target.name) {
 
-				attribute.columnName = event.target.value
+				attribute.columnName = helper.generateColumnName(event.target.value)
 
 			}
 		})
@@ -304,9 +305,9 @@ export default class MLVGenerator extends Component {
 			attributes = this.state[selectedObject].attributes;
 			var attributesLength = attributes.length
 			attributes.push({
-				columnName: `${selectedObject}_${event.target.value}_${attributesLength}`,
+				columnName: helper.generateColumnName(`level_${this.state[selectedObject].level}_${selectedObject}_${event.target.value}_${attributesLength}`),
 				attributeName: event.target.value,
-				ID: `${selectedObject}_${event.target.value}_${attributesLength}`
+				ID: helper.generateColumnName(`level_${this.state[selectedObject].level}_${selectedObject}_${event.target.value}_${attributesLength}`)
 			})
 			this.setState({
 				[this.state.selectedObject]: {
