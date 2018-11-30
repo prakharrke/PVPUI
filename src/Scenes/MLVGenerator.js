@@ -107,7 +107,14 @@ export default class MLVGenerator extends Component {
 							fetchSize: "",
 							chunkSize: "",
 							levelWeight: "",
-							delimiter: `*level${index}*`
+							delimiter: `*level${index}*`,
+							groupBy: {
+								attributes: []
+							},
+							orderBy: {
+								attributes: [],
+
+							}
 
 						}
 					})
@@ -324,11 +331,12 @@ export default class MLVGenerator extends Component {
 	// * EDIT CUSTOM ATTRIBUTE
 
 	editCustomAttribute(event) {
+		if (this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] != undefined && this.state.selectedObject != "Selected Sources") {
+			this.setState({
 
-		this.setState({
-
-			customAttribute: event.target.value
-		})
+				customAttribute: event.target.value
+			})
+		}
 	}
 
 	// * METHOD TO REMOVE SELECTED ATTRIBUTE 
@@ -354,6 +362,8 @@ export default class MLVGenerator extends Component {
 
 	}
 
+
+
 	// * ADD PREDICATE FOR CURRENT OBJECT
 
 	addPredicate(event) {
@@ -368,47 +378,292 @@ export default class MLVGenerator extends Component {
 		}
 	}
 
+	// * EDIT PREDICATE VALUE FROM INPUT COMPONENT
+
+	editPredicate(event) {
+		if (this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] != undefined && this.state.selectedObject != "Selected Sources") {
+			this.setState({
+				[this.state.selectedObject]: {
+					...this.state[this.state.selectedObject],
+					predicate: event.target.value
+				}
+			})
+		}
+	}
+
 
 	// * METHOD TO ADD FETCH SIZE 
 	addFetchSize(event) {
 		var numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
-		
-		if (numbers.includes(event.target.value[event.target.value.length - 1]) || event.target.value==='') {
-			
-			this.setState({
 
-				[this.state.selectedObject]: {
-					...this.state[this.state.selectedObject],
-					fetchSize: event.target.value
-				}
-			})
+		if (this.state.selectedObject != "Selected Sources") {
+			if (numbers.includes(event.target.value[event.target.value.length - 1]) || event.target.value === '') {
+
+				this.setState({
+
+					[this.state.selectedObject]: {
+						...this.state[this.state.selectedObject],
+						fetchSize: event.target.value
+					}
+				})
+			}
 		}
 	}
 
-	addChunkSize(event){
+	addChunkSize(event) {
 		var numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
-			if (numbers.includes(event.target.value[event.target.value.length - 1]) || event.target.value==='') {
-			
-			this.setState({
 
-				[this.state.selectedObject]: {
-					...this.state[this.state.selectedObject],
-					chunkSize: event.target.value
-				}
-			})
+		if (this.state.selectedObject != "Selected Sources") {
+
+			if (numbers.includes(event.target.value[event.target.value.length - 1]) || event.target.value === '') {
+
+				this.setState({
+
+					[this.state.selectedObject]: {
+						...this.state[this.state.selectedObject],
+						chunkSize: event.target.value
+					}
+				})
+			}
 		}
 	}
 
-		addLevelWeight(event){
-		var numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0','-'];
-			if (numbers.includes(event.target.value[event.target.value.length - 1]) || event.target.value==='') {
-			
-			this.setState({
+	addLevelWeight(event) {
+		var numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-'];
+		if (this.state.selectedObject != "Selected Sources") {
+			if (numbers.includes(event.target.value[event.target.value.length - 1]) || event.target.value === '') {
 
-				[this.state.selectedObject]: {
-					...this.state[this.state.selectedObject],
-					levelWeight: event.target.value
+				if (event.target.value[event.target.value.length - 1] === '-') {
+
+					if (this.state[this.state.selectedObject].levelWeight.length === 0) {
+						this.setState({
+
+							[this.state.selectedObject]: {
+								...this.state[this.state.selectedObject],
+								levelWeight: event.target.value
+							}
+						})
+
+					}
+
+
 				}
+				else {
+
+					this.setState({
+
+						[this.state.selectedObject]: {
+							...this.state[this.state.selectedObject],
+							levelWeight: event.target.value
+						}
+					})
+				}
+			}
+		}
+	}
+
+	// * METHOD TO ADD GROUP BY ATTRIBUTE
+	addGroupByAttribute(event) {
+		console.log(event.target.getAttribute('name'))
+		if (event.target.value === "") {
+
+			return
+		}
+		var selectedObject = this.state.selectedObject;
+		var attributes = new Array();
+		attributes = this.state[selectedObject].groupBy.attributes;
+
+		var attributesLength = attributes.length;
+
+		for (var i = 0; i < attributes.length; i++) {
+
+			if (event.target.getAttribute('name') === attributes[i].ID) {
+
+				return
+			}
+		}
+		attributes.push({
+
+			attributeName: event.target.value,
+			ID: event.target.getAttribute('name'),
+			columnName: event.target.getAttribute('name')
+		})
+
+
+
+
+		this.setState({
+
+			[this.selectedObject]: {
+				...this.state[this.selectedObject],
+				groupBy: {
+
+					attributes: attributes
+				}
+			}
+		})
+
+
+	}
+
+
+	// * REMOVE GROUP BY ATTRIBUTE 
+
+	removeGroupByAttribute(event) {
+
+		var temp = this.state[this.state.selectedObject].groupBy.attributes;
+
+		temp.map((attribute, index) => {
+
+			if (event.target.getAttribute('name') === attribute.ID) {
+				temp.splice(index, 1)
+			}
+		})
+
+		this.setState({
+			[this.state.selectedObject]: {
+
+				...this.state[this.state.selectedObject],
+				groupBy: {
+					...this.state[this.state.selectedObject].groupBy,
+					attributes: temp
+
+				}
+			}
+		})
+	}
+
+	// * METHOD TO ADD ORDER BY ATTRIBUTE 
+
+	addOrderByAttribute(event) {
+
+		console.log(event.target.getAttribute('name'))
+		if (event.target.value === "") {
+
+			return
+		}
+		var selectedObject = this.state.selectedObject;
+		var attributes = new Array();
+		attributes = this.state[selectedObject].orderBy.attributes;
+
+		var attributesLength = attributes.length;
+
+		for (var i = 0; i < attributes.length; i++) {
+
+			if (event.target.getAttribute('name') === attributes[i].ID) {
+
+				return
+			}
+		}
+		attributes.push({
+
+			attributeName: event.target.value,
+			ID: event.target.getAttribute('name'),
+			columnName: event.target.getAttribute('name'),
+			order: {
+				asc: true,
+				desc: false
+			}
+		})
+
+
+		this.setState({
+
+			[this.selectedObject]: {
+				...this.state[this.selectedObject],
+				orderBy: {
+
+					attributes: attributes
+				}
+			}
+		})
+	}
+	// * METHOD TO REMOVE ORDER BY ATTRIBUTE
+
+	removeOrderByAttribute(event) {
+
+		var temp = this.state[this.state.selectedObject].orderBy.attributes;
+
+		temp.map((attribute, index) => {
+
+			if (event.target.getAttribute('name') === attribute.ID) {
+				temp.splice(index, 1)
+			}
+		})
+
+		this.setState({
+			[this.state.selectedObject]: {
+
+				...this.state[this.state.selectedObject],
+				orderBy: {
+					...this.state[this.state.selectedObject].orderBy,
+					attributes: temp
+
+				}
+			}
+		})
+
+	}
+
+
+	// * METHOD TO SELECT ORDER FOR ORDER BY
+
+	toggleOrderForOrderBy(event) {
+
+
+
+		if (event.target.getAttribute("component") === "asc") {
+			if(event.target.checked){
+				alert("Return")
+				return
+			}
+			alert("asc")
+
+			var orderByAttributes = this.state[this.state.selectedObject].orderBy.attributes;
+			orderByAttributes.map((attribute, index) => {
+
+				if (attribute.ID === event.target.getAttribute("name")) {
+
+					attribute.order.asc = true
+					attribute.order.desc = false
+					orderByAttributes[index] = attribute;
+
+					this.setState({
+
+						[this.state.selectedObject]: {
+							...this.state[this.state.selectedObject],
+							orderBy: {
+								attributes: orderByAttributes
+							}
+						}
+					})
+				}
+
+			})
+		}
+		if (event.target.getAttribute("component") === "desc") {
+
+
+			var orderByAttributes = this.state[this.state.selectedObject].orderBy.attributes;
+			orderByAttributes.map((attribute, index) => {
+
+				if (attribute.ID === event.target.getAttribute("name")) {
+
+					attribute.order.asc = false
+					attribute.order.desc = true
+					orderByAttributes[index] = attribute;
+
+					this.setState({
+
+						[this.state.selectedObject]: {
+							...this.state[this.state.selectedObject],
+							orderBy: {
+								attributes: orderByAttributes
+							}
+						}
+					})
+				}
+
 			})
 		}
 	}
@@ -525,7 +780,7 @@ export default class MLVGenerator extends Component {
 					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
 						<PanelBar >
-							<PanelBarItem title="Select Attributes">
+							<PanelBarItem title={<b>Select Attributes</b>}>
 
 								<div className="row" >
 
@@ -564,7 +819,7 @@ export default class MLVGenerator extends Component {
 									</div>
 
 								</div>
-								<PanelBarItem title="Add custom attributes">
+								<PanelBarItem title={<b>Add custom Attrbutes</b>}>
 									<div className="row">
 										<div className="col-lg-11" tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
 											<Input
@@ -636,7 +891,7 @@ export default class MLVGenerator extends Component {
 
 								</PanelBarItem>
 							</PanelBarItem>
-							<PanelBarItem title="Details">
+							<PanelBarItem title={<b>Details</b>}>
 								<div className="row">
 									<div className="col-lg-6">
 										<Input
@@ -670,20 +925,20 @@ export default class MLVGenerator extends Component {
 											label="Delimiter"
 											value={this.state[this.state.selectedObject] === null || this.state[this.state.selectedObject] === undefined ? "" : this.state[this.state.selectedObject].delimiter}
 											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											
+
 
 										/>
 									</div>
 								</div>
 
-								<PanelBarItem title="Add Predicate">
+								<PanelBarItem title={<b>Add Predicate</b>}>
 									<div className="row">
-										<div className="col-lg-11" tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
+										<div className="col-lg-11" tabIndex="0">
 											<Input
 												value={this.state[this.state.selectedObject] == null || this.state[this.state.selectedObject] == undefined ? "" : this.state[this.state.selectedObject].predicate}
 												placeholder="Predicate"
 												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-												onChange={this.editCustomAttribute.bind(this)}
+												onChange={this.editPredicate.bind(this)}
 
 											/>
 										</div>
@@ -744,8 +999,215 @@ export default class MLVGenerator extends Component {
 
 										</div>
 									</div>
+								</PanelBarItem>
+								<PanelBarItem title={<b>Group By</b>}>
+
+									<div className="row">
+										<div className="col-lg-6">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+												{
+
+													(this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] && this.state.selectedObject != "Selected Sources") ?
+
+														this.state[this.state.selectedObject].attributes.map((attribute) => {
+
+															for (var i = 0; i < this.state[this.state.selectedObject].groupBy.attributes.length; i++) {
+
+																if (attribute.columnName === this.state[this.state.selectedObject].groupBy.attributes[i].columnName) {
 
 
+																} else {
+
+
+
+																}
+															}
+
+															return (
+
+
+																<option
+																	key={attribute.ID}
+																	id={attribute.ID}
+																	name={attribute.ID}
+																	onDoubleClick={this.addGroupByAttribute.bind(this)}
+																	value={attribute.attributeName}>{attribute.columnName}
+
+																</option>
+
+															)
+														}) : ""
+
+
+												}
+
+
+											</select>
+										</div>
+										<div className="col-lg-6">
+
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+
+												{
+
+													(this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] && this.state.selectedObject != "Selected Sources") ?
+
+														this.state[this.state.selectedObject].groupBy.attributes.map((attribute) => {
+
+															return (
+
+
+																<option
+																	key={attribute.ID}
+																	id={attribute.ID}
+																	name={attribute.ID}
+																	onDoubleClick={this.removeGroupByAttribute.bind(this)}
+																	value={attribute.attributeName}>{attribute.columnName}
+
+																</option>
+
+															)
+														}) : ""
+
+
+												}
+
+											</select>
+										</div>
+									</div>
+								</PanelBarItem>
+								<PanelBarItem title={<b>Order By</b>}>
+									<div className="row">
+										<div className="col-lg-6">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+												{
+
+													(this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] && this.state.selectedObject != "Selected Sources") ?
+
+														this.state[this.state.selectedObject].attributes.map((attribute) => {
+
+
+															return (
+
+
+																<option
+																	key={attribute.ID}
+																	id={attribute.ID}
+																	name={attribute.ID}
+																	onDoubleClick={this.addOrderByAttribute.bind(this)}
+																	value={attribute.attributeName}>{attribute.columnName}
+
+																</option>
+
+															)
+														}) : ""
+
+
+												}
+
+
+											</select>
+										</div>
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+
+												{
+
+													(this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] && this.state.selectedObject != "Selected Sources") ?
+
+														this.state[this.state.selectedObject].orderBy.attributes.map((attribute) => {
+
+															return (
+
+
+																<option
+																	key={attribute.ID}
+																	id={attribute.ID}
+																	name={attribute.ID}
+																	onDoubleClick={this.removeOrderByAttribute.bind(this)}
+																	value={attribute.attributeName}>{attribute.columnName}
+
+																</option>
+
+															)
+														}) : ""
+
+
+												}
+
+											</select>
+										</div>
+										<div className="col-lg-1 justify-content-start" >
+											{
+
+												(this.state[this.state.selectedObject] != null && this.state[this.state.selectedObject] && this.state.selectedObject != "Selected Sources") ?
+
+													this.state[this.state.selectedObject].orderBy.attributes.map((attribute) => {
+														console.log(attribute)
+														return (
+
+															<div className=" row justify-content-start">
+																<form>
+																	<label style={{ float: "left", marginTop: "0.25em", marginBottom: "0px" }}>
+																		<input
+																			type="radio"
+																			key={attribute.ID}
+																			id={attribute.ID}
+																			name={attribute.ID}
+																			checked={attribute.order.asc}
+																			onClick={this.toggleOrderForOrderBy.bind(this)}
+																			component="asc"
+
+																		/>ASC
+																	</label>
+
+																	<label style={{ float: "right", margin: "0.25em", marginBottom: "0px" }}>
+																		<input
+																			type="radio"
+																			key={attribute.ID}
+																			id={attribute.ID}
+																			name={attribute.ID}
+																			onClick={this.toggleOrderForOrderBy.bind(this)}
+																			component="desc"
+																			checked={attribute.order.desc}
+
+																		/>DESC
+																	</label>
+																</form>
+															</div>
+
+
+														)
+													}) : ""
+
+
+											}
+										</div>
+									</div>
 								</PanelBarItem>
 							</PanelBarItem>
 						</PanelBar>
