@@ -94,6 +94,7 @@ export default class ConnectionCreation extends Component{
     }).then((response)=>{
 
     	var parsedJson = JSON.parse(atob(response.data))
+    	
     	var objectList = new Array();
     	objectList = parsedJson.objectList;
     	

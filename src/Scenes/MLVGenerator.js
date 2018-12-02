@@ -26,7 +26,15 @@ export default class MLVGenerator extends Component {
 			selectedObject: 'Selected Sources',
 			attributeListForSelectedObject: [],
 			isLoading: false,
-			customAttribute: ""
+			customAttribute: "",
+			parentObjectsForRelation: [],
+			parentObject: {
+				levelName: "Select Parent",
+				id: 0,
+				level: '',
+				objectName: '',
+				nativeRelations: []
+			}
 
 		}
 
@@ -64,8 +72,6 @@ export default class MLVGenerator extends Component {
 	componentDidUpdate() {
 
 
-
-
 		if (!(this.state.selectedObjectList.includes(this.state.selectedObject)) && this.state.selectedObject != "Selected Sources") {
 
 			this.setState({
@@ -74,9 +80,6 @@ export default class MLVGenerator extends Component {
 
 			})
 		}
-
-
-
 
 
 
@@ -90,6 +93,7 @@ export default class MLVGenerator extends Component {
 		var updatedObjectList = new Array();
 		updatedObjectList = tempStateObjectList;
 		var newObjectList = event.target.value;
+		var isObjectDeleted = false;
 		if (newObjectList.length > tempStateObjectList.length) {
 
 			newObjectList.map((objectName, index) => {
@@ -115,7 +119,25 @@ export default class MLVGenerator extends Component {
 							orderBy: {
 								attributes: [],
 
-							}
+							},
+							relation: {
+
+								parentLevelName: '',
+								id: '',
+								level: '',
+								parentObject: '',
+								type: '',
+								native: '',
+								explicit: {
+									attribute: {
+
+									},
+
+								}
+
+
+							},
+							parentTo: []
 
 						}
 					})
@@ -133,22 +155,20 @@ export default class MLVGenerator extends Component {
 				console.log(objectName)
 
 				if (!(newObjectList.includes(objectName))) {
+					var objectToBeDeleted = temp[objectName];
+					if (objectToBeDeleted.parentTo.length !== 0 || objectToBeDeleted.relation.type !== '') {
 
+						alert('Object is in a relation. Cannot delete')
 
-					updatedObjectList.splice(index, 1);
-					console.log('Hre')
-					temp.selectedObjectList = updatedObjectList;
-					delete temp[objectName];
-					/*this.setState({
-
-						...temp
-					})*/
+					} else {
+						updatedObjectList.splice(index, 1);
+						console.log('Hre')
+						temp.selectedObjectList = updatedObjectList;
+						delete temp[objectName];
+					}
 				}
 
-				/*this.setState({
 
-					...temp
-				})*/
 
 
 			})
@@ -174,20 +194,29 @@ export default class MLVGenerator extends Component {
 
 				})
 
-				this.setState({
+				
+			}
+			this.setState({
 
 					...temp
 				})
-			}
 
+
+			// * CHANGING DEFAULT VALUE OF PARENT LEVEL STATE
+			// ***********************REMOVING THIS PIECE OF CODE PARENT LEVEL STATE WILL CHANGE ONLY WHEN SELECTED OBJECT CHANGES OR A RELATIONSHIP IS DELETED
+			/*this.setState({
+				...this.state,
+				parentObject: {
+					levelName: "Parent level",
+					id: 0,
+					level: '',
+					objectName: ''
+				}
+			})*/
 		}
 
 
-		this.setState({
 
-			selectedObjectList: [...event.target.value],
-
-		})
 	}
 
 	totalObjectListFilter(event) {
@@ -208,11 +237,45 @@ export default class MLVGenerator extends Component {
 	//* METHOD TO SELECT AN OBJECT FROM SELECTED_OBJECT_LIST
 
 	selectedObject(event) {
+		/*
+		* UPDATING PARENT LEVEL TAG'S VALUE TO SELECTED RELATION PARENT LEVEL IF IT IS SET, OTHERWISE TO DEFAULT VALUE
+		*/
 
 
-		this.setState({
-			selectedObject: event.target.value
-		})
+		if (this.state[event.target.value].relation.type === '') {
+
+			this.setState({
+
+				...this.state,
+				parentObject: {
+					levelName: "Parent level",
+					id: 0,
+					level: '',
+					objectName: ''
+
+
+				},
+				selectedObject: event.target.value,
+				nativeRelations: []
+			})
+		} else {
+			// * FIRST SETTING NATIVE RELATIONS FOR LEVEL SAVED AS PARENT IN THE SELECTED OBJECT
+			this.getNativeObjectsBetweenObjects(this.state[event.target.value].relation.parentObject)
+
+			this.setState({
+
+				...this.state,
+				selectedObject: event.target.value,
+				parentObject: {
+					levelName: this.state[event.target.value].relation.parentLevelName,
+					level: this.state[event.target.value].relation.level,
+					id: this.state[event.target.value].relation.id,
+					objectName: this.state[event.target.value].relation.parentObject
+				},
+			})
+		}
+
+
 		this.isLoading();
 
 		axios.post('http://localhost:9090/PVPUI/GetAttributesForSelectedObject', `objectName=${event.target.value}`, {
@@ -235,6 +298,8 @@ export default class MLVGenerator extends Component {
 
 
 		})
+
+
 
 
 	}
@@ -265,9 +330,6 @@ export default class MLVGenerator extends Component {
 			}
 
 		})
-
-
-
 	}
 
 
@@ -614,7 +676,7 @@ export default class MLVGenerator extends Component {
 
 
 		if (event.target.getAttribute("component") === "asc") {
-			if(event.target.checked){
+			if (event.target.checked) {
 				alert("Return")
 				return
 			}
@@ -667,6 +729,102 @@ export default class MLVGenerator extends Component {
 
 			})
 		}
+	}
+
+	// * METHOD TO SET PARENT OBJECT FOR RELATIONSHIP
+	setRelationShipParent(event) {
+
+		console.log(event.target.value)
+		this.setState({
+			...this.state,
+			parentObject: {
+				...event.target.value
+			}
+		})
+
+		// * POST REQUEST TO GET NATIVE RELATIONS BETWEEN PARENT AND CHILD OBJECTS
+
+		var parentObject = event.target.value.objectName;
+		this.getNativeObjectsBetweenObjects(parentObject)
+
+
+	}
+	// * METHOD TO SEND POST REQUIEST TO GET NATIVE RELATIONS FOR OBJECTS
+	getNativeObjectsBetweenObjects(parentObject) {
+		var childObject = this.state.selectedObject;
+		axios.post('http://localhost:9090/PVPUI/NativeRelationsBetweenObjects', JSON.stringify({ childObject: childObject, parentObject: parentObject }), {
+			headers: {
+			}
+
+
+		}).then((response) => {
+
+			this.setState({
+				...this.state,
+				nativeRelations: response.data.nativeRelationsBetweenObjects
+			})
+
+		})
+	}
+
+	// * METHOD TO ADD NATIVE RELATION FOR SELECTED OBJECT
+	addNativeRelation(event) {
+
+		// * CHECK OF EXPLICIT RELATION IS ALREADY PRESENT
+		if(this.state[this.state.selectedObject].relation.type === 'explicit'){
+
+			alert('Explicit Relation is already present. Cannot apply relation')
+			return
+		}
+
+		// * DELETING THE CURRENT NATIVE RELATION
+		
+		if(event.target.value.length === 0){
+
+			// delete native relation
+		}
+
+
+		var parentObject = this.state.parentObject;
+		var parentTo = new Array();
+		var presentInParentTo=false;
+		parentTo = this.state[parentObject.objectName].parentTo;
+
+		parentTo.map((object)=>{
+
+			if(object.objectName === this.state[this.state.selectedObject].objectName && object.level === this.state[this.state.selectedObject].level){
+
+				presentInParentTo = true;
+			}
+		})	
+		if(!presentInParentTo){
+		parentTo.push({
+			objectName: this.state[this.state.selectedObject].objectName,
+			level: this.state[this.state.selectedObject].level
+		})
+	}
+
+	// * NATIVE RELATION CAN HAVE ONLY ONE VALUE. BUT WE HAVE USED AN ARRAY BECAUSE WE HAVE USED MULTISELECT, WHICH REQUIRES AN ARRAY AS DATA. THIS ARRAY WOULD HOLD ONLY ONE VALUE
+		var selectedNativeRelation = new Array();
+		selectedNativeRelation.push(event.target.value[event.target.value.length-1])
+		this.setState({
+			[this.state.selectedObject]: {
+				...this.state[this.state.selectedObject],
+				relation: {
+					parentLevelName: parentObject.levelName,
+					id: parentObject.id,
+					level: parentObject.level,
+					parentObject: parentObject.objectName,
+					type: "native",
+					native: selectedNativeRelation
+				}
+			},
+			[parentObject.objectName]: {
+				...this.state[parentObject.objectName],
+				parentTo: parentTo
+			}
+		})
+
 	}
 
 	render() {
@@ -743,6 +901,24 @@ export default class MLVGenerator extends Component {
 
 		}
 
+		// * COMPUTING PARENT OBJECTS FOR REALTION
+		if (this.state.selectedObject !== "Select Sources") {
+			var objectList = new Array();
+			objectList = this.state.selectedObjectList;
+			var indexOfSelectedObject = objectList.indexOf(this.state.selectedObject)
+			var parentObjectsForRelation = new Array();
+			console.log(indexOfSelectedObject);
+			for (var i = 0; i < indexOfSelectedObject; i++) {
+
+				parentObjectsForRelation.push({
+					objectName: objectList[i],
+					id: i + 1,
+					level: i,
+					levelName: "level" + i
+				})
+			}
+		}
+
 
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 
@@ -781,7 +957,7 @@ export default class MLVGenerator extends Component {
 					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
 						<PanelBar >
-							<PanelBarItem title={<b>Select Attributes</b>}>
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Select Attributes</i>}>
 
 								<div className="row" >
 
@@ -820,7 +996,7 @@ export default class MLVGenerator extends Component {
 									</div>
 
 								</div>
-								<PanelBarItem title={<b>Add custom Attrbutes</b>}>
+								<PanelBarItem title={<i style={{ fintSize: "14px" }}>Add custom Attrbutes</i>}>
 									<div className="row">
 										<div className="col-lg-11" tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
 											<Input
@@ -892,7 +1068,7 @@ export default class MLVGenerator extends Component {
 
 								</PanelBarItem>
 							</PanelBarItem>
-							<PanelBarItem title={<b>Details</b>}>
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Details</i>}>
 								<div className="row">
 									<div className="col-lg-6">
 										<Input
@@ -932,7 +1108,7 @@ export default class MLVGenerator extends Component {
 									</div>
 								</div>
 
-								<PanelBarItem title={<b>Add Predicate</b>}>
+								<PanelBarItem title={<i style={{ fontSize: "14px" }}>Add Predicate</i>}>
 									<div className="row">
 										<div className="col-lg-11" tabIndex="0">
 											<Input
@@ -1001,7 +1177,7 @@ export default class MLVGenerator extends Component {
 										</div>
 									</div>
 								</PanelBarItem>
-								<PanelBarItem title={<b>Group By</b>}>
+								<PanelBarItem title={<i style={{ fontSize: "14px" }}>Group By</i>}>
 
 									<div className="row">
 										<div className="col-lg-6">
@@ -1089,7 +1265,7 @@ export default class MLVGenerator extends Component {
 										</div>
 									</div>
 								</PanelBarItem>
-								<PanelBarItem title={<b>Order By</b>}>
+								<PanelBarItem title={<i style={{ fontSize: "14px" }}>Order By</i>}>
 									<div className="row">
 										<div className="col-lg-6">
 											<select
@@ -1211,6 +1387,37 @@ export default class MLVGenerator extends Component {
 									</div>
 								</PanelBarItem>
 							</PanelBarItem>
+							{this.state.selectedObjectList.indexOf(this.state.selectedObject) <= 0 ? "" :
+
+								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Add Relation</i>}>
+
+									<div className="row justify-content-center align-items-start">
+										<DropDownList
+											defaultValue={{ levelName: "Parent Level", id: 0 }}
+											data={parentObjectsForRelation}
+											textField='levelName'
+											dataItemKey="id"
+											style={{ margin: "0.5em"}}
+											onChange={this.setRelationShipParent.bind(this)}
+											value={this.state.parentObject}
+
+										/>
+									</div>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Native Relations</i>}>
+										<div className="row justify-content-center">
+											<div className="col-lg-6 justify-content-center">
+												<MultiSelect
+													placeholder={"Native Relations"}
+													data={this.state.nativeRelations}
+													style={{ margin: "1em", width: '100%' }}
+													onChange={this.addNativeRelation.bind(this)}
+													value={this.state[this.state.selectedObject].relation.native}
+												/>
+											</div>
+										</div>
+									</PanelBarItem>
+								</PanelBarItem>
+							}
 						</PanelBar>
 
 					</div>

@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PVPUI from "./Scenes/PVPUI"
 import '@progress/kendo-theme-default/dist/all.css';
+import './css/bootstrap.min.css'
+import './css/bootstrap.css'
+import './css/transition.css'
+
 
 class App extends Component {
   render() {
