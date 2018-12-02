@@ -5,6 +5,7 @@ import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import { filterBy } from '@progress/kendo-data-query';
 import { Input, NumericTextBox } from '@progress/kendo-react-inputs';
 import LoadingPanel from './Components/LoadingPanel'
+import { Button } from '@progress/kendo-react-buttons';
 import axios from 'axios';
 import * as helpers from '../MLVObject'
 import * as Constants from '../Constants.js'
@@ -34,7 +35,8 @@ export default class MLVGenerator extends Component {
 				level: '',
 				objectName: '',
 				nativeRelations: []
-			}
+			},
+			explicitRelationExpression: ''
 
 		}
 
@@ -81,7 +83,22 @@ export default class MLVGenerator extends Component {
 			})
 		}
 
+		// * UPDATING PARENT OBJECT SAVED IN STATE SO THAT THE CURRENTLY SELECTED OBJECT CAN RENDER WITH NEWLY SET PARENT OBJECT OF ITS RELATION
+		if (this.state.selectedObject !== "Selected Sources" && this.state[this.state.selectedObject].relation.parentObject === this.state.parentObject.objectName && this.state[this.state.selectedObject].relation.level !== this.state.parentObject.level) {
 
+			console.log(this.state[this.state.selectedObject])
+			console.log(this.state.parentObject)
+			var newParentObject = {
+				...this.state.parentObject,
+				level: this.state[this.state.selectedObject].relation.level,
+				levelName: this.state[this.state.selectedObject].relation.parentLevelName,
+				id: this.state[this.state.selectedObject].relation.id
+			}
+			this.setState({
+				...this.state,
+				parentObject: newParentObject
+			})
+		}
 
 
 	}
@@ -132,6 +149,10 @@ export default class MLVGenerator extends Component {
 									attribute: {
 
 									},
+									parentAttribute: {
+
+									},
+									operator: ''
 
 								}
 
@@ -171,14 +192,27 @@ export default class MLVGenerator extends Component {
 
 
 
+
+
 			})
 
 			if (updatedObjectList.length != 0) {
 				alert(updatedObjectList)
 				updatedObjectList.map((objectName, level) => {
-
+					// * UPDATING LEVEL AND DELIMTER FOR EVERY OBJECT 
 					temp[objectName].level = level;
 					temp[objectName].delimiter = `*level${level}*`
+					// * UPDATING RELATION PARENT LEVEL, PARENT_TO FOR UPDATED OBJECT
+					if (temp[objectName].relation.type != '') {
+						var parentObject = temp[objectName].relation.parentObject
+						console.log(parentObject);
+						temp[objectName].relation.level = temp[parentObject].level;
+						temp[objectName].relation.parentLevelName = "level" + temp[parentObject].level;
+						temp[objectName].relation.id = (temp[parentObject].level + 1);
+
+
+					}
+					// * UPDATING COLUMN_NAME AND ID FOR EVERY ATTRIBUTE FOR UPDATED OBJECT
 					if (temp[objectName].attributes.length != 0) {
 
 						temp[objectName].attributes.map((attribute, attIndex) => {
@@ -194,12 +228,12 @@ export default class MLVGenerator extends Component {
 
 				})
 
-				
+
 			}
 			this.setState({
 
-					...temp
-				})
+				...temp
+			})
 
 
 			// * CHANGING DEFAULT VALUE OF PARENT LEVEL STATE
@@ -733,7 +767,11 @@ export default class MLVGenerator extends Component {
 
 	// * METHOD TO SET PARENT OBJECT FOR RELATIONSHIP
 	setRelationShipParent(event) {
+		if (this.state[this.state.selectedObject].relation.type != '') {
 
+			alert('Please remove current relation first')
+			return
+		}
 		console.log(event.target.value)
 		this.setState({
 			...this.state,
@@ -771,42 +809,67 @@ export default class MLVGenerator extends Component {
 	addNativeRelation(event) {
 
 		// * CHECK OF EXPLICIT RELATION IS ALREADY PRESENT
-		if(this.state[this.state.selectedObject].relation.type === 'explicit'){
+		if (this.state[this.state.selectedObject].relation.type === 'explicit') {
 
 			alert('Explicit Relation is already present. Cannot apply relation')
 			return
 		}
 
 		// * DELETING THE CURRENT NATIVE RELATION
-		
-		if(event.target.value.length === 0){
 
-			// delete native relation
+		if (event.target.value.length === 0) {
+
+			var parentObject = this.state[this.state.selectedObject].relation.parentObject;
+			var parentTo = new Array();
+			parentTo = this.state[parentObject].parentTo;
+			parentTo.splice(parentTo.indexOf(this.state.selectedObject), 1);
+			this.setState({
+
+				[this.state.selectedObject]: {
+					...this.state[this.state.selectedObject],
+					relation: {
+						...this.state[this.state.selectedObject].relation,
+						parentLevelName: '',
+						id: '',
+						level: '',
+						parentObject: '',
+						type: '',
+						native: '',
+
+					}
+				},
+				[parentObject]: {
+					...this.state[parentObject],
+					parentTo: parentTo
+				}
+			})
+
+			return
 		}
 
 
 		var parentObject = this.state.parentObject;
 		var parentTo = new Array();
-		var presentInParentTo=false;
+		var presentInParentTo = false;
 		parentTo = this.state[parentObject.objectName].parentTo;
 
-		parentTo.map((object)=>{
+		parentTo.map((object) => {
 
-			if(object.objectName === this.state[this.state.selectedObject].objectName && object.level === this.state[this.state.selectedObject].level){
+			if (object.objectName === this.state[this.state.selectedObject].objectName && object.level === this.state[this.state.selectedObject].level) {
 
 				presentInParentTo = true;
 			}
-		})	
-		if(!presentInParentTo){
-		parentTo.push({
-			objectName: this.state[this.state.selectedObject].objectName,
-			level: this.state[this.state.selectedObject].level
 		})
-	}
+		if (!presentInParentTo) {
+			parentTo.push({
+				objectName: this.state[this.state.selectedObject].objectName,
+				level: this.state[this.state.selectedObject].level
+			})
+		}
 
-	// * NATIVE RELATION CAN HAVE ONLY ONE VALUE. BUT WE HAVE USED AN ARRAY BECAUSE WE HAVE USED MULTISELECT, WHICH REQUIRES AN ARRAY AS DATA. THIS ARRAY WOULD HOLD ONLY ONE VALUE
+		// * NATIVE RELATION CAN HAVE ONLY ONE VALUE. BUT WE HAVE USED AN ARRAY BECAUSE WE HAVE USED MULTISELECT, WHICH REQUIRES AN ARRAY AS DATA. THIS ARRAY WOULD HOLD ONLY ONE VALUE
 		var selectedNativeRelation = new Array();
-		selectedNativeRelation.push(event.target.value[event.target.value.length-1])
+		selectedNativeRelation.push(event.target.value[event.target.value.length - 1])
 		this.setState({
 			[this.state.selectedObject]: {
 				...this.state[this.state.selectedObject],
@@ -826,6 +889,43 @@ export default class MLVGenerator extends Component {
 		})
 
 	}
+
+	// * METHOD TO ADD CHILD ATTRIBUTE FOR EXPLICIT RELATION 
+	addChildAttributeForExplicitRelation(event) {
+		if (this.state[this.state.selectedObject].relation.type !== '') {
+			alert('A relation already exists on this object')
+			return
+		}
+		var attributeName = event.target.value.object + '.' + event.target.value.attributeName
+		this.setState({
+			explicitRelationExpression: this.state.explicitRelationExpression + attributeName
+		})
+	}
+
+	// * METHOD TO ADD OPERATOR FOR EXPLICIT RELATION
+	addOperatorForExplicitRelation(event) {
+
+		if (this.state[this.state.selectedObject].relation.type !== '') {
+			alert('A relation already exists on this object')
+			return
+		}
+		this.setState({
+			explicitRelationExpression: this.state.explicitRelationExpression + event.target.value.operator
+		})
+	}
+
+	addParentAttributeForExplicitRelation(event) {
+
+		if (this.state[this.state.selectedObject].relation.type !== '') {
+			alert('A relation already exists on this object')
+			return
+		}
+		var attributeName = event.target.value.object + '.' + event.target.value.attributeName
+		this.setState({
+			explicitRelationExpression: this.state.explicitRelationExpression + attributeName
+		})
+	}
+
 
 	render() {
 
@@ -1397,7 +1497,7 @@ export default class MLVGenerator extends Component {
 											data={parentObjectsForRelation}
 											textField='levelName'
 											dataItemKey="id"
-											style={{ margin: "0.5em"}}
+											style={{ margin: "0.5em" }}
 											onChange={this.setRelationShipParent.bind(this)}
 											value={this.state.parentObject}
 
@@ -1416,6 +1516,104 @@ export default class MLVGenerator extends Component {
 											</div>
 										</div>
 									</PanelBarItem>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Explicit Relations</i>}>
+
+										<div className="row justify-content-center">
+											<div className="col-lg-10 justify-content-center">
+												<Input
+													placeholder="Explicit Relation"
+													style={{ width: "100%", textAlign: "center", margin: "1em" }}
+													value={this.state.explicitRelationExpression}
+												/>
+											</div>
+											<div classNam="col-lg-2">
+												<Button
+												style={{ margin: "1em"}}>
+												Remove
+												</Button>
+											</div>
+										</div>
+										<div className="row">
+											<div className="col-lg-5">
+
+												<DropDownList
+													data={this.state[this.state.selectedObject] != "Select Sources" ?
+														this.state[this.state.selectedObject].attributes.map((attribute, index) => {
+															return (
+
+																{
+																	key: attribute.ID,
+																	id: index,
+																	attributeName: attribute.attributeName,
+																	object: this.state[this.state.selectedObject].objectName,
+
+																}
+
+															)
+														}) : []}
+													textField="attributeName"
+													dataItemKey="id"
+													style={{ width: "100%" }}
+													label="Select Attribute"
+													onChange={this.addChildAttributeForExplicitRelation.bind(this)}
+
+												/>
+											</div>
+											<div className="col-lg-2">
+
+												<DropDownList
+													data={
+														Constants.Constants.MLVOperators.map((operator, index) => {
+															return (
+
+																{
+
+																	id: index,
+																	operator: operator,
+
+
+																}
+
+															)
+														})}
+													dataItemKey="id"
+													textField="operator"
+													style={{ width: "100%" }}
+													label="Select Operator"
+													onChange={this.addOperatorForExplicitRelation.bind(this)}
+												/>
+											</div>
+											<div className="col-lg-5">
+
+												<DropDownList
+													data={this.state.parentObject.id !== 0 ?
+														this.state[this.state.parentObject.objectName].attributes.map((attribute, index) => {
+															return (
+
+																{
+																	key: attribute.ID,
+																	id: index,
+																	attributeName: attribute.attributeName,
+																	object: this.state[this.state.selectedObject].objectName,
+
+																}
+
+															)
+														}) : []}
+													textField="attributeName"
+													dataItemKey="id"
+													style={{ width: "100%" }}
+													label="Select Attribute"
+													onChange={this.addParentAttributeForExplicitRelation.bind(this)}
+												/>
+											</div>
+										</div>
+
+
+
+
+									</PanelBarItem>
+
 								</PanelBarItem>
 							}
 						</PanelBar>
