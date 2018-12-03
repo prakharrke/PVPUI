@@ -36,7 +36,24 @@ export default class MLVGenerator extends Component {
 				objectName: '',
 				nativeRelations: []
 			},
-			explicitRelationExpression: ''
+			explicitRelation: {
+
+				attribute: {
+					attributeName: '',
+					object: ''
+
+				},
+				parentAttribute: {
+					level: '',
+					object: '',
+					attributeIndex: ''
+				},
+				operator: {
+					operator: '',
+
+				},
+				expression: ''
+			}
 
 		}
 
@@ -128,7 +145,7 @@ export default class MLVGenerator extends Component {
 							predicate: "",
 							fetchSize: "",
 							chunkSize: "",
-							levelWeight: "",
+							levelWeight: -1,
 							delimiter: `*level${index}*`,
 							groupBy: {
 								attributes: []
@@ -150,9 +167,14 @@ export default class MLVGenerator extends Component {
 
 									},
 									parentAttribute: {
+										level: '',
+										attributeIndex: ''
+									},
+									operator: {
+										operator: '',
 
 									},
-									operator: ''
+									expression: ''
 
 								}
 
@@ -209,17 +231,43 @@ export default class MLVGenerator extends Component {
 						temp[objectName].relation.level = temp[parentObject].level;
 						temp[objectName].relation.parentLevelName = "level" + temp[parentObject].level;
 						temp[objectName].relation.id = (temp[parentObject].level + 1);
-
-
 					}
+					// * UPDATING PARENT_TO ARRAY OF EVERY OBJECT, IF CHILDREN OBJECTS ARE PRESENT, THEIR CORRECT LEVELS SHOULD BE UPDATED AFTER AN OBJECT IS DELETED
+					if (temp[objectName].parentTo.length > 0) {
+
+						var parentTo = temp[objectName].parentTo;
+						parentTo.map((object, index) => {
+							parentTo[index].level = updatedObjectList.indexOf(object.objectName)
+						})
+						temp[objectName].parentTo = parentTo
+					}
+
 					// * UPDATING COLUMN_NAME AND ID FOR EVERY ATTRIBUTE FOR UPDATED OBJECT
 					if (temp[objectName].attributes.length != 0) {
 
 						temp[objectName].attributes.map((attribute, attIndex) => {
 
-							attribute.columnName = `level_${temp[objectName].level}_${objectName}_${event.target.value}_${attIndex}`;
-							attribute.ID = `level_${temp[objectName].level}_${objectName}_${event.target.value}_${attIndex}`
+							attribute.columnName = `level_${temp[objectName].level}_${objectName}_${attribute.attributeName}_${attIndex}`;
+							//attribute.ID = `level_${temp[objectName].level}_${objectName}_${event.target.value}_${attIndex}`
 							temp[objectName].attributes[attIndex] = attribute;
+
+							// * CHECK IF THIS ATTRIBUTE IS SAVED IN GROUP BY ATTRIBUTES, IF SO, UPDATE THAT COLUMN NAME
+							temp[objectName].groupBy.attributes.map((groupByAttribute, index) => {
+
+								if (attribute.ID === groupByAttribute.ID) {
+									temp[objectName].groupBy.attributes[index].columnName = `level_${temp[objectName].level}_${objectName}_${attribute.attributeName}_${attIndex}`;
+
+								}
+							})
+
+							// * CHECK IF THIS ATTRIBUTE IS SAVED IN GROUP BY ATTRIBUTES, IF SO, UPDATE THAT COLUMN NAME
+							temp[objectName].orderBy.attributes.map((orderByAttribute, index) => {
+
+								if (attribute.ID === orderByAttribute.ID) {
+									temp[objectName].orderBy.attributes[index].columnName = `level_${temp[objectName].level}_${objectName}_${attribute.attributeName}_${attIndex}`;
+
+								}
+							})
 
 						})
 					}
@@ -273,6 +321,7 @@ export default class MLVGenerator extends Component {
 	selectedObject(event) {
 		/*
 		* UPDATING PARENT LEVEL TAG'S VALUE TO SELECTED RELATION PARENT LEVEL IF IT IS SET, OTHERWISE TO DEFAULT VALUE
+		* SETTING EXPLICIT RELATION GLOBAL STATE TO EMPTY
 		*/
 
 
@@ -290,7 +339,24 @@ export default class MLVGenerator extends Component {
 
 				},
 				selectedObject: event.target.value,
-				nativeRelations: []
+				nativeRelations: [],
+				explicitRelation: {
+					attribute: {
+						attributeName: '',
+						object: '',
+						expression: ''
+
+					},
+					parentAttribute: {
+						level: '',
+						attributeName: '',
+						attributeIndex: ''
+					},
+					operator: {
+						operator: '',
+						id: ''
+					}
+				}
 			})
 		} else {
 			// * FIRST SETTING NATIVE RELATIONS FOR LEVEL SAVED AS PARENT IN THE SELECTED OBJECT
@@ -306,8 +372,27 @@ export default class MLVGenerator extends Component {
 					id: this.state[event.target.value].relation.id,
 					objectName: this.state[event.target.value].relation.parentObject
 				},
+				explicitRelation: {
+					attribute: {
+						attributeName: '',
+						object: '',
+
+					},
+					parentAttribute: {
+						level: '',
+						attributeName: '',
+						attributeIndex: ''
+					},
+					operator: {
+						operator: '',
+						id: ''
+					}
+				}
 			})
 		}
+
+
+
 
 
 		this.isLoading();
@@ -373,21 +458,51 @@ export default class MLVGenerator extends Component {
 
 		var temp = new Array();
 		temp = this.state[this.state.selectedObject].attributes
+		var groupByAttributes = this.state[this.state.selectedObject].groupBy.attributes;
+		var orderByAttributes = this.state[this.state.selectedObject].orderBy.attributes;
+
 		temp.map((attribute) => {
 
 			if (attribute.ID === event.target.name) {
 
 				attribute.columnName = helper.generateColumnName(event.target.value)
+				groupByAttributes.map((groupByAttribute, index) => {
+
+					if (groupByAttribute.ID === attribute.ID) {
+						console.log(groupByAttribute.ID)
+						console.log(attribute.ID)
+						groupByAttributes[index].columnName = helper.generateColumnName(event.target.value)
+					}
+				})
+				orderByAttributes.map((orderByAttribute, index) => {
+					if (orderByAttribute.ID === attribute.ID) {
+						orderByAttributes[index].columnName = helper.generateColumnName(event.target.value)
+					}
+				})
 
 			}
+
+
+
 		})
+
+
+
 
 		this.setState({
 
 			[this.state.selectedObject]: {
 
 				...this.state[this.state.selectedObject],
-				attributes: temp
+				attributes: temp,
+				groupBy: {
+					...this.state[this.state.selectedObject].groupBy,
+					attributes: groupByAttributes
+				},
+				orderBy: {
+					...this.state[this.state.selectedObject].orderBy,
+					attributes: orderByAttributes
+				}
 			}
 		})
 
@@ -443,7 +558,60 @@ export default class MLVGenerator extends Component {
 		var temp = this.state[this.state.selectedObject].attributes;
 		temp.map((attribute, index) => {
 
+
+
 			if (event.target.getAttribute('name') === attribute.ID) {
+				console.log(attribute.ID)
+				// * CHECK IF THIS ATTRIBUTE HAS EXPLICIT RELATION WITH ANOTHER OBJECT, BOTH ARE PARENT AND CHILD
+				if (this.state[this.state.selectedObject].relation.type === 'explicit' && this.state[this.state.selectedObject].relation.explicit.attribute.key === attribute.ID) {
+					alert('This attribute is involved in explicit relation.')
+					return;
+				}
+
+				// * CHECK IF ANY OBJECT WITH EXPLICIT RELATION HAS THIS OBJECT AS PARENT
+				var isAttributeParent = false;
+				var isGroupByAttribute = false;
+				var isOrderByAttribute = false;
+				this.state.selectedObjectList.map((objectName) => {
+
+					if (this.state[objectName].relation.type === 'explicit') {
+
+						if (this.state[objectName].relation.explicit.parentAttribute.key === attribute.ID) {
+
+							alert('This attribute is involved in explicit relation. Cannot delete')
+							isAttributeParent = true;
+							return;
+						}
+					}
+				})
+				if (isAttributeParent) {
+					return;
+				}
+
+				// * CHECK IF ATTRIBUTE IS A PART OF GROUP BY
+
+				this.state[this.state.selectedObject].groupBy.attributes.map((groupByAttribute) => {
+					if (groupByAttribute.ID === attribute.ID) {
+						isGroupByAttribute = true;
+					}
+				})
+
+				if (isGroupByAttribute) {
+					alert('Attribute has group by constraint on it. Cannot delete')
+					return;
+				}
+
+				// * CHECK IF ATTRIBUTE IS PART OF ORDER BY
+				this.state[this.state.selectedObject].orderBy.attributes.map((orderByAttribute) => {
+					if (orderByAttribute.ID === attribute.ID) {
+						isOrderByAttribute = true;
+					}
+				})
+				if (isOrderByAttribute) {
+					alert('Attribute has order by constraint on it. Cannot delete')
+					return;
+				}
+
 
 				temp.splice(index, 1);
 			}
@@ -574,7 +742,7 @@ export default class MLVGenerator extends Component {
 
 		for (var i = 0; i < attributes.length; i++) {
 
-			if (event.target.getAttribute('name') === attributes[i].ID) {
+			if (event.target.getAttribute('id') === attributes[i].ID) {
 
 				return
 			}
@@ -582,7 +750,7 @@ export default class MLVGenerator extends Component {
 		attributes.push({
 
 			attributeName: event.target.value,
-			ID: event.target.getAttribute('name'),
+			ID: event.target.getAttribute('id'),
 			columnName: event.target.getAttribute('name')
 		})
 
@@ -612,7 +780,7 @@ export default class MLVGenerator extends Component {
 
 		temp.map((attribute, index) => {
 
-			if (event.target.getAttribute('name') === attribute.ID) {
+			if (event.target.getAttribute('id') === attribute.ID) {
 				temp.splice(index, 1)
 			}
 		})
@@ -647,7 +815,7 @@ export default class MLVGenerator extends Component {
 
 		for (var i = 0; i < attributes.length; i++) {
 
-			if (event.target.getAttribute('name') === attributes[i].ID) {
+			if (event.target.getAttribute('id') === attributes[i].ID) {
 
 				return
 			}
@@ -655,7 +823,7 @@ export default class MLVGenerator extends Component {
 		attributes.push({
 
 			attributeName: event.target.value,
-			ID: event.target.getAttribute('name'),
+			ID: event.target.getAttribute('id'),
 			columnName: event.target.getAttribute('name'),
 			order: {
 				asc: true,
@@ -822,7 +990,15 @@ export default class MLVGenerator extends Component {
 			var parentObject = this.state[this.state.selectedObject].relation.parentObject;
 			var parentTo = new Array();
 			parentTo = this.state[parentObject].parentTo;
-			parentTo.splice(parentTo.indexOf(this.state.selectedObject), 1);
+			var indexToSplice = 0
+			parentTo.map((attribute, index) => {
+
+				if (attribute.objectName === this.state[this.state.selectedObject.objectName] && attribute.level === this.state[this.state.selectedObject].level) {
+					indexToSplice = index
+				}
+			})
+
+			parentTo.splice(indexToSplice, 1);
 			this.setState({
 
 				[this.state.selectedObject]: {
@@ -896,9 +1072,20 @@ export default class MLVGenerator extends Component {
 			alert('A relation already exists on this object')
 			return
 		}
+		// * SAVING PARENT OBJECT TO RELATION DETAILS OF SELECTED OBJECT
+
+
+
 		var attributeName = event.target.value.object + '.' + event.target.value.attributeName
 		this.setState({
-			explicitRelationExpression: this.state.explicitRelationExpression + attributeName
+			...this.state,
+			explicitRelation: {
+				...this.state.explicitRelation,
+				attribute: {
+					...event.target.value
+				},
+				expression: this.state.explicitRelation.expression + attributeName
+			}
 		})
 	}
 
@@ -909,9 +1096,18 @@ export default class MLVGenerator extends Component {
 			alert('A relation already exists on this object')
 			return
 		}
+		console.log(event.target.value)
 		this.setState({
-			explicitRelationExpression: this.state.explicitRelationExpression + event.target.value.operator
+			...this.state,
+			explicitRelation: {
+				...this.state.explicitRelation,
+				operator: {
+					...event.target.value
+				},
+				expression: this.state.explicitRelation.expression + event.target.value.operator
+			}
 		})
+
 	}
 
 	addParentAttributeForExplicitRelation(event) {
@@ -920,16 +1116,146 @@ export default class MLVGenerator extends Component {
 			alert('A relation already exists on this object')
 			return
 		}
-		var attributeName = event.target.value.object + '.' + event.target.value.attributeName
+		var attributeName = 'level' + event.target.value.level + '.' + event.target.value.attributeIndex
 		this.setState({
-			explicitRelationExpression: this.state.explicitRelationExpression + attributeName
+			...this.state,
+			explicitRelation: {
+				...this.state.explicitRelation,
+				parentAttribute: {
+					...event.target.value
+				},
+				expression: this.state.explicitRelation.expression + attributeName
+			}
 		})
+	}
+
+	// * METHOD TO SAVE EXPLICIT RELATION
+
+	saveExplicitRelation(event) {
+		if (this.state[this.state.selectedObject].relation.type !== '') {
+
+			alert('A relation already exists on this object')
+			return
+		}
+
+		if (this.state.explicitRelation.attribute.attributeName === '' || this.state.explicitRelation.parentAttribute.level === '' || this.state.explicitRelation.operator.operator === '') {
+			alert('Incomplete Relation')
+			return
+		}
+		var parentTo = this.state[this.state.parentObject.objectName].parentTo;
+		parentTo.push({
+			objectName: this.state[this.state.selectedObject].objectName,
+			level: this.state[this.state.selectedObject].level
+		})
+		this.setState({
+			...this.state,
+			[this.state.selectedObject]: {
+				...this.state[this.state.selectedObject],
+				relation: {
+					...this.state[this.state.selectedObject].relation,
+					parentLevelName: this.state.parentObject.levelName,
+					id: this.state.parentObject.id,
+					level: this.state.parentObject.level,
+					parentObject: this.state.parentObject.objectName,
+					type: "explicit",
+					explicit: {
+						...this.state.explicitRelation
+					}
+				}
+			},
+			[this.state.parentObject.objectName]: {
+				...this.state[this.state.parentObject.objectName],
+				parentTo: parentTo
+			}
+		})
+	}
+
+	// * REMOVE EXPLICIT RELATION 
+	removeExplictRelation(event) {
+
+		if (this.state[this.state.selectedObject].relation.type !== 'explicit') {
+			alert('Explicit relation is not added for this object')
+			return
+		}
+		var parentTo = this.state[this.state.parentObject.objectName].parentTo;
+		var indexToSplice = 0
+		parentTo.map((attribute, index) => {
+
+			if (attribute.objectName === this.state[this.state.selectedObject.objectName] && attribute.level === this.state[this.state.selectedObject].level) {
+				indexToSplice = index
+			}
+		})
+
+		parentTo.splice(indexToSplice, 1);
+		this.setState({
+			[this.state.selectedObject]: {
+				...this.state[this.state.selectedObject],
+				relation: {
+					parentLevelName: '',
+					id: '',
+					level: '',
+					parentObject: '',
+					type: '',
+					explicit: {
+						attribute: {
+
+						},
+						parentAttribute: {
+							level: '',
+							attributeIndex: ''
+						},
+						operator: {
+							operator: '',
+
+						},
+						expression: ''
+
+					}
+				}
+			},
+			explicitRelation: {
+
+				attribute: {
+					attributeName: '',
+					object: ''
+
+				},
+				parentAttribute: {
+					level: '',
+					object: '',
+					attributeIndex: ''
+				},
+				operator: {
+					operator: '',
+
+				},
+				expression: ''
+			},
+			[this.state.parentObject.objectName]: {
+				...this.state[this.state.parentObject.objectName],
+				parentTo: parentTo
+			}
+		})
+
+	}
+	createMLV(event) {
+		event.preventDefault();
+		axios.post('http://localhost:9090/PVPUI/GenerateMLV', `state=${btoa(JSON.stringify(this.state))}`, {
+			headers: {
+			}
+
+
+		})
+
+
 	}
 
 
 	render() {
+		console.log('PO');
+		console.log(this.state.parentObject)
 
-
+		if (this.state.selectedObject != "Selected Sources") console.log(this.state[this.state.selectedObject])
 
 		// * ADDING ALL THE ATTRIBUTES FOR SELECTED OBJECT 
 		var totalAttributesElement = (this.state.selectedObject === "Selected Sources") ? "" :
@@ -1312,7 +1638,7 @@ export default class MLVGenerator extends Component {
 																<option
 																	key={attribute.ID}
 																	id={attribute.ID}
-																	name={attribute.ID}
+																	name={attribute.columnName}
 																	onDoubleClick={this.addGroupByAttribute.bind(this)}
 																	value={attribute.attributeName}>{attribute.columnName}
 
@@ -1349,7 +1675,7 @@ export default class MLVGenerator extends Component {
 																<option
 																	key={attribute.ID}
 																	id={attribute.ID}
-																	name={attribute.ID}
+																	name={attribute.columnName}
 																	onDoubleClick={this.removeGroupByAttribute.bind(this)}
 																	value={attribute.attributeName}>{attribute.columnName}
 
@@ -1388,7 +1714,7 @@ export default class MLVGenerator extends Component {
 																<option
 																	key={attribute.ID}
 																	id={attribute.ID}
-																	name={attribute.ID}
+																	name={attribute.columnName}
 																	onDoubleClick={this.addOrderByAttribute.bind(this)}
 																	value={attribute.attributeName}>{attribute.columnName}
 
@@ -1424,7 +1750,7 @@ export default class MLVGenerator extends Component {
 																<option
 																	key={attribute.ID}
 																	id={attribute.ID}
-																	name={attribute.ID}
+																	name={attribute.columnName}
 																	onDoubleClick={this.removeOrderByAttribute.bind(this)}
 																	value={attribute.attributeName}>{attribute.columnName}
 
@@ -1523,13 +1849,25 @@ export default class MLVGenerator extends Component {
 												<Input
 													placeholder="Explicit Relation"
 													style={{ width: "100%", textAlign: "center", margin: "1em" }}
-													value={this.state.explicitRelationExpression}
+													value={
+														this.state[this.state.selectedObject].relation.type !== 'explicit' ?
+															(this.state.explicitRelation.attribute.object + '.' + this.state.explicitRelation.attribute.attributeName + this.state.explicitRelation.operator.operator + this.state.explicitRelation.parentAttribute.level + '.' + this.state.explicitRelation.parentAttribute.attributeIndex) : (
+																this.state[this.state.selectedObject].relation.explicit.attribute.object + '.' + this.state[this.state.selectedObject].relation.explicit.attribute.attributeName + this.state[this.state.selectedObject].relation.explicit.operator.operator + this.state[this.state.selectedObject].relation.explicit.parentAttribute.level + '.' + this.state[this.state.selectedObject].relation.explicit.parentAttribute.attributeIndex)
+													}
 												/>
 											</div>
 											<div classNam="col-lg-2">
 												<Button
-												style={{ margin: "1em"}}>
-												Remove
+													style={{ margin: "1em" }}
+													onClick={this.saveExplicitRelation.bind(this)}
+												>
+													Add
+												</Button>
+												<Button
+													style={{ margin: "1em" }}
+													onClick={this.removeExplictRelation.bind(this)}
+												>
+													Remove
 												</Button>
 											</div>
 										</div>
@@ -1556,6 +1894,13 @@ export default class MLVGenerator extends Component {
 													style={{ width: "100%" }}
 													label="Select Attribute"
 													onChange={this.addChildAttributeForExplicitRelation.bind(this)}
+													value={
+														this.state[this.state.selectedObject].relation.type !== 'explicit' ? (
+															this.state.explicitRelation.attribute
+														) : (
+																this.state[this.state.selectedObject].relation.explicit.attribute
+															)
+													}
 
 												/>
 											</div>
@@ -1581,6 +1926,13 @@ export default class MLVGenerator extends Component {
 													style={{ width: "100%" }}
 													label="Select Operator"
 													onChange={this.addOperatorForExplicitRelation.bind(this)}
+													value={
+														this.state[this.state.selectedObject].relation.type !== 'explicit' ? (
+															this.state.explicitRelation.operator
+														) : (
+																this.state[this.state.selectedObject].relation.explicit.operator
+															)
+													}
 												/>
 											</div>
 											<div className="col-lg-5">
@@ -1591,11 +1943,13 @@ export default class MLVGenerator extends Component {
 															return (
 
 																{
+																	// key property can be used to compare the attribute while deleting attributes
 																	key: attribute.ID,
 																	id: index,
 																	attributeName: attribute.attributeName,
 																	object: this.state[this.state.selectedObject].objectName,
-
+																	attributeIndex: (index + 1),
+																	level: 'level' + this.state.selectedObjectList.indexOf(this.state.parentObject.objectName)
 																}
 
 															)
@@ -1605,6 +1959,13 @@ export default class MLVGenerator extends Component {
 													style={{ width: "100%" }}
 													label="Select Attribute"
 													onChange={this.addParentAttributeForExplicitRelation.bind(this)}
+													value={
+														this.state[this.state.selectedObject].relation.type !== 'explicit' ? (
+															this.state.explicitRelation.parentAttribute
+														) : (
+																this.state[this.state.selectedObject].relation.explicit.parentAttribute
+															)
+													}
 												/>
 											</div>
 										</div>
@@ -1617,6 +1978,13 @@ export default class MLVGenerator extends Component {
 								</PanelBarItem>
 							}
 						</PanelBar>
+						<div className="row">
+							<div className="col-lg-6">
+								<Button onClick={this.createMLV.bind(this)}>
+									Generate MLV
+								</Button>
+							</div>
+						</div>
 
 					</div>
 				</div>
