@@ -3,7 +3,7 @@ import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { MultiSelect, AutoComplete } from '@progress/kendo-react-dropdowns';
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import { filterBy } from '@progress/kendo-data-query';
-import { Input, NumericTextBox } from '@progress/kendo-react-inputs';
+import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import LoadingPanel from './Components/LoadingPanel'
 import { Button } from '@progress/kendo-react-buttons';
 import axios from 'axios';
@@ -52,12 +52,21 @@ export default class MLVGenerator extends Component {
 					operator: '',
 
 				},
-				expression: ''
+				expression: '',
+
+
+
+			},
+			parallelExecution: false,
+			cache: {
+				enabled: false,
+				setting: "USE SITE SETTING"
 			}
 
 		}
 
 	}
+
 
 	// * METHOD TO MOUNT LOADING COMPONENT
 
@@ -180,7 +189,9 @@ export default class MLVGenerator extends Component {
 
 
 							},
-							parentTo: []
+							parentTo: [],
+
+							hideLevel: false,
 
 						}
 					})
@@ -1168,6 +1179,7 @@ export default class MLVGenerator extends Component {
 				parentTo: parentTo
 			}
 		})
+		alert('Explicit Relation saved')
 	}
 
 	// * REMOVE EXPLICIT RELATION 
@@ -1250,10 +1262,67 @@ export default class MLVGenerator extends Component {
 
 	}
 
+	// * METHOD TO TOGGLE PARALLEL EXECUTION
+	enableParallelExecution(event) {
+		event.preventDefault();
+			this.setState({
+					...this.state,
+					parallelExecution: !this.state.parallelExecution
+				
+			})
+		
+	}
+
+	// * METHOD TO HIDE, UNHIDE LEVEL
+	hideLevel(event) {
+		event.preventDefault();
+		if (this.state.selectedObject !== "Selected Sources") {
+			this.setState({
+				[this.state.selectedObject]: {
+					...this.state[this.state.selectedObject],
+					hideLevel: !this.state[this.state.selectedObject].hideLevel
+				}
+			})
+		}
+	}
+
+	// * METHOD TO ENABLE, DISABLE CACHE
+
+	enableCache(event) {
+
+			
+					this.setState({
+				
+					...this.state,
+					cache: {
+						...this.state.cache,
+						enabled: !this.state.cache.enabled
+					}
+				
+			})
+				
+		
+	}
+
+	// * METHOD TO SET CACHE SETTING
+	setCacheSetting(event) {
+			if (this.state.cache.enabled) {
+				this.setState({
+					
+						...this.state,
+						cache: {
+							...this.state.cache,
+							setting: event.target.value
+						}
+					
+				})
+			}
+		
+	}
+
 
 	render() {
-		console.log('PO');
-		console.log(this.state.parentObject)
+		console.log(this.state)
 
 		if (this.state.selectedObject != "Selected Sources") console.log(this.state[this.state.selectedObject])
 
@@ -1495,6 +1564,22 @@ export default class MLVGenerator extends Component {
 								</PanelBarItem>
 							</PanelBarItem>
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Details</i>}>
+								<div className="row justify-content-center">
+									<div className="col-lg-2 justify-content-center">
+										<Button
+											style={{ margin: "1em" }}
+											onClick={this.hideLevel.bind(this)}>
+											Hide Level
+											</Button>
+										<Switch
+											style={{ margin: "1em" }}
+											checked={
+												this.state.selectedObject != "Selected Sources" &&
+												this.state[this.state.selectedObject].hideLevel
+											}
+										/>
+									</div>
+								</div>
 								<div className="row">
 									<div className="col-lg-6">
 										<Input
@@ -1557,7 +1642,15 @@ export default class MLVGenerator extends Component {
 												id="totalAttributes"
 												style={{ overflowX: "scroll" }}
 											>
-												{totalAttributesElement}
+												{(this.state.selectedObject !== "Selected Sources") &&
+													this.state.attributeListForSelectedObject.map((attribute) => {
+
+														return (
+
+															<option key={attribute} value={this.state[this.state.selectedObject].objectName + '.' + attribute}>{this.state[this.state.selectedObject].objectName + '.' + attribute}</option>
+														)
+													})
+												}
 											</select>
 										</div>
 										<div className="col-lg-2">
@@ -1947,6 +2040,7 @@ export default class MLVGenerator extends Component {
 																	key: attribute.ID,
 																	id: index,
 																	attributeName: attribute.attributeName,
+
 																	object: this.state[this.state.selectedObject].objectName,
 																	attributeIndex: (index + 1),
 																	level: 'level' + this.state.selectedObjectList.indexOf(this.state.parentObject.objectName)
@@ -1977,6 +2071,47 @@ export default class MLVGenerator extends Component {
 
 								</PanelBarItem>
 							}
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Global Properties</i>}>
+
+								<div className="row">
+									<div className="col-lg-6">
+										<Button
+											style={{ margin: "1em" }}
+											onClick={this.enableParallelExecution.bind(this)}>
+											Parallel Execution
+											</Button>
+										<Switch
+											style={{ margin: "1em" }}
+											checked={
+
+												this.state.parallelExecution
+											}
+										/>
+										<Button
+											style={{ margin: "1em" }}
+											onClick={this.enableCache.bind(this)}>
+											Cache Enabled
+											</Button>
+										<Switch
+											style={{ margin: "1em" }}
+											checked={
+
+												this.state.cache.enabled
+											}
+										/>
+										<DropDownList
+											data={Constants.CacheTypes}
+											style={{ marginLeft: "1em" }}
+											value={
+
+												this.state.cache.setting
+											}
+											onChange={this.setCacheSetting.bind(this)}
+										/>
+
+									</div>
+								</div>
+							</PanelBarItem>
 						</PanelBar>
 						<div className="row">
 							<div className="col-lg-6">

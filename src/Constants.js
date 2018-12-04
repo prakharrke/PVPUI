@@ -5,3 +5,4 @@ exports.Constants = {
 	MLVOperators : [],
 	
 }
+exports.CacheTypes = ['USE SITE SETTING', 'APPLICATION', 'CACHE', 'HYBRID', 'INGNORE APP SECURITY'] 
