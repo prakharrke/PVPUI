@@ -862,7 +862,7 @@ export default class MLVGenerator extends Component {
 
 		temp.map((attribute, index) => {
 
-			if (event.target.getAttribute('name') === attribute.ID) {
+			if (event.target.getAttribute('id') === attribute.ID) {
 				temp.splice(index, 1)
 			}
 		})
@@ -969,16 +969,17 @@ export default class MLVGenerator extends Component {
 	// * METHOD TO SEND POST REQUIEST TO GET NATIVE RELATIONS FOR OBJECTS
 	getNativeObjectsBetweenObjects(parentObject) {
 		var childObject = this.state.selectedObject;
-		axios.post('http://localhost:9090/PVPUI/NativeRelationsBetweenObjects', JSON.stringify({ childObject: childObject, parentObject: parentObject }), {
+		axios.post('http://localhost:9090/PVPUI/NativeRelationsBetweenObjects', `objects=${JSON.stringify({ childObject: childObject, parentObject: parentObject })}`, {
 			headers: {
 			}
 
 
 		}).then((response) => {
-
+			var parsedJson = JSON.parse(atob(response.data));
+			console.log(parsedJson);
 			this.setState({
 				...this.state,
-				nativeRelations: response.data.nativeRelationsBetweenObjects
+				nativeRelations: parsedJson.nativeRelationsBetweenObjects
 			})
 
 		})

@@ -811,6 +811,13 @@
   dependencies:
     tslib "^1.7.0"
 
+"@progress/kendo-date-math@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-date-math/-/kendo-date-math-1.2.0.tgz#62fc00b540786b8bb5c7001ecb06b2e3ff05b498"
+  integrity sha512-SVj6lSajwgI/dxqn+Gm1Pe1T8aaQkMmf/1ALETx2pii6SMLDLdCH9tp6Kp+M5t+NDqppLVrdMYDXWng9buiU8A==
+  dependencies:
+    tslib "^1.7.0"
+
 "@progress/kendo-drawing@^1.5.7":
   version "1.5.7"
   resolved "https://registry.yarnpkg.com/@progress/kendo-drawing/-/kendo-drawing-1.5.7.tgz#03c8edadf85a7880234657e87599106b76fbc88e"
@@ -848,6 +855,16 @@
   dependencies:
     prop-types "^15.6.0"
 
+"@progress/kendo-react-dateinputs@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-react-dateinputs/-/kendo-react-dateinputs-2.4.0.tgz#afa08380cbe02be570d7a81c190dcd93c6a76b35"
+  integrity sha512-Fl7/HhICElHe+wmMYWvZI8uaYy3CdozZdVGKaG3pvVMKHVGwYgp5sZLVbPk9I/OkA7YpBurj2ak1r0wIF+Qtiw==
+  dependencies:
+    "@progress/kendo-date-math" "1.2.0"
+    "@progress/kendo-react-common" "2.4.0"
+    "@progress/kendo-react-popup" "2.4.0"
+    prop-types "^15.6.0"
+
 "@progress/kendo-react-dropdowns@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@progress/kendo-react-dropdowns/-/kendo-react-dropdowns-2.4.0.tgz#8a8e1aa49de0877bd4d0bc223222ce18350fa588"
@@ -864,6 +881,15 @@
   dependencies:
     "@progress/kendo-charts" "^1.9.0"
     "@progress/kendo-react-common" "2.4.0"
+    prop-types "^15.6.0"
+
+"@progress/kendo-react-grid@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-react-grid/-/kendo-react-grid-2.4.0.tgz#3b3ce9ead20fd6b86634735b30c5b88d12c73341"
+  integrity sha512-wS6OBaj6zkVZbSHdJooCTKNqPDuz/yTS14LA9jJymui95a6Oie4d1B5BV5NGUWXjOK1PZ2bvOJqKStn61M70bw==
+  dependencies:
+    "@progress/kendo-react-common" "2.4.0"
+    "@telerik/kendo-draggable" "^1.9.0"
     prop-types "^15.6.0"
 
 "@progress/kendo-react-inputs@^2.4.0":

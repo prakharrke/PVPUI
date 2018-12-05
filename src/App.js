@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PVPUI from "./Scenes/PVPUI"
+import CreateBaseline from "./Scenes/CreateBaseline"
 import '@progress/kendo-theme-default/dist/all.css';
 import './css/bootstrap.min.css'
 import './css/bootstrap.css'
@@ -11,7 +12,7 @@ class App extends Component {
     return (
       <div className="App">
 
-        <PVPUI />
+        <CreateBaseline />
 
       </div>
     );
