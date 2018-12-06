@@ -3,6 +3,9 @@ import axios from 'axios';
 import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import { Button } from '@progress/kendo-react-buttons';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import LoadingPanel from './Components/LoadingPanel'
+import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
 export default class CreateBaseline extends Component {
 
 	constructor(props) {
@@ -11,19 +14,61 @@ export default class CreateBaseline extends Component {
 			testCaseSummary: '',
 			testCaseDescription: '',
 			runFlag: '',
-			mlv: '',
+			mlv: this.props.mlv,
 			testFilter: '',
 			resultSheet: '',
 			viewOnview: '',
 			mlvQualification: '',
 			resultSetList: [],
-			columnNames: []
+			columnNames: [],
+			isLoading: false,
+			baslineFilesList: [],
+			showResultSet: false,
+			selectedBaseline: '',
+			newBaselineName: ''
 		}
+	}
+
+
+	componentWillMount() {
+		this.isLoading();
+		axios.post('http://localhost:9090/PVPUI/GetBaselineFilesList', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+
+			console.log(response.data)
+			this.isNotLoading();
+			this.setState({
+				baslineFilesList: response.data
+			})
+		})
+	}
+	isLoading() {
+
+		this.setState({
+
+			isLoading: true,
+
+		})
+	}
+
+	// * METHOD TO UNMOUNT LOADING COMPONENT
+
+	isNotLoading() {
+
+		this.setState({
+
+			isLoading: false
+		})
 	}
 
 	// * METHOD TO ADD TEST CASE SUMMARY
 	addTestCaseSummary(event) {
 		this.setState({
+			...this.state,
 			testCaseSummary: event.target.value
 		})
 	}
@@ -75,6 +120,7 @@ export default class CreateBaseline extends Component {
 
 	// * METHOD TO EXECUTE MLV
 	executeMLV(event) {
+		this.isLoading();
 		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
 			headers: {
 			}
@@ -146,18 +192,77 @@ export default class CreateBaseline extends Component {
 		console.log(temp)
 
 		console.log(resultsetList);
+		this.isNotLoading();
 		this.setState({
 			...this.state,
 			resultSetList: resultsetList,
+			showResultSet: true
 
 		})
+	}
+
+	// * MEHTOD TO CLOSE THE RESULTSET WINDOW
+	closeResultSet(event) {
+		event.preventDefault();
+		this.setState({
+			showResultSet: false
+		})
+	}
+
+	// * METHOD TO ADD NEW BASELINE
+	addNewBaseline(event) {
+
+		this.setState({
+			...this.state,
+			selectedBaseline: '',
+			newBaselineName: event.target.value
+		})
+	}
+
+	// * METHOD TO SELECT FROM EXISTING BASELINES
+	selectBaseline(event) {
+		this.setState({
+			newBaselineName: '',
+			selectedBaseline: event.target.value
+		})
+	}
+
+	// * METHOD TO ADD TO BASELINE
+
+	addToBaseline(event) {
+		event.preventDefault();
+		this.isLoading();
+		var baselineDetails = {
+			testCaseSummary: this.state.testCaseSummary,
+			testCaseDescription: this.state.testCaseDescription,
+			mlv: this.state.mlv,
+			testFilter: this.state.testFilter,
+			resultSheetName: this.state.resultSheet,
+			viewOnview: this.state.viewOnview,
+			mlvQualification: this.state.mlvQualification,
+			selectedBaseline: this.state.selectedBaseline,
+			newBaselineName: this.state.newBaselineName
+
+		}
+
+		axios.post('http://localhost:9090/PVPUI/AddToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+			this.isNotLoading();
+			console.log(response.data);
+		})
+
+
 	}
 
 	render() {
 
 		var columnsElement = this.state.columnNames.map((column) => {
-			console.log('!!!!!!!!')
-			console.log(column)
+
+
 			return (
 
 				<Column
@@ -168,119 +273,171 @@ export default class CreateBaseline extends Component {
 
 			)
 		})
+		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 
 		return (
 
 			<div className="container-fluid" style={{ marginTop: "2em" }}>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
+				{loadingComponent}
+				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
+					<PanelBar >
+						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Baseline Details</i>}>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
+										required={true}
+										label="Test Case Summary*"
+										value={this.state.testCaseSummary}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addTestCaseSummary.bind(this)}
 
-							label="Test Case Summary"
-							value={this.state.testCaseSummary}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addTestCaseSummary.bind(this)}
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
+										required={true}
+										label="Test Case Description*"
+										value={this.state.testCaseDescription}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addTestCaseDescription.bind(this)}
 
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
+										required={true}
+										label="Test Case Filter*"
+										value={this.state.testFilter}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addTestCaseFilter.bind(this)}
 
-							label="Test Case Description"
-							value={this.state.testCaseDescription}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addTestCaseDescription.bind(this)}
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
+										required={true}
+										label="Result Sheet Name*"
+										value={this.state.resultSheet}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addResultSheet.bind(this)}
 
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
+										required={true}
+										label="View on View*"
+										value={this.state.viewOnview}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addViewOnView.bind(this)}
 
-							label="Test Case Filter"
-							value={this.state.testFilter}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addTestCaseFilter.bind(this)}
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
+										required={true}
+										label="MLV Qualification*"
+										value={this.state.mlvQualification}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addMlvQualification.bind(this)}
 
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-12">
+									<Input
 
-							label="Result Sheet Name"
-							value={this.state.resultSheet}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addResultSheet.bind(this)}
+										label="MLV*"
+										value={this.state.mlv}
+										style={{ width: "100%", textAlign: "center", margin: "1em", height: "10em" }}
+										onChange={this.addMLV.bind(this)}
 
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
-
-							label="View on View"
-							value={this.state.viewOnview}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addViewOnView.bind(this)}
-
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
-
-							label="MLV Qualification"
-							value={this.state.mlvQualification}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addMlvQualification.bind(this)}
-
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<Input
-
-							label="MLV"
-							value={this.state.mlv}
-							style={{ width: "100%", textAlign: "center", margin: "1em", height: "10em" }}
-							onChange={this.addMLV.bind(this)}
-
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-2">
-						<Button
-							style={{ textAlign: "center", margin: "1em" }}
-							onClick={this.executeMLV.bind(this)}
-						>
-							Execute MLV
+									/>
+								</div>
+							</div>
+							<div className="row">
+								<div className="col-lg-2">
+									<Button
+										style={{ textAlign: "center", margin: "1em" }}
+										onClick={this.executeMLV.bind(this)}
+									>
+										Execute MLV
 						</Button>
+								</div>
+							</div>
+							<div className="row justify-content-center">
+								<div className="col-lg-6 justify-content-center">
+									<DropDownList
+										style={{ margin: "1em", width: "100%" }}
+										data={this.state.baslineFilesList}
+										label="Select baseline file"
+										onChange={this.selectBaseline.bind(this)}
+										value={this.state.selectedBaseline}
+									/>
+									<Input
+
+										label="Add a new baseline instead.."
+										value={this.state.newBaselineName}
+										style={{ width: "100%", textAlign: "center", margin: "1em" }}
+										onChange={this.addNewBaseline.bind(this)}
+
+									/>
+									<Button
+										style={{ margin: "1em" }}
+										onClick={this.addToBaseline.bind(this)}
+									>
+										Add
+									</Button>
+
+								</div>
+
+
+
+							</div>
+
+						</PanelBarItem>
+					</PanelBar>
+				</div>
+
+				{
+					this.state.resultSetList.length > 0 &&
+					this.state.showResultSet == true &&
+
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%' }}>
+						<div className=" justify-content-right">
+							<Button
+								style={{ margin: "1em" }}
+								onClick={this.closeResultSet.bind(this)}
+							>
+								Close
+						</Button>
+						</div>
+
+						<div style={{ overflowX: "scroll" }}>
+							<Grid
+								style={{ height: "40em", overflowX: "scroll" }}
+								data={this.state.resultSetList}
+								resizable={true}
+
+							>
+								{
+									columnsElement
+								}
+							</Grid>
+						</div>
 					</div>
-				</div>
-
-				<div>
-
-					{
-						this.state.resultSetList.length > 0 &&
-						<Grid
-						style={{height : "40em"}}
-						data={this.state.resultSetList}
-						>
-							{
-								columnsElement
-							}
-						</Grid>}
-
-				</div>
+				}
 			</div>
 
 		)

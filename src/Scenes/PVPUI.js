@@ -3,6 +3,8 @@ import LoadingPanel from './Components/LoadingPanel'
 import ConnectionCreation from './Components/ConnectionCreation'
 import MLVGenerator from './MLVGenerator'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { Button } from '@progress/kendo-react-buttons';
+import CreateBaseline from "./CreateBaseline"
 export default class PVPUI extends Component {
 
 	constructor(props) {
@@ -11,7 +13,9 @@ export default class PVPUI extends Component {
 
 			isLoading: false,
 			objectList: [],
-			isModelCreated: ""
+			isModelCreated: "",
+			mlv: '',
+			createBaseline: false
 
 		}
 
@@ -57,6 +61,19 @@ export default class PVPUI extends Component {
 
 	}
 
+	addMLV(mlv) {
+		this.setState({
+			mlv: mlv
+		})
+	}
+	toggleBaseline(event) {
+
+		event.preventDefault();
+		this.setState({
+			createBaseline: !this.state.createBaseline
+		})
+	}
+
 
 
 
@@ -67,15 +84,24 @@ export default class PVPUI extends Component {
 		var mountGenerator = "";
 
 
-		if (this.state.isModelCreated === true) {
+		if (this.state.isModelCreated === true && this.state.createBaseline == false) {
 
 			mountGenerator = <MLVGenerator
 				objectList={this.state.objectList}
+				addMLV={this.addMLV.bind(this)}
 			/>
 
-		} if (this.state.isModelCreated === false) {
+		} if (this.state.isModelCreated === false && this.state.createBaseline == false) {
 
 			mountGenerator = <LoadingPanel />
+		}
+		if (this.state.createBaseline) {
+			mountGenerator = <CreateBaseline
+				isLoading={this.isLoading.bind(this)}
+				isNotLoading={this.isNotLoading.bind(this)}
+				mlv={this.state.mlv}
+			/>
+
 		}
 		return (
 
@@ -101,6 +127,12 @@ export default class PVPUI extends Component {
 				>
 					{mountGenerator}
 				</ReactCSSTransitionGroup>
+				<Button className="float-lg-right"
+					style={{ textAlign: "center", margin: "1em" }}
+					onClick={this.toggleBaseline.bind(this)}
+				>
+					{this.state.createBaseline ? "Generate MLV" : "Create Baseline"}
+				</Button>
 
 			</div>
 

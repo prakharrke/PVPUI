@@ -73,7 +73,9 @@ export default class MLVGenerator extends Component {
 	isLoading() {
 
 		this.setState({
-			isLoading: true
+			
+			isLoading: true,
+
 		})
 	}
 
@@ -82,6 +84,7 @@ export default class MLVGenerator extends Component {
 	isNotLoading() {
 
 		this.setState({
+			
 			isLoading: false
 		})
 	}
@@ -1253,11 +1256,21 @@ export default class MLVGenerator extends Component {
 	}
 	createMLV(event) {
 		event.preventDefault();
+		this.isLoading();
 		axios.post('http://localhost:9090/PVPUI/GenerateMLV', `state=${btoa(JSON.stringify(this.state))}`, {
 			headers: {
 			}
 
 
+		}).then(response=>{
+
+			this.setState({
+				...this.state,
+				isLoading:false,
+				mlv: response.data
+			})
+
+			this.props.addMLV(response.data)
 		})
 
 
@@ -2119,6 +2132,18 @@ export default class MLVGenerator extends Component {
 								<Button onClick={this.createMLV.bind(this)}>
 									Generate MLV
 								</Button>
+							</div>
+						</div>
+						<div className="row">
+							<div className="col-lg-12">
+														<Input
+
+							label="MLV"
+							value={this.state.mlv}
+							style={{ width: "100%", textAlign: "center", margin: "1em", height: "10em" }}
+							
+
+						/>
 							</div>
 						</div>
 
