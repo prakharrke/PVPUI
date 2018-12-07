@@ -15,7 +15,8 @@ export default class PVPUI extends Component {
 			objectList: [],
 			isModelCreated: "",
 			mlv: '',
-			createBaseline: false
+			createBaseline: false,
+			mlvGeneratorState : {}
 
 		}
 
@@ -74,6 +75,14 @@ export default class PVPUI extends Component {
 		})
 	}
 
+	// * MEHTOD TO STORE MLV GENERATOR STATE
+	loadMLVGeneratorState(mlvGeneratorState){
+		this.setState({
+			mlvGeneratorState : {
+				...mlvGeneratorState
+			}
+		})
+	}
 
 
 
@@ -89,6 +98,8 @@ export default class PVPUI extends Component {
 			mountGenerator = <MLVGenerator
 				objectList={this.state.objectList}
 				addMLV={this.addMLV.bind(this)}
+				oldState={this.state.mlvGeneratorState}
+				loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
 			/>
 
 		} if (this.state.isModelCreated === false && this.state.createBaseline == false) {
@@ -100,6 +111,7 @@ export default class PVPUI extends Component {
 				isLoading={this.isLoading.bind(this)}
 				isNotLoading={this.isNotLoading.bind(this)}
 				mlv={this.state.mlv}
+				mlvGeneratorState={this.state.mlvGeneratorState}
 			/>
 
 		}

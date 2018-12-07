@@ -18,7 +18,13 @@ export default class MLVGenerator extends Component {
 	constructor(props) {
 
 		super(props);
+		if(Object.keys(this.props.oldState).length != 0){
 
+			this.state={
+				...this.props.oldState
+			}
+		}
+		else
 		this.state = {
 
 			selectedObjectList: [],
@@ -1332,6 +1338,12 @@ export default class MLVGenerator extends Component {
 				})
 			}
 		
+	}
+	// * COMPONENT WILL UNMOUNT METHOD, TO TRANSFER ITS STATE TO PARENT COMPONENT (PVPUI COMPONENT)
+
+	componentWillUnmount(){
+
+		this.props.loadMLVGeneratorState(this.state);
 	}
 
 
