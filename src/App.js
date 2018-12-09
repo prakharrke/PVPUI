@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PVPUI from "./Scenes/PVPUI"
+import BaselineGrid from "./Scenes/BaselineGrid"
 import CreateBaseline from "./Scenes/CreateBaseline"
 import '@progress/kendo-theme-default/dist/all.css';
 import './css/bootstrap.min.css'
