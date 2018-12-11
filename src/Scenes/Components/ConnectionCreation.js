@@ -46,6 +46,9 @@ export default class ConnectionCreation extends Component{
     			pluginList : pluginList
     		})
 
+    }).catch(e=>{
+    	console.log(e)
+    	alert("Something went wrong")
     })
 
 	}
@@ -63,6 +66,10 @@ export default class ConnectionCreation extends Component{
 	connectionTest(event){
 		event.preventDefault();
 		var selectedPlugin = this.state.selectedPlugin;
+		if(selectedPlugin === '' || selectedPlugin === null || selectedPlugin === undefined){
+			alert('Please select a plugin to connect to');
+			return
+		}
 		this.props.isLoading();
 		  axios.post('http://localhost:9090/PVPUI/TestConnection',`selectedPlugin=${this.state.selectedPlugin}`,{
       headers :{
@@ -79,12 +86,19 @@ export default class ConnectionCreation extends Component{
     			alert('Connection Test failed')
     		}
 
+    }).catch((e)=>{
+    	console.log(e);
+    	alert(e);
     })
 	}
 	createModel(event){
 
 		event.preventDefault();
 		var selectedPlugin = this.state.selectedPlugin
+		if(selectedPlugin === '' || selectedPlugin === null || selectedPlugin === undefined){
+			alert('Please select a plugin to connect to');
+			return
+		}
 		this.props.modelNotCreated();
 		axios.post('http://localhost:9090/PVPUI/CreateModel',`selectedPlugin=${this.state.selectedPlugin}`,{
       headers :{
@@ -101,6 +115,9 @@ export default class ConnectionCreation extends Component{
     	this.props.setObjectList(objectList);
     	this.props.modelCreated();
 
+    }).catch(e=>{
+    	console.log(e)
+    	alert(e)
     })
 
 	}

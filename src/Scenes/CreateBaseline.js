@@ -257,7 +257,10 @@ export default class CreateBaseline extends Component {
 			viewOnview: this.state.viewOnview,
 			mlvQualification: this.state.mlvQualification,
 			selectedBaseline: this.state.selectedBaseline,
-			newBaselineName: this.state.newBaselineName
+			newBaselineName: this.state.newBaselineName,
+			filters : {
+				...this.state.filters
+			}
 
 		}
 
@@ -334,6 +337,7 @@ export default class CreateBaseline extends Component {
 		var selectedAttribute = this.state.selectedSuitableAttribute.attributeName
 		var filterExpression = event.target.props.filterExpression;
 		var filterKey = event.target.props.filterKey;
+		var filterName = event.target.props.filterName;
 		this.setState({
 			...this.state,
 			filters:{
@@ -343,7 +347,8 @@ export default class CreateBaseline extends Component {
 					[filterKey] : {
 
 						filterExpression : filterExpression,
-						value: event.target.value
+						value: event.target.value,
+						name : filterName
 					}
 
 				}
@@ -360,9 +365,10 @@ export default class CreateBaseline extends Component {
 				...this.state.filters
 			}
 		}
+		console.log(JSON.stringify(temp));
 
 
-		axios.post('http://localhost:9090/PVPUI/ExecuteFilterMLV', `MLV=${btoa(JSON.stringify(temp))}`, {
+		axios.post('http://localhost:9090/PVPUI/ExecuteFilterMLV', `MLV=${JSON.stringify(temp)}`, {
 			headers: {
 			}
 
@@ -404,8 +410,42 @@ export default class CreateBaseline extends Component {
 			}
 	}
 
+// * METHOD TO ADD FILTERS GENERATED TO BASELINE
+
+addFiltersGeneratedToBaseline(event){
+	this.isLoading();
+	event.preventDefault();
+	var baselineDetails= {
+		filters : {
+			...this.state.filters
+		},
+		mlv: this.state.mlv,
+		testCaseSummary : this.state.testCaseSummary,
+		testCaseDescription : this.state.testCaseDescription,
+		runFlag: this.state.runFlag,
+		viewOnView : this.state.viewOnview,
+		mlvQualification: this.state.mlvQualification,
+		selectedBaseline : this.state.selectedBaseline,
+		newBaselineName : this.state.newBaselineName
+
+	}
+
+	axios.post('http://localhost:9090/PVPUI/AddGeneratedFiltersToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
+			headers: {
+			}
+
+
+		}).then(response=>{
+			this.isNotLoading();
+			alert(response.data)
+		}).catch(e=>{
+			this.isNotLoading();
+			alert("Error occured. Please follow logs")
+		})
+}
+
 	render() {
-		
+		console.log(this.state.filters)
 		var columnsElement = this.state.columnNames.map((column) => {
 
 
@@ -535,12 +575,7 @@ export default class CreateBaseline extends Component {
 										onChange={this.addNewBaseline.bind(this)}
 
 									/>
-									<Button
-										style={{ margin: "1em" }}
-										onClick={this.addToBaseline.bind(this)}
-									>
-										Add
-									</Button>
+									
 
 								</div>
 
@@ -604,6 +639,7 @@ export default class CreateBaseline extends Component {
 												<Input
 
 													filterKey={this.state.selectedSuitableAttribute.columnName + "_" + filter.name}
+													filterName={filter.name}
 													filterExpression={this.state.selectedSuitableAttribute.columnName +  " " + filter.value}
 													style={{ width: "100%", textAlign: "center", margin: "1em" }}
 													onChange={this.setFilterValue.bind(this)}
@@ -620,6 +656,16 @@ export default class CreateBaseline extends Component {
 								Execute Filters
 						</Button>
 
+							</div>
+							<div className="row justify-content-center">
+								<div className="col-lg-2">
+									<Button
+										style={{ margin: "1em" }}
+										onClick={this.addFiltersGeneratedToBaseline.bind(this)}
+									>
+										Add
+									</Button>
+								</div>
 							</div>
 						</PanelBarItem>
 					</PanelBar>
