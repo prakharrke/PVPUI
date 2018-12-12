@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter, Route, Router, HashRouter, Redirect, Switch } from 'react-router-dom';
 import PVPUI from './Scenes/PVPUI';
 import LoginForm from './Scenes/loginForm'
-import Report from './Scenes/Report'
+import Report from './Scenes/Report2'
 const PrivateRoute = ({ component: Component, ...rest }) => {
 
 	console.log(rest)
