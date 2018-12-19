@@ -3,34 +3,54 @@ import axios from 'axios';
 import { groupBy, process } from '@progress/kendo-data-query';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import PluginNameGrid from './Components/PluginNameGrid'
+import LoadingPanel from './Components/LoadingPanel'
+import { DatePicker } from '@progress/kendo-react-dateinputs';
 export default class Report extends Component {
 
 	constructor(props) {
 		super(props);
-
+		var currentDate = new Date();
+		var minDate = currentDate.getDate() - 30;
+		var minDateForCalender = new Date(currentDate);
+		minDateForCalender.setDate(minDate);
+		var maxDate = currentDate.getDate() + 1;
+		var maxDateForCalender = new Date(currentDate);
+		maxDateForCalender.setDate(maxDate);
+		
 		this.state = {
-			currentDate: new Date().getTime(),
+			currentDate: currentDate,
 			resultSet: [],
 			dataResult: [],
+			isloading: false,
+			minDate : minDateForCalender,
+			maxDate : maxDateForCalender,
+			reportDate : currentDate
 
 
 
 		}
 	}
 
-	componentWillMount() {
-		var fromDate = new Date(this.state.currentDate)
-		fromDate.setHours(19)
-		fromDate.setMinutes(0)
-		fromDate.setSeconds(0)
-		fromDate.setMilliseconds(0)
-		var toDate = new Date(fromDate);
-		var nextDate = toDate.getDate() + 1;
-		toDate.setDate(nextDate);
+	componentWillMount(){
+		this.fetchReportData(this.state.reportDate);
+	}
+
+
+	fetchReportData(reportDate){
+
+		this.isLoading();
+		var toDate = new Date(reportDate)
 		toDate.setHours(7)
 		toDate.setMinutes(0)
 		toDate.setSeconds(0)
 		toDate.setMilliseconds(0)
+		var fromDate = new Date(toDate);
+		var prevDate = fromDate.getDate() - 1;
+		fromDate.setDate(prevDate);
+		fromDate.setHours(19)
+		fromDate.setMinutes(0)
+		fromDate.setSeconds(0)
+		fromDate.setMilliseconds(0)
 		console.log(fromDate)
 		console.log(toDate)
 		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
@@ -48,6 +68,7 @@ export default class Report extends Component {
 					
 				})
 			})
+			this.isNotLoading();
 			this.setState({
 				resultSet: response.data,
 				dataResult: connectionData
@@ -56,15 +77,57 @@ export default class Report extends Component {
 			//console.log(result)
 
 		}).catch()
+
+	}
+
+	changeReportDate(event){
+		this.fetchReportData(event.target.value);
+		this.setState({
+			reportDate : event.target.value
+		})
+	}
+
+		isLoading() {
+
+		this.setState({
+
+			isLoading: true,
+
+		})
+	}
+
+	// * METHOD TO UNMOUNT LOADING COMPONENT
+
+	isNotLoading() {
+
+		this.setState({
+
+			isLoading: false
+		})
 	}
 
 	render() {
 
+		
 
+		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 
 
 		return (
-
+			<div>
+			{loadingComponent}
+			<div className="row justify-content-center" style={{ margin:'1em'}}>
+				<div className="col-lg-2">
+					<DatePicker
+						width='10em'
+                       
+                       	min={this.state.minDate}
+                        max={this.state.maxDate}
+                        value={this.state.reportDate}
+                        onChange={this.changeReportDate.bind(this)}
+                    />
+				</div>
+			</div>
 			<Grid
 
 				resizable={true}
@@ -75,12 +138,13 @@ export default class Report extends Component {
 				detail={PluginNameGrid}
 				expandField="expanded"
 				onExpandChange={this.expandChange.bind(this)}
-				
+				style={{margin : '1em'}}
 				
 			>
 				<Column field="connectionName" title="Connection Name" />
 
 			</Grid>
+			</div>
 		)
 	}
 

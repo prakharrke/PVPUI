@@ -14,7 +14,8 @@ export default class PluginNameGrid extends Component {
 				pluginName : pluginObject.value,
 				items : pluginObject.items,
 				totalRead : pluginObject.items[0].readTotal,
-				readFail : pluginObject.items[0].readFail
+				readFail : pluginObject.items[0].readFail,
+				readPass : pluginObject.items[0].readPass
 			})
 		})
 
@@ -43,6 +44,7 @@ export default class PluginNameGrid extends Component {
 			>
 				<Column field="pluginName" title="Plugin Name" />
 				<Column field="totalRead" title="Total Count" />
+				<Column field="readPass" title="Pass Count" />
 				<Column field="readFail" title="Fail Count" />
 				
 
