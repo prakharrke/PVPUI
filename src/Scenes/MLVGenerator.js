@@ -110,7 +110,8 @@ export default class MLVGenerator extends Component {
 
 
 		if (!(this.state.selectedObjectList.includes(this.state.selectedObject)) && this.state.selectedObject != "Selected Sources") {
-
+			console.log('UPDATING')
+			console.log(this.state.selectedObject)
 			this.setState({
 				selectedObject: "Selected Sources",
 				attributeListForSelectedObject: [],

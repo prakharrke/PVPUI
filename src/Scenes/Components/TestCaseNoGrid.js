@@ -32,7 +32,7 @@ export default class TestCaseNoGrid extends Component {
 				style={{ width: '100%' }}
 				resizable={true}
 				reorderable={true}
-				filterable={true}
+				filterable={false}
 				data={this.state.testCaseNoList}
 				onExpandChange={this.expandChange.bind(this)}
 				detail={TestCaseDataGrid}

@@ -33,7 +33,7 @@ export default class PluginNameGrid extends Component {
 				style={{width:'100%'}}
 				resizable={true}
 				reorderable={true}
-				filterable={true}
+				filterable={false}
 				data={this.state.pluginList}
 				detail={TestCaseNoGrid}
 				onExpandChange={this.expandChange.bind(this)}
