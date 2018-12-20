@@ -5,6 +5,8 @@ import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import PluginNameGrid from './Components/PluginNameGrid'
 import LoadingPanel from './Components/LoadingPanel'
 import { DatePicker } from '@progress/kendo-react-dateinputs';
+import { Input } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
 export default class Report extends Component {
 
 	constructor(props) {
@@ -16,28 +18,32 @@ export default class Report extends Component {
 		var maxDate = currentDate.getDate() + 1;
 		var maxDateForCalender = new Date(currentDate);
 		maxDateForCalender.setDate(maxDate);
-		
+
 		this.state = {
 			currentDate: currentDate,
 			resultSet: [],
 			dataResult: [],
 			isloading: false,
-			minDate : minDateForCalender,
-			maxDate : maxDateForCalender,
-			reportDate : currentDate
+			minDate: minDateForCalender,
+			maxDate: maxDateForCalender,
+			reportDate: currentDate,
+			connectionName : ''
 
 
 
 		}
 	}
 
-	componentWillMount(){
-		this.fetchReportData(this.state.reportDate);
+	componentWillMount() {
+		//this.fetchReportData(this.state.reportDate);
 	}
 
 
-	fetchReportData(reportDate){
-
+	fetchReportData(reportDate) {
+		if(this.state.connectionName === ''){
+			alert('Please enter Connection Name');
+			return
+		}
 		this.isLoading();
 		var toDate = new Date(reportDate)
 		toDate.setHours(7)
@@ -53,7 +59,7 @@ export default class Report extends Component {
 		fromDate.setMilliseconds(0)
 		console.log(fromDate)
 		console.log(toDate)
-		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
+		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : this.state.connectionName })}`, {
 			headers: {
 			}
 
@@ -61,11 +67,11 @@ export default class Report extends Component {
 		}).then(response => {
 			const result = groupBy(response.data, [{ field: "connectionName" }]);
 			var connectionData = []
-			result.map(connectionObject=>{
+			result.map(connectionObject => {
 				connectionData.push({
-					connectionName : connectionObject.value,
+					connectionName: connectionObject.value,
 					items: connectionObject.items,
-					
+
 				})
 			})
 			this.isNotLoading();
@@ -73,21 +79,21 @@ export default class Report extends Component {
 				resultSet: response.data,
 				dataResult: connectionData
 			})
-			
+
 			//console.log(result)
 
 		}).catch()
 
 	}
 
-	changeReportDate(event){
-		this.fetchReportData(event.target.value);
+	changeReportDate(event) {
+		//this.fetchReportData(event.target.value);
 		this.setState({
-			reportDate : event.target.value
+			reportDate: event.target.value
 		})
 	}
 
-		isLoading() {
+	isLoading() {
 
 		this.setState({
 
@@ -106,52 +112,76 @@ export default class Report extends Component {
 		})
 	}
 
+	setConnectionName(event){
+
+		this.setState({
+			connectionName : event.target.value
+		})
+	}
+
+	fetchReport(){
+
+		this.fetchReportData(this.state.reportDate)
+	}
+
 	render() {
 
-		
+
 
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 
 
 		return (
 			<div>
-			{loadingComponent}
-			<div className="row justify-content-center" style={{ margin:'1em'}}>
-				<div className="col-lg-2">
-					<DatePicker
-						width='10em'
-                       
-                       	min={this.state.minDate}
-                        max={this.state.maxDate}
-                        value={this.state.reportDate}
-                        onChange={this.changeReportDate.bind(this)}
-                    />
+				{loadingComponent}
+				<div className="row justify-content-center" style={{ margin: '1em' }}>
+					<div className="col-lg-2">
+						<DatePicker
+							width='10em'
+
+							min={this.state.minDate}
+							max={this.state.maxDate}
+							value={this.state.reportDate}
+							onChange={this.changeReportDate.bind(this)}
+						/>
+						<Input
+
+							label="Connection Name"
+							value={this.state.connectionName}
+							style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+							onChange={this.setConnectionName.bind(this)}
+
+						/>
+						<Button style={{margin : '1em'}}
+						onClick = {this.fetchReport.bind(this)}
+						>Fetch Report
+						</Button>
+					</div>
 				</div>
-			</div>
-			<Grid
+				<Grid
 
-				resizable={true}
-				reorderable={true}
-				filterable={true}
-				sortable={true}
-				data={this.state.dataResult}
-				detail={PluginNameGrid}
-				expandField="expanded"
-				onExpandChange={this.expandChange.bind(this)}
-				style={{margin : '1em'}}
-				
-			>
-				<Column field="connectionName" title="Connection Name" />
+					resizable={true}
+					reorderable={true}
+					filterable={true}
+					sortable={true}
+					data={this.state.dataResult}
+					detail={PluginNameGrid}
+					expandField="expanded"
+					onExpandChange={this.expandChange.bind(this)}
+					style={{ margin: '1em' }}
 
-			</Grid>
+				>
+					<Column field="connectionName" title="Connection Name" />
+
+				</Grid>
 			</div>
 		)
 	}
 
 	expandChange = (event) => {
-        event.dataItem.expanded = !event.dataItem.expanded;
-        this.forceUpdate();
-    }
+		event.dataItem.expanded = !event.dataItem.expanded;
+		this.forceUpdate();
+	}
 
 
 
