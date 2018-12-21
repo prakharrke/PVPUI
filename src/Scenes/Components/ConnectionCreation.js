@@ -1,147 +1,276 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import {DropDownList} from '@progress/kendo-react-dropdowns';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
 import * as Constants from '../../Constants.js'
-export default class ConnectionCreation extends Component{
+import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
+export default class ConnectionCreation extends Component {
 
-	constructor(props){
+	constructor(props) {
 
 		super(props);
 
 		this.state = {
 
-			pluginList : [],
-			selectedPlugin : ""
+			pluginList: [],
+			secondarySelectedPlugin : '',
+			secondaryConnections: []
 		}
 		this.selectedPlugin = ""
 	}
 
-	componentWillMount(){
+	componentWillMount() {
 
-			this.props.isLoading();
+		this.props.isLoading();
 
-		    axios.post('http://localhost:9090/PVPUI/GetPlugins',{p :'1'},{
-      headers :{
+		axios.post('http://localhost:9090/PVPUI/GetPlugins', { p: '1' }, {
+			headers: {
 
-        'Content-Type' : 'application/json',
-
-
-
-      }
+				'Content-Type': 'application/json',
 
 
-    }).then((response)=>{
-			
+
+			}
+
+
+		}).then((response) => {
+
 			this.props.isNotLoading();
 			var parsedJson = response.data;
 			Constants.Constants.MLVFunctions = parsedJson.MLVFunctions;
 			Constants.Constants.MLVWhereClauseFunctions = parsedJson.MLVWhereClauseFunctions;
 			Constants.Constants.MLVOperators = parsedJson.MLVOperators;
-    		var pluginList = new Array();
-    		pluginList = parsedJson.pluginList.split(",")
+			var pluginList = new Array();
+			pluginList = parsedJson.pluginList.split(",")
 
-    		this.setState({
+			this.setState({
 
-    			pluginList : pluginList
-    		})
+				pluginList: pluginList
+			})
 
-    }).catch(e=>{
-    	console.log(e)
-    	alert("Something went wrong")
-    })
+		}).catch(e => {
+			console.log(e)
+			this.props.isNotLoading();
+			alert("Something went wrong")
+		})
 
 	}
 
 	setPlugin = (event) => {
 
-			this.setState({
+		this.setState({
 
-				selectedPlugin : event.target.value
+			selectedPlugin: event.target.value
 
-			})
+		})
 
 	}
 
-	connectionTest(event){
+	connectionTest(event) {
 		event.preventDefault();
 		var selectedPlugin = this.state.selectedPlugin;
-		if(selectedPlugin === '' || selectedPlugin === null || selectedPlugin === undefined){
+		if (selectedPlugin === '' || selectedPlugin === null || selectedPlugin === undefined) {
 			alert('Please select a plugin to connect to');
 			return
 		}
 		this.props.isLoading();
-		  axios.post('http://localhost:9090/PVPUI/TestConnection',`selectedPlugin=${this.state.selectedPlugin}`,{
-      headers :{
-      }
+		axios.post('http://localhost:9090/PVPUI/TestConnection', `selectedPlugin=${this.state.selectedPlugin}`, {
+			headers: {
+			}
 
 
-    }).then((response)=>{
+		}).then((response) => {
 			this.props.isNotLoading();
-    		if(response.data.status === 'true'){
+			if (response.data.status === 'true') {
 
-    			alert('Connection Successful')
-    		}else{
+				alert('Connection Successful')
+			} else {
 
-    			alert('Connection Test failed')
-    		}
+				alert('Connection Test failed')
+			}
 
-    }).catch((e)=>{
-    	console.log(e);
-    	alert(e);
-    })
+		}).catch((e) => {
+			console.log(e);
+			alert(e);
+		})
 	}
-	createModel(event){
+	createModel(event) {
 
 		event.preventDefault();
 		var selectedPlugin = this.state.selectedPlugin
-		if(selectedPlugin === '' || selectedPlugin === null || selectedPlugin === undefined){
+		if (selectedPlugin === '' || selectedPlugin === null || selectedPlugin === undefined) {
 			alert('Please select a plugin to connect to');
 			return
 		}
 		this.props.modelNotCreated();
-		axios.post('http://localhost:9090/PVPUI/CreateModel',`selectedPlugin=${this.state.selectedPlugin}`,{
-      headers :{
-      }
+		axios.post('http://localhost:9090/PVPUI/CreateModel', `selectedPlugin=${this.state.selectedPlugin}`, {
+			headers: {
+			}
 
 
-    }).then((response)=>{
+		}).then((response) => {
 
-    	var parsedJson = JSON.parse(atob(response.data))
-    	
-    	var objectList = new Array();
-    	objectList = parsedJson.objectList;
-    	
-    	this.props.setObjectList(objectList);
-    	this.props.modelCreated();
+			var parsedJson = JSON.parse(atob(response.data))
 
-    }).catch(e=>{
-    	console.log(e)
-    	alert(e)
-    })
+			var objectList = new Array();
+			objectList = parsedJson.objectList;
+			var secondaryConnections = this.state.secondaryConnections;
+			secondaryConnections.push({
+			pluginName: this.state.selectedPlugin,
+			modelCreated: true,
+			index: secondaryConnections.length,
+			objectList : objectList
+			})
+			this.props.setObjectList(objectList);
+			this.props.setConnInfoList(secondaryConnections);
+			this.props.modelCreated();
+			this.setState({
+				secondaryConnections : secondaryConnections
+			})
+
+		}).catch(e => {
+			console.log(e)
+			alert(e)
+		})
 
 	}
 
+	// * METHOD TO ADD SECONDARY CONNECTION
+	createNewConnection(event) {
+		event.preventDefault();
+		var secondaryConnections = this.state.secondaryConnections;
+		secondaryConnections.push({
+			pluginName: '',
+			modelCreated: false,
+			index: secondaryConnections.length
+		})
+
+		this.setState({
+			secondaryConnections: secondaryConnections
+		})
+	}
+
+	selectPluginForNewConnection(event) {
+		var secondaryConnections = this.state.secondaryConnections;
+		secondaryConnections[event.target.props.index]['pluginName'] = event.target.value
+		secondaryConnections[event.target.props.index]['modelCreated'] = false
+		this.setState({
+			secondaryConnections: secondaryConnections
+		})
+	}
+
+	testSecondaryConnection(event) {
+		this.props.isLoading();
+		console.log(event.target.getAttribute('index'))
+		event.preventDefault();
+		axios.post('http://localhost:9090/PVPUI/TestConnection', `selectedPlugin=${this.state.secondaryConnections[event.target.getAttribute('index')].pluginName}`, {
+			headers: {
+			}
 
 
+		}).then((response) => {
+			this.props.isNotLoading();
+			if (response.data.status === 'true') {
 
-	render(){
+				alert('Connection Successful')
+			} else {
 
-		
+				alert('Connection Test failed')
+			}
+
+		}).catch((e) => {
+			console.log(e);
+			alert(e);
+		})
+
+	}
+	createModelForSecondaryConnection(event) {
+		this.props.isLoading();
+		console.log(event.target.getAttribute('index'))
+		var index = event.target.getAttribute('index');
+		event.preventDefault();
+		axios.post('http://localhost:9090/PVPUI/CreateModelForSecondaryConnections', `pluginDetails=${JSON.stringify({ pluginName: this.state.secondaryConnections[event.target.getAttribute('index')].pluginName, index: event.target.getAttribute('index') })}`, {
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
 
 
-		return(
-			
-			<form className="form-inline" style={{width : "100%"}}>
-			<div className = "d-flex justify-content-start" style={{width : "50%"}}>
-			<DropDownList data={this.state.pluginList} defaultValue="Select Plugin"  onChange = {this.setPlugin.bind(this)}style={{width : "100%"}}/>
-			</div>
-			<div className = "d-flex justify-content-end" style={{width : "50%"}}>
-				<Button primary={true} onClick={this.connectionTest.bind(this)}>Test Connection</Button>
-				<Button primary={false} onClick={this.createModel.bind(this)}>Create Model</Button>
-			</div>
-			</form>
-			
+		}).then((response) => {
+			this.props.isNotLoading();
+			var parsedJson = JSON.parse(atob(response.data))
+
+			var objectList = new Array();
+			objectList = parsedJson.objectList;
+			var secondaryConnections = this.state.secondaryConnections;
+			secondaryConnections[index]['objectList'] = objectList
+			console.log(secondaryConnections[index]['objectList'])
+			this.setState({
+				secondaryConnections: secondaryConnections
+			})
+
+		})
+	}
+
+
+	render() {
+		console.log(this.state.secondaryConnections)
+		var secondayConnectionsElement = this.state.secondaryConnections.map((secondaryConnection, index) => {
+			if(index === 0) return ''
+			return (
+
+				<form className="form-inline" style={{ width: "90%" }}>
+
+					<div className="d-flex justify-content-start" style={{ width: "50%" }}>
+						<DropDownList data={this.state.pluginList} index={index} onChange={this.selectPluginForNewConnection.bind(this)} defaultValue="Select Plugin" value={secondaryConnection.pluginName} style={{ width: "100%" }} />
+					</div>
+					<div className="d-flex justify-content-end" style={{ width: "50%" }}>
+						<Button primary={false} index={index} style={{ margin: '1em' }} onClick={this.testSecondaryConnection.bind(this)}>Test Connection</Button>
+						<Button primary={false} index={index} style={{ margin: '1em' }} onClick={this.createModelForSecondaryConnection.bind(this)}>Create Model</Button>
+					</div>
+				</form>
+
 			)
+		
+		})
+
+
+		return (
+			<div style={{ width: '100%' }}>
+				<div className="row">
+					<form className="form-inline" style={{ width: "100%" }}>
+
+						<div className="d-flex justify-content-start" style={{ width: "50%" }}>
+							<DropDownList data={this.state.pluginList} defaultValue="Select Plugin" onChange={this.setPlugin.bind(this)} style={{ width: "100%" }} />
+						</div>
+						<div className="d-flex justify-content-end" style={{ width: "50%" }}>
+							<Button primary={false} style={{ margin: '0.5em' }} onClick={this.connectionTest.bind(this)}>Test Connection</Button>
+							<Button primary={false} style={{ margin: '0.5em' }} onClick={this.createModel.bind(this)}>Create Model</Button>
+						</div>
+					</form>
+				</div>
+				<div className="row justify-content-center" style={{ marginTop: "2em" }}>
+					<div className="col-lg-8 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
+
+						<PanelBar >
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>New Connections</i>}>
+								<div className="row justify-content-center" style={{ width: "100%" }}>
+									<div className="row justify-content-center">
+										<div className="col-lg-2">
+											<Button primary={true} style={{ margin: '1em' }} onClick={this.createNewConnection.bind(this)}>New Connection</Button>
+										</div>
+
+									</div>
+
+									{secondayConnectionsElement}
+								</div>
+							</PanelBarItem>
+						</PanelBar>
+					</div>
+				</div>
+
+
+			</div>
+
+		)
 	}
 }

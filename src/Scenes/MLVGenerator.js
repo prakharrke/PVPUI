@@ -29,7 +29,8 @@ export default class MLVGenerator extends Component {
 				tempObject: '',
 				selectedObjectList: [],
 				loading: false,
-				objectList: this.props.objectList,
+				objectList: this.props.connInfoList[0].objectList,
+				connInfoList : this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
 				isLoading: false,
@@ -1460,8 +1461,11 @@ export default class MLVGenerator extends Component {
 	createMLV(event) {
 		event.preventDefault();
 		this.isLoading();
-		axios.post('http://localhost:9090/PVPUI/GenerateMLV', `state=${btoa(JSON.stringify(this.state))}`, {
+		var stateJson =JSON.stringify(this.state);
+		alert(stateJson)
+		axios.post('http://localhost:9090/PVPUI/GenerateMLV','selectedObjectList=' + btoa(JSON.stringify(this.state)), {
 			headers: {
+				 'Content-Type': 'application/x-www-form-urlencoded'
 			}
 
 

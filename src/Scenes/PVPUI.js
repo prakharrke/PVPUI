@@ -16,7 +16,8 @@ export default class PVPUI extends Component {
 			isModelCreated: "",
 			mlv: '',
 			createBaseline: false,
-			mlvGeneratorState : {}
+			mlvGeneratorState : {},
+			connInfoList : []
 
 		}
 
@@ -44,6 +45,13 @@ export default class PVPUI extends Component {
 
 		this.setState({
 			objectList: objectList
+		})
+	}
+
+	setConnInfoList(connectionList){
+
+		this.setState({
+			connInfoList : connectionList
 		})
 	}
 
@@ -97,6 +105,7 @@ export default class PVPUI extends Component {
 
 			mountGenerator = <MLVGenerator
 				objectList={this.state.objectList}
+				connInfoList={this.state.connInfoList}
 				addMLV={this.addMLV.bind(this)}
 				oldState={this.state.mlvGeneratorState}
 				loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
@@ -127,6 +136,7 @@ export default class PVPUI extends Component {
 						setObjectList={this.setObjectList.bind(this)}
 						modelNotCreated={this.modelNotCreated.bind(this)}
 						modelCreated={this.modelCreated.bind(this)}
+						setConnInfoList={this.setConnInfoList.bind(this)}
 					/>
 
 				</nav>

@@ -25,7 +25,7 @@ export default class ReportContainer extends Component {
 	categories = [];
 
 	componentWillMount() {
-		alert(new Date(1545317576622))
+		//alert(new Date(1545317576622))
 		var toDate = new Date(this.state.currentDate);
 		toDate.setDate(this.state.currentDate.getDate() +1);
 		toDate.setHours(7)
@@ -33,14 +33,14 @@ export default class ReportContainer extends Component {
 		toDate.setSeconds(0)
 		toDate.setMilliseconds(0)
 		var fromDate = new Date(toDate);
-		var prevDate = fromDate.getDate() - 3;
+		var prevDate = fromDate.getDate() - 4;
 		fromDate.setDate(prevDate);
 		fromDate.setHours(19)
 		fromDate.setMinutes(0)
 		fromDate.setSeconds(0)
 		fromDate.setMilliseconds(0)
 		var categoriesLocal = [];
-		for(var i=0;i<3;i++){
+		for(var i=0;i<4;i++){
 			var tempDate = new Date(fromDate);
 			var newDate = fromDate.getDate();
 			tempDate.setDate(newDate + i);
