@@ -26,11 +26,12 @@ export default class MLVGenerator extends Component {
 		}
 		else
 			this.state = {
+				selectedConnectionID: -1,
 				tempObject: '',
 				selectedObjectList: [],
 				loading: false,
 				objectList: this.props.connInfoList[0].objectList,
-				connInfoList : this.props.connInfoList,
+				connInfoList: this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
 				isLoading: false,
@@ -97,17 +98,31 @@ export default class MLVGenerator extends Component {
 		})
 	}
 
-	static componentWillReceiveProps(props) {
-		console.log("componentWillReceiveProps")
-		if (!(this.state.objectList === props.objectList)) {
+	/* componentWillReceiveProps(props) {
+	 	console.log('component will receive props')
+		var oldConnInfoList = this.state.connInfoList;
+		var isDifferent = false;
+		oldConnInfoList.map(connInfo=>{
+			var index = props.connInfoList.map(newConnInfo=>{return newConnInfo.connectionID}).indexOf(oldConnInfoList.connectionID)
+			if(index != -1){
+				if(props.connInfoList[index].pluginName === oldConnInfoList.pluginName){
 
+				}else{
+					isDifferent = true;
+				}
+			}else{
+				isDifferent = true;
+			}
+		})
+
+		if(isDifferent){
 			this.setState({
-				objectList: props.objectList
+				connInfoList : props.connInfoList,
+				objectList : props.connInfoList[props.connInfoList.map(connInfo=>{return connInfo.connectionID}).indexOf(this.state.selectedConnectionID)].objectList
 			})
-
 		}
 	}
-
+*/
 
 	componentWillUpdate() {
 
@@ -159,7 +174,14 @@ export default class MLVGenerator extends Component {
 			})
 		}
 
+		// * UPDATING OBJECTLIST FROM CONNINFO AFTER CHANGE IN BASE CONNECTION
 
+		if(!this.state.objectList.every(object=>{ return this.state.connInfoList[this.state.connInfoList.map(connInfo=>{return connInfo.connectionID}).indexOf(this.state.selectedConnectionID)].objectList.includes(object)})){
+
+			this.setState({
+				objectList : this.state.connInfoList[this.state.connInfoList.map(connInfo=>{return connInfo.connectionID}).indexOf(this.state.selectedConnectionID)].objectList
+			})
+		}
 	}
 	addSelectedObjectTry(event) {
 
@@ -199,6 +221,7 @@ export default class MLVGenerator extends Component {
 					parentObject: '',
 					type: '',
 					native: '',
+					isRecursionTrue: false,
 					explicit: {
 						attribute: {
 
@@ -220,6 +243,7 @@ export default class MLVGenerator extends Component {
 				parentTo: [],
 
 				hideLevel: false,
+				connectionID: this.state.selectedConnectionID
 
 			}
 		})
@@ -517,8 +541,9 @@ export default class MLVGenerator extends Component {
 
 		clearTimeout(this.timeout);
 		this.timeout = setTimeout(() => {
+
 			this.setState({
-				objectList: filterBy(this.props.objectList.slice(), event.filter),
+				objectList: filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(), event.filter),
 				loading: false
 			});
 		}, delay);
@@ -724,6 +749,10 @@ export default class MLVGenerator extends Component {
 	}
 
 	addSelectedAttributeFromAutoComplete(event) {
+		if(!this.state.attributeListForSelectedObject.includes(event.target.value)){
+
+			return
+		}
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
@@ -1179,7 +1208,9 @@ export default class MLVGenerator extends Component {
 
 		}).then((response) => {
 			var parsedJson = JSON.parse(atob(response.data));
-			console.log(parsedJson);
+
+
+
 			this.setState({
 				...this.state,
 				nativeRelations: parsedJson.nativeRelationsBetweenObjects
@@ -1188,23 +1219,40 @@ export default class MLVGenerator extends Component {
 		})
 	}
 
+	// * METHOD TO SET RECURSION FLAG
+	toggleIsRecursionTrue(event) {
+
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID] : {
+				...this.state[this.state.selectedObject.objectID],
+				relation : {
+
+					...this.state[this.state.selectedObject.objectID].relation,
+					isRecursionTrue : ! this.state[this.state.selectedObject.objectID].relation.isRecursionTrue
+				}
+			}
+		})
+	}
+
 	// * METHOD TO ADD NATIVE RELATION FOR SELECTED OBJECT
 	addNativeRelation(event) {
+		// * CHECK TO SEE IF USER DELETES THE RELATIONSHIP
 
 		// * CHECK OF EXPLICIT RELATION IS ALREADY PRESENT
-		if (this.state[this.state.selectedObject].relation.type === 'explicit') {
+		if (this.state[this.state.selectedObject.objectID].relation.type === 'explicit') {
 
 			alert('Explicit Relation is already present. Cannot apply relation')
 			return
 		}
 
 		// * DELETING THE CURRENT NATIVE RELATION
-
+		console.log(this.state);
 		if (event.target.value.length === 0) {
 
 			var parentObject = this.state[this.state.selectedObject.objectID].relation.parentObject;
 			var parentTo = new Array();
-			parentTo = this.state[parentObject.objectID].parentTo;
+			parentTo = this.state[parentObject].parentTo;
 			var indexToSplice = 0
 			parentTo.map((attribute, index) => {
 
@@ -1226,6 +1274,7 @@ export default class MLVGenerator extends Component {
 						parentObject: '',
 						type: '',
 						native: '',
+						isRecursionTrue : false
 
 					}
 				},
@@ -1461,11 +1510,19 @@ export default class MLVGenerator extends Component {
 	createMLV(event) {
 		event.preventDefault();
 		this.isLoading();
-		var stateJson =JSON.stringify(this.state);
-		alert(stateJson)
-		axios.post('http://localhost:9090/PVPUI/GenerateMLV','selectedObjectList=' + btoa(JSON.stringify(this.state)), {
+		var stateJson = JSON.stringify(this.state);
+		var requestData = {}
+		this.state.selectedObjectList.map(object => {
+
+			requestData[object.objectID] = this.state[object.objectID];
+
+		})
+		requestData['selectedObjectList'] = this.state.selectedObjectList;
+		requestData['parallelExecution'] = this.state.parallelExecution;
+		requestData['cache'] = this.state.cache;
+		axios.post('http://localhost:9090/PVPUI/GenerateMLV', 'selectedObjectList=' + btoa(JSON.stringify(requestData)), {
 			headers: {
-				 'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 
 
@@ -1539,6 +1596,36 @@ export default class MLVGenerator extends Component {
 			})
 		}
 
+	}
+
+	// * METHOD TO SELECT SOURCE CONNECTION FOR MULTICONNECTION MLV
+	selectSourceConnection(event) {
+
+		// * CHECK IF THE SELECTED_OBJECT_LIST IS EMPTY, IF SO, ONLY BASE OBJECT CAN BE USED TO SELECT LEVEL 0
+
+		if (this.state.selectedObjectList.length === 0) {
+
+			if (event.target.value.connectionID != -1) {
+				alert('Level 0 can only have source from base connection')
+				return
+			}
+		}
+		// * LOAD MODEL WITH CONNECTION_ID AS PROVIDED
+		axios.post('http://localhost:9090/PVPUI/LoadModel', 'details=' + JSON.stringify({ connectionID: event.target.value.connectionID, pluginName: event.target.value.pluginName }), {
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+
+
+		}).then(response => {
+			var parsedJson = JSON.parse(atob(response.data))
+
+			this.setState({
+				objectList: parsedJson.objectList,
+				selectedConnectionID: parsedJson.connectionID,
+
+			})
+		})
 	}
 	// * COMPONENT WILL UNMOUNT METHOD, TO TRANSFER ITS STATE TO PARENT COMPONENT (PVPUI COMPONENT)
 
@@ -1644,6 +1731,7 @@ export default class MLVGenerator extends Component {
 		}
 
 
+
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 
 
@@ -1655,6 +1743,21 @@ export default class MLVGenerator extends Component {
 				{loadingComponent}
 				<div className=" row justify-content-center">
 					<form className="form-inline" style={{ width: "50%" }}>
+						{
+							this.state.connInfoList.length > 1 &&
+							(
+								<DropDownList
+
+									data={this.state.connInfoList}
+									onChange={this.selectSourceConnection.bind(this)}
+									style={{ width: '100%', marginTop: "1em" }}
+									label='Select Source Connection'
+									textField='pluginName'
+									dataItemKey='connectionID'
+
+								/>
+							)
+						}
 						<DropDownList
 
 							data={this.state.objectList}
@@ -1673,6 +1776,7 @@ export default class MLVGenerator extends Component {
 							dataItemKey='objectID'
 							loading={this.state.loading}
 							onChange={this.removeSelectedObject.bind(this)}
+							style={{ width: '100%', marginTop: "1em" }}
 						/>
 
 						<br />
@@ -2165,7 +2269,23 @@ export default class MLVGenerator extends Component {
 									</div>
 									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Native Relations</i>}>
 										<div className="row justify-content-center">
-											<div className="col-lg-6 justify-content-center">
+											<div className="col-lg-2">
+												<Button
+													style={{ margin: "1em" }}
+													onClick={this.toggleIsRecursionTrue.bind(this)}>
+													Recursion
+											</Button>
+												<Switch
+													style={{ margin: "1em" }}
+													checked={
+														this.state.selectedObject.objectName != "Selected Sources" ?
+															this.state[this.state.selectedObject.objectID].relation.isRecursionTrue : false
+													}
+												/>
+											</div>
+
+
+											<div className="col-lg-4 justify-content-center">
 												<MultiSelect
 													placeholder={"Native Relations"}
 													data={this.state.nativeRelations}
@@ -2356,7 +2476,7 @@ export default class MLVGenerator extends Component {
 								</div>
 							</PanelBarItem>
 						</PanelBar>
-						<div className="row">
+						<div className="row" style={{ marginTop: '1em' }}>
 							<div className="col-lg-6">
 								<Button onClick={this.createMLV.bind(this)}>
 									Generate MLV

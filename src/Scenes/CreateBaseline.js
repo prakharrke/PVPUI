@@ -6,12 +6,13 @@ import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import LoadingPanel from './Components/LoadingPanel'
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
-import * as Constants from '../Constants.js'
-import * as helper from '../helper.js'
+import * as Constants from '../Constants.js';
+import * as helper from '../helper.js';
+
 export default class CreateBaseline extends Component {
 
-	 resultSetListIndex = 0;
-	listOfResultSetList= new Array()
+	resultSetListIndex = 0;
+	listOfResultSetList = new Array()
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -23,9 +24,9 @@ export default class CreateBaseline extends Component {
 			resultSheet: '',
 			viewOnview: '',
 			mlvQualification: '',
-			
+
 			resultSetList: [],
-			
+
 			columnNames: [],
 			isLoading: false,
 			baslineFilesList: [],
@@ -39,7 +40,7 @@ export default class CreateBaseline extends Component {
 			selectedSuitableAttribute: {
 				attributeName: ''
 			},
-			filters:{
+			filters: {
 
 			}
 		}
@@ -105,8 +106,14 @@ export default class CreateBaseline extends Component {
 		})
 	}
 	// * METHOD TO ADD TEST CASE FILTER
-	addTestCaseFilter(event) {
-
+	addFilter(event) {
+		console.log(event.target.value)
+		this.setState({
+			...this.state,
+			testFilter: this.state.testFilter + event.target.value
+		})
+	}
+	editFilter(event) {
 		this.setState({
 			...this.state,
 			testFilter: event.target.value
@@ -136,6 +143,10 @@ export default class CreateBaseline extends Component {
 
 	// * METHOD TO EXECUTE MLV
 	executeMLV(event) {
+		if (this.state.mlv === '') {
+			alert("MLV not present")
+			return
+		}
 		this.isLoading();
 		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
 			headers: {
@@ -151,70 +162,80 @@ export default class CreateBaseline extends Component {
 
 	// * METHOD TO COMPUTE RESULT SET FROM SERVER
 	computeResultSet(response) {
-		console.log(response)
-		var resultsetList = new Array();
-
-		//alert(response)
-
-		//alert(response.length)
-
-		var parsed = response;
-
-		// columnsNames array to hold decoded keys (columns in resultset)
-
-		var columnNames = new Array();
 
 
+		try {
 
-		var keys = Object.keys(parsed[0]);
+			console.log(response)
+			var resultsetList = new Array();
 
-		// populating columnNames array by decoding every element of keys array
+			//alert(response)
 
-		for (var i = 0; i < keys.length; i++) {
+			//alert(response.length)
 
-			var key = keys[i];
+			var parsed = response;
 
-			columnNames[i] = atob(key);
+			// columnsNames array to hold decoded keys (columns in resultset)
 
-
-		}
-
-		this.setState({
-			...this.state,
-			columnNames: columnNames
-		})
-
-		// * Populating resultsetList array with decoded values from the parsed resultset received.
-
-		for (var i = 0; i < parsed.length; i++) {
+			var columnNames = new Array();
 
 
-			var temp = {};
 
-			for (var j = 0; j < keys.length; j++) {
+			var keys = Object.keys(parsed[0]);
+
+			// populating columnNames array by decoding every element of keys array
+
+			for (var i = 0; i < keys.length; i++) {
+
+				var key = keys[i];
+
+				columnNames[i] = atob(key);
 
 
-				var value = parsed[i][keys[j]];
-
-				// * fetching value from pared resultset and decoding it
-				console.log(atob(value));
-
-				temp[columnNames[j]] = atob(value);
 			}
 
-			resultsetList[i] = temp;
+			this.setState({
+				...this.state,
+				columnNames: columnNames
+			})
+
+			// * Populating resultsetList array with decoded values from the parsed resultset received.
+
+			for (var i = 0; i < parsed.length; i++) {
+
+
+				var temp = {};
+
+				for (var j = 0; j < keys.length; j++) {
+
+
+					var value = parsed[i][keys[j]];
+
+					// * fetching value from pared resultset and decoding it
+					console.log(atob(value));
+
+					temp[columnNames[j]] = atob(value);
+				}
+
+				resultsetList[i] = temp;
+			}
+
+			console.log(temp)
+
+			console.log(resultsetList);
+			this.isNotLoading();
+			this.setState({
+				...this.state,
+				resultSetList: resultsetList,
+				showResultSet: true
+
+			})
+
+		} catch{
+			this.isNotLoading();
+			alert("Error occurred while executing MLV.")
 		}
 
-		console.log(temp)
-
-		console.log(resultsetList);
-		this.isNotLoading();
-		this.setState({
-			...this.state,
-			resultSetList: resultsetList,
-			showResultSet: true
-
-		})
 	}
 
 	// * MEHTOD TO CLOSE THE RESULTSET WINDOW
@@ -247,7 +268,20 @@ export default class CreateBaseline extends Component {
 
 	addToBaseline(event) {
 		event.preventDefault();
+		if (this.state.mlv === '') {
+			alert('Please add MLV to be inserted')
+			return
+		}
+		if (this.state.resultSheet === '') {
+			alert('Please enter resultsheet name')
+			return
+		}
+		if (this.state.selectedBaseline === '' && this.state.newBaselineName === '') {
+			alert('Please select baseline name')
+			return
+		}
 		this.isLoading();
+		alert(this.state.testFilter)
 		var baselineDetails = {
 			testCaseSummary: this.state.testCaseSummary,
 			testCaseDescription: this.state.testCaseDescription,
@@ -258,19 +292,23 @@ export default class CreateBaseline extends Component {
 			mlvQualification: this.state.mlvQualification,
 			selectedBaseline: this.state.selectedBaseline,
 			newBaselineName: this.state.newBaselineName,
-			filters : {
+			filters: {
 				...this.state.filters
 			}
 
 		}
 
+		console.log(baselineDetails)
+
 		axios.post('http://localhost:9090/PVPUI/AddToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
 			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 
 
 		}).then((response) => {
 			this.isNotLoading();
+			console.log(response.data)
 			console.log(response.data);
 
 			alert(response.data)
@@ -281,6 +319,12 @@ export default class CreateBaseline extends Component {
 
 	// * METHOD TO SELECT DATA TYPE FOR FILTER GENERATION
 	selectDataType(event) {
+
+		if (this.props.mlvGeneratorState.selectedObjectList === undefined) {
+			alert('Only available if mlv is generated using generator')
+			return
+		}
+
 		this.setState({
 			...this.state,
 			selectedDataType: {
@@ -289,8 +333,17 @@ export default class CreateBaseline extends Component {
 			selectedSuitableAttribute: {}
 		})
 		console.log(this.props.mlvGeneratorState)
+		var requestData = {}
+		this.props.mlvGeneratorState.selectedObjectList.map(object => {
+
+			requestData[object.objectID] = this.props.mlvGeneratorState[object.objectID];
+
+		})
+		requestData['selectedObjectList'] = this.props.mlvGeneratorState.selectedObjectList;
+		requestData['parallelExecution'] = this.props.mlvGeneratorState.parallelExecution;
+		requestData['cache'] = this.props.mlvGeneratorState.cache;
 		var state = {
-			...this.props.mlvGeneratorState,
+			...requestData,
 			dataType: {
 				...event.target.value
 			}
@@ -298,6 +351,7 @@ export default class CreateBaseline extends Component {
 
 		axios.post('http://localhost:9090/PVPUI/GenerateFilterTestCases', `state=${btoa(JSON.stringify(state))}`, {
 			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 
 
@@ -322,16 +376,16 @@ export default class CreateBaseline extends Component {
 			selectedSuitableAttribute: {
 				...event.target.value
 			},
-			filters : {
-				
-				[event.target.value.columnName] : {}
-				
+			filters: {
+
+				[event.target.value.columnName]: {}
+
 			}
 		})
 	}
 
 	// * METHOD TO SET FILTER VALUE
-	setFilterValue(event){
+	setFilterValue(event) {
 		// WE NEED COLUMN_NAME OF THE SELECTED ATTRIBUTE AS IT IS USED AS KEY IN FILTERS OBJECT OF STATE FOR EVERY ATTRIBUTE
 		var key = this.state.selectedSuitableAttribute.columnName
 		var selectedAttribute = this.state.selectedSuitableAttribute.attributeName
@@ -340,15 +394,15 @@ export default class CreateBaseline extends Component {
 		var filterName = event.target.props.filterName;
 		this.setState({
 			...this.state,
-			filters:{
+			filters: {
 				...this.state.filters,
-				[key] : {
+				[key]: {
 					...this.state.filters[key],
-					[filterKey] : {
+					[filterKey]: {
 
-						filterExpression : filterExpression,
+						filterExpression: filterExpression,
 						value: event.target.value,
-						name : filterName
+						name: filterName
 					}
 
 				}
@@ -357,11 +411,11 @@ export default class CreateBaseline extends Component {
 	}
 
 	// * METHOD TO EXECUTE FILTER MLVs
-	executeFilterMLVs(event){
+	executeFilterMLVs(event) {
 
-		var temp={
-			mlv:this.state.mlv,
-			filters : {
+		var temp = {
+			mlv: this.state.mlv,
+			filters: {
 				...this.state.filters
 			}
 		}
@@ -370,10 +424,11 @@ export default class CreateBaseline extends Component {
 
 		axios.post('http://localhost:9090/PVPUI/ExecuteFilterMLV', `MLV=${JSON.stringify(temp)}`, {
 			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 
 
-		}).then((response)=>{
+		}).then((response) => {
 
 			console.log(response.data)
 			this.listOfResultSetList = response.data;
@@ -381,68 +436,68 @@ export default class CreateBaseline extends Component {
 		})
 	}
 
-	decreaseIndex(event){
+	decreaseIndex(event) {
 		var length = this.listOfResultSetList.length;
-			if(this.resultSetListIndex === 0){
-				this.resultSetListIndex = 0
-			}
-			else{
-				this.resultSetListIndex  = this.resultSetListIndex - 1;
-			}
-			if(length !==0){
+		if (this.resultSetListIndex === 0) {
+			this.resultSetListIndex = 0
+		}
+		else {
+			this.resultSetListIndex = this.resultSetListIndex - 1;
+		}
+		if (length !== 0) {
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
-			}
-	
+		}
+
 	}
 
-		increaseIndex(event){
+	increaseIndex(event) {
 		var length = this.listOfResultSetList.length;
 
-	
-			if(this.resultSetListIndex === (length-1)){
-				this.resultSetListIndex = (length -1)
-			}
-			else{
-					this.resultSetListIndex = this.resultSetListIndex + 1
-			}
-			if(length !==0){
+
+		if (this.resultSetListIndex === (length - 1)) {
+			this.resultSetListIndex = (length - 1)
+		}
+		else {
+			this.resultSetListIndex = this.resultSetListIndex + 1
+		}
+		if (length !== 0) {
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
-			}
+		}
 	}
 
-// * METHOD TO ADD FILTERS GENERATED TO BASELINE
+	// * METHOD TO ADD FILTERS GENERATED TO BASELINE
 
-addFiltersGeneratedToBaseline(event){
-	this.isLoading();
-	event.preventDefault();
-	var baselineDetails= {
-		filters : {
-			...this.state.filters
-		},
-		mlv: this.state.mlv,
-		testCaseSummary : this.state.testCaseSummary,
-		testCaseDescription : this.state.testCaseDescription,
-		runFlag: this.state.runFlag,
-		viewOnView : this.state.viewOnview,
-		mlvQualification: this.state.mlvQualification,
-		selectedBaseline : this.state.selectedBaseline,
-		newBaselineName : this.state.newBaselineName
+	addFiltersGeneratedToBaseline(event) {
+		this.isLoading();
+		event.preventDefault();
+		var baselineDetails = {
+			filters: {
+				...this.state.filters
+			},
+			mlv: this.state.mlv,
+			testCaseSummary: this.state.testCaseSummary,
+			testCaseDescription: this.state.testCaseDescription,
+			runFlag: this.state.runFlag,
+			viewOnView: this.state.viewOnview,
+			mlvQualification: this.state.mlvQualification,
+			selectedBaseline: this.state.selectedBaseline,
+			newBaselineName: this.state.newBaselineName
 
-	}
+		}
 
-	axios.post('http://localhost:9090/PVPUI/AddGeneratedFiltersToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
+		axios.post('http://localhost:9090/PVPUI/AddGeneratedFiltersToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
 			headers: {
 			}
 
 
-		}).then(response=>{
+		}).then(response => {
 			this.isNotLoading();
 			alert(response.data)
-		}).catch(e=>{
+		}).catch(e => {
 			this.isNotLoading();
 			alert("Error occured. Please follow logs")
 		})
-}
+	}
 
 	render() {
 		console.log(this.state.filters)
@@ -460,6 +515,15 @@ addFiltersGeneratedToBaseline(event){
 			)
 		})
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
+		var attributeColumns = new Array();
+		if (this.state.mlv != '') {
+			try {
+				var temp = this.state.mlv.split('attributes=')[1].split(';')[0].split(',')
+				attributeColumns = temp;
+			} catch{
+				alert('Error parsing MLV')
+			}
+		}
 
 		return (
 
@@ -468,96 +532,154 @@ addFiltersGeneratedToBaseline(event){
 				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 					<PanelBar >
 						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Baseline Details</i>}>
-							<div className="row justify-content-center">
-								<div className="col-lg-10 justify-content-center">
-									<Input
-										required={true}
-										label="Test Case Summary*"
-										value={this.state.testCaseSummary}
-										style={{ width: "100%", textAlign: "center", margin: "1em" }}
-										onChange={this.addTestCaseSummary.bind(this)}
+							<div className="k-form">
+								<div className="row justify-content-center">
+									<div className="col-lg-6 justify-content-center">
+										<Input
+											required={true}
+											label="Test Case Summary*"
+											value={this.state.testCaseSummary}
+											style={{ width: "100%", textAlign: "center", margin: "1em" }}
+											onChange={this.addTestCaseSummary.bind(this)}
 
-									/>
+										/>
+									</div>
+									<div className="col-lg-6">
+										<Input
+											required={true}
+											label="Test Case Description*"
+											value={this.state.testCaseDescription}
+											style={{ width: "100%", textAlign: "center", margin: "1em" }}
+											onChange={this.addTestCaseDescription.bind(this)}
+
+										/>
+									</div>
+								</div>
+								<div className="row justify-content-center">
+									<div className="col-lg-6">
+										<Input
+											required={true}
+											label="Result Sheet Name*"
+											value={this.state.resultSheet}
+											style={{ width: "100%", textAlign: "center", margin: "1em" }}
+											onChange={this.addResultSheet.bind(this)}
+
+										/>
+									</div>
+									<div className="col-lg-6">
+										<Input
+											required={true}
+											label="View on View"
+											value={this.state.viewOnview}
+											style={{ width: "100%", textAlign: "center", margin: "1em" }}
+											onChange={this.addViewOnView.bind(this)}
+
+										/>
+									</div>
+								</div>
+
+								<div className="row justify-content-center">
+
+									<div className="col-lg-6">
+										<Input
+											required={true}
+											label="MLV Qualification"
+											value={this.state.mlvQualification}
+											style={{ width: "100%", textAlign: "center", margin: "1em" }}
+											onChange={this.addMlvQualification.bind(this)}
+
+										/>
+									</div>
+								</div>
+
+								<div className="row justify-content-center">
+									<div className="col-lg-10">
+
+										<textarea label="MLV*" class="form-control rounded-0" id="exampleFormControlTextarea1" rows="5" value={this.state.mlv} onChange={this.addMLV.bind(this)}>
+
+										</textarea>
+
+									</div>
+								</div>
+								<div className="row justify-content-center">
+									<div className="col-lg-10" tabIndex="0">
+										<Input
+
+											placeholder="Filter"
+											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+											onChange={this.editFilter.bind(this)}
+											value={this.state.testFilter}
+										/>
+									</div>
+								</div>
+								<div className="row">
+
+									<div className="col-lg-5">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+											onDoubleClick={this.addFilter.bind(this)}
+										>
+											{attributeColumns.map((attributeName) => {
+												return (
+													<option value={attributeName}>{attributeName}</option>
+
+												)
+											})}
+										</select>
+									</div>
+									<div className="col-lg-2">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+											onDoubleClick={this.addFilter.bind(this)}
+										>
+											{
+												Constants.Constants.MLVOperators.map((operator) => {
+
+													return (
+
+														<option value={operator}>{operator}</option>
+													)
+												})
+											}
+										</select>
+									</div>
+									<div className="col-lg-5">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											onDoubleClick={this.addFilter.bind(this)}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+										>
+											{
+												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+													return (
+
+														<option value={func}>{func}</option>
+													)
+												})
+											}
+										</select>
+
+									</div>
 								</div>
 							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-10">
-									<Input
-										required={true}
-										label="Test Case Description*"
-										value={this.state.testCaseDescription}
-										style={{ width: "100%", textAlign: "center", margin: "1em" }}
-										onChange={this.addTestCaseDescription.bind(this)}
-
-									/>
-								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-10">
-									<Input
-										required={true}
-										label="Test Case Filter*"
-										value={this.state.testFilter}
-										style={{ width: "100%", textAlign: "center", margin: "1em" }}
-										onChange={this.addTestCaseFilter.bind(this)}
-
-									/>
-								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-10">
-									<Input
-										required={true}
-										label="Result Sheet Name*"
-										value={this.state.resultSheet}
-										style={{ width: "100%", textAlign: "center", margin: "1em" }}
-										onChange={this.addResultSheet.bind(this)}
-
-									/>
-								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-10">
-									<Input
-										required={true}
-										label="View on View*"
-										value={this.state.viewOnview}
-										style={{ width: "100%", textAlign: "center", margin: "1em" }}
-										onChange={this.addViewOnView.bind(this)}
-
-									/>
-								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-10">
-									<Input
-										required={true}
-										label="MLV Qualification*"
-										value={this.state.mlvQualification}
-										style={{ width: "100%", textAlign: "center", margin: "1em" }}
-										onChange={this.addMlvQualification.bind(this)}
-
-									/>
-								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-10">
-									<Input
-
-										label="MLV*"
-										value={this.state.mlv}
-										style={{ width: "100%", textAlign: "center", margin: "1em", height: "10em" }}
-										onChange={this.addMLV.bind(this)}
-
-									/>
-									<Button
-										style={{ textAlign: "center", margin: "1em" }}
-										onClick={this.executeMLV.bind(this)}
-									>
-										Execute MLV
+							<Button
+								style={{ textAlign: "center", margin: "1em" }}
+								onClick={this.executeMLV.bind(this)}
+							>
+								Execute MLV
 									</Button>
-								</div>
-							</div>
 							<div className="row justify-content-center">
 								<div className="col-lg-6 justify-content-center">
 									<DropDownList
@@ -575,126 +697,148 @@ addFiltersGeneratedToBaseline(event){
 										onChange={this.addNewBaseline.bind(this)}
 
 									/>
-									
+
 
 								</div>
 
 
 
 							</div>
+							<Button
+								style={{ margin: "1em" }}
+								onClick={this.addToBaseline.bind(this)}
+							>
+								Add Test Case
+							</Button>
 
 						</PanelBarItem>
-						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Generate Filters</i>}>
-							<div className="row justify-content-center">
-								<div className="col-lg-2">
-									<DropDownList
-										style={{ margin: "1em", width: "100%" }}
-										data={Constants.dataTypes}
-										textField="dataType"
-										dataItemKey="id"
-										label="Select Data type"
-										value={this.state.selectedDataType}
-										onChange={this.selectDataType.bind(this)}
 
-									/>
+						{
+
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Generate Filters</i>}>
+								<div className="row justify-content-center">
+									<div className="col-lg-2">
+										<DropDownList
+											style={{ margin: "1em", width: "100%" }}
+											data={Constants.dataTypes}
+											textField="dataType"
+											dataItemKey="id"
+											label="Select Data type"
+											value={this.state.selectedDataType}
+											onChange={this.selectDataType.bind(this)}
+
+										/>
+									</div>
 								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-6">
-									<DropDownList
-										style={{ margin: "1em", width: "100%" }}
-										data={this.state.suitableAttributes}
-										textField="attributeName"
-										dataItemKey="index"
-										label="Attribute To Apply Filter On"
-										value={this.state.selectedSuitableAttribute}
-										onChange={this.selectSuitableAttribute.bind(this)}
+								<div className="row justify-content-center">
+									<div className="col-lg-6">
+										<DropDownList
+											style={{ margin: "1em", width: "100%" }}
+											data={this.state.suitableAttributes}
+											textField="attributeName"
+											dataItemKey="index"
+											label="Attribute To Apply Filter On"
+											value={this.state.selectedSuitableAttribute}
+											onChange={this.selectSuitableAttribute.bind(this)}
 
-									/>
+										/>
+									</div>
 								</div>
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-4">
-									{
-										this.state.selectedDataType.dataType !== '' && this.state.selectedSuitableAttribute.attributeName !== '' &&
-										helper.getFilters(this.state.selectedDataType.type).map((filter) => {
-											return (
-												<Input
+								<div className="row justify-content-center">
+									<div className="col-lg-4">
+										{
+											this.state.selectedDataType.dataType !== '' && this.state.selectedSuitableAttribute.attributeName !== '' &&
+											helper.getFilters(this.state.selectedDataType.type).map((filter) => {
+												return (
+													<Input
 
-													id={this.state.selectedSuitableAttribute.columnName + "_" + filter.name}
-													value={this.state.selectedSuitableAttribute.columnName +  " " + filter.value}
-													style={{ width: "100%", textAlign: "center", margin: "1em" }}
+														id={this.state.selectedSuitableAttribute.columnName + "_" + filter.name}
+														value={this.state.selectedSuitableAttribute.columnName + " " + filter.value}
+														style={{ width: "100%", textAlign: "center", margin: "1em" }}
 
 
-												/>
-											)
-										})
-									}
-								</div>
-								<div className="col-lg-2">
-									{
-										this.state.selectedDataType.dataType !== '' && this.state.selectedSuitableAttribute.attributeName !== '' &&
-										helper.getFilters(this.state.selectedDataType.type).map((filter) => {
-											return (
-												<Input
+													/>
+												)
+											})
+										}
+									</div>
+									<div className="col-lg-2">
+										{
+											this.state.selectedDataType.dataType !== '' && this.state.selectedSuitableAttribute.attributeName !== '' &&
+											helper.getFilters(this.state.selectedDataType.type).map((filter) => {
+												return (
+													<Input
 
-													filterKey={this.state.selectedSuitableAttribute.columnName + "_" + filter.name}
-													filterName={filter.name}
-													filterExpression={this.state.selectedSuitableAttribute.columnName +  " " + filter.value}
-													style={{ width: "100%", textAlign: "center", margin: "1em" }}
-													onChange={this.setFilterValue.bind(this)}
+														filterKey={this.state.selectedSuitableAttribute.columnName + "_" + filter.name}
+														filterName={filter.name}
+														filterExpression={this.state.selectedSuitableAttribute.columnName + " " + filter.value}
+														style={{ width: "100%", textAlign: "center", margin: "1em" }}
+														onChange={this.setFilterValue.bind(this)}
 
-												/>
-											)
-										})
-									}
-								</div>
-								<Button
-								style={{ margin: "1em" }}
-								onClick={this.executeFilterMLVs.bind(this)}
-							>
-								Execute Filters
-						</Button>
-
-							</div>
-							<div className="row justify-content-center">
-								<div className="col-lg-2">
+													/>
+												)
+											})
+										}
+									</div>
 									<Button
 										style={{ margin: "1em" }}
-										onClick={this.addFiltersGeneratedToBaseline.bind(this)}
+										onClick={this.executeFilterMLVs.bind(this)}
 									>
-										Add
-									</Button>
+										Execute Filters
+												</Button>
+
 								</div>
-							</div>
-						</PanelBarItem>
+								<div className="row justify-content-center">
+									<div className="col-lg-2">
+										<Button
+											style={{ margin: "1em" }}
+											onClick={this.addFiltersGeneratedToBaseline.bind(this)}
+										>
+											Add
+															</Button>
+									</div>
+								</div>
+							</PanelBarItem>}
 					</PanelBar>
 				</div>
 
 				{
 					this.state.resultSetList.length > 0 &&
-					this.state.showResultSet == true && 
+					this.state.showResultSet == true &&
 
 					<div className="fixed-bottom" style={{ width: "100%", height: '50%', marginBottom: '10em' }}>
 						<div className="row justify-content-right">
-							<Button
-								style={{ margin: "1em" }}
-								onClick={this.closeResultSet.bind(this)}
-							>
-								Close
+							<div className='col-lg-2'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.decreaseIndex.bind(this)}
+								>
+									Left
 						</Button>
-						<Button
-								style={{ margin: "1em" }}
-								onClick={this.decreaseIndex.bind(this)}
-							>
-								Left
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.increaseIndex.bind(this)}
+								>
+									Right
 						</Button>
-						<Button
-								style={{ margin: "1em" }}
-								onClick={this.increaseIndex.bind(this)}
-							>
-								Right
+							</div>
+							
+							<div className='col-lg-2'></div>
+							<div className='col-lg-2'></div>
+							<div className='col-lg-2'></div>
+							<div className='col-lg-2'></div>
+							<div className='col-lg-1'></div>
+							<div className='col-lg-1'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.closeResultSet.bind(this)}
+								>
+									Close
 						</Button>
+							</div>
 						</div>
 
 						<div style={{ overflowX: "scroll" }}>

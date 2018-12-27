@@ -5,7 +5,7 @@ import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import PluginNameGrid from './Components/PluginNameGrid'
 import LoadingPanel from './Components/LoadingPanel'
 import { DatePicker } from '@progress/kendo-react-dateinputs';
-import { Input } from '@progress/kendo-react-inputs';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
 export default class Report extends Component {
 
@@ -39,13 +39,9 @@ export default class Report extends Component {
 	}
 
 
-	fetchReportData(reportDate) {
-		if(this.state.connectionName === ''){
-			alert('Please enter Connection Name');
-			return
-		}
+	fetchReportData(connectionName) {
 		this.isLoading();
-		var toDate = new Date(reportDate)
+		var toDate = new Date(this.state.reportDate)
 		toDate.setHours(7)
 		toDate.setMinutes(0)
 		toDate.setSeconds(0)
@@ -59,7 +55,7 @@ export default class Report extends Component {
 		fromDate.setMilliseconds(0)
 		console.log(fromDate)
 		console.log(toDate)
-		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : this.state.connectionName })}`, {
+		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : connectionName })}`, {
 			headers: {
 			}
 
@@ -113,16 +109,13 @@ export default class Report extends Component {
 	}
 
 	setConnectionName(event){
-
+		this.fetchReportData(event.target.value)
 		this.setState({
 			connectionName : event.target.value
 		})
 	}
 
-	fetchReport(){
-
-		this.fetchReportData(this.state.reportDate)
-	}
+	
 
 	render() {
 
@@ -134,8 +127,13 @@ export default class Report extends Component {
 		return (
 			<div>
 				{loadingComponent}
+				<div className="row justify-content-center">
+					<div className="col-lg-1">
+						<h5>Read Report</h5>
+					</div>
+				</div>
 				<div className="row justify-content-center" style={{ margin: '1em' }}>
-					<div className="col-lg-2">
+					<div className="col-lg-2 d-flex align-items-center">
 						<DatePicker
 							width='10em'
 
@@ -144,19 +142,18 @@ export default class Report extends Component {
 							value={this.state.reportDate}
 							onChange={this.changeReportDate.bind(this)}
 						/>
-						<Input
+						</div>
+						<div className="col-lg-2">
+						<DropDownList
 
-							label="Connection Name"
+							defaultValue="Connection Name"
+							data={this.props.connectionNames}
 							value={this.state.connectionName}
 							style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
 							onChange={this.setConnectionName.bind(this)}
 
 						/>
-						<Button style={{margin : '1em'}}
-						onClick = {this.fetchReport.bind(this)}
-						>Fetch Report
-						</Button>
-					</div>
+						</div>
 				</div>
 				<Grid
 

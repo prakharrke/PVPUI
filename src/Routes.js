@@ -29,7 +29,8 @@ export default class Routes extends Component {
 
 		super(props);
 		this.state = {
-			isUserAuthenticated: false
+			isUserAuthenticated: false,
+			connectionNames : []
 		}
 	}
 	authenticateUser(){
@@ -43,19 +44,25 @@ export default class Routes extends Component {
 		
 	}
 
+	holdConnectionNamesArray(connectionNameArray){
+		this.setState({
+			connectionNames : connectionNameArray
+		})
+	}
+
 	render() {
 
 		return (
 
-			<BrowserRouter>
+			<HashRouter basename="/PVPUI" >
 
 				<Switch>
-				<Route exact  path='/reports' component = {ReportContainer} />
-				<Route exact  path='/reports/details' component = {Report} />
-				<Route exact  path='/login' render={props=>{return (<LoginForm authenticateUser={this.authenticateUser.bind(this)} isUserAuthenticated={this.state.isUserAuthenticated} />)}} />
+				<Route  path='/reports/details' render = {props=>{return (<Report connectionNames={this.state.connectionNames}/>)}} />
+				<Route path='/reports' render = {props=>{return (<ReportContainer holdConnectionNamesArray={this.holdConnectionNamesArray.bind(this)}/>)}} />
+				<Route  path='/login' render={props=>{return (<LoginForm authenticateUser={this.authenticateUser.bind(this)} isUserAuthenticated={this.state.isUserAuthenticated} />)}} />
 				<PrivateRoute isAuthenticated={this.state.isUserAuthenticated} path='/' component = {PVPUI}/>
 				</Switch>
-			</BrowserRouter>
+			</HashRouter>
 
 		)
 	}

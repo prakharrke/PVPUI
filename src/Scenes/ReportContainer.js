@@ -2,22 +2,26 @@ import React, { Component } from 'react';
 import { TabStrip, TabStripTab } from '@progress/kendo-react-layout';
 import axios from 'axios';
 import { groupBy, process, aggregateBy } from '@progress/kendo-data-query';
+import { Button } from '@progress/kendo-react-buttons';
+import {Link,NavLink} from 'react-router-dom';
+import 'hammerjs';
 import {
 	Chart,
 	ChartTitle,
 	ChartSeries,
 	ChartSeriesItem,
 	ChartCategoryAxis,
-	ChartCategoryAxisItem
+	ChartCategoryAxisItem,
+	Sparkline,
 } from '@progress/kendo-react-charts';
 export default class ReportContainer extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
-			currentDate : new Date(),
+			currentDate: new Date(),
 			graphData: [],
-			
+
 		}
 
 	}
@@ -27,20 +31,20 @@ export default class ReportContainer extends Component {
 	componentWillMount() {
 		//alert(new Date(1545317576622))
 		var toDate = new Date(this.state.currentDate);
-		toDate.setDate(this.state.currentDate.getDate() +1);
+		toDate.setDate(this.state.currentDate.getDate());
 		toDate.setHours(7)
 		toDate.setMinutes(0)
 		toDate.setSeconds(0)
 		toDate.setMilliseconds(0)
 		var fromDate = new Date(toDate);
-		var prevDate = fromDate.getDate() - 4;
+		var prevDate = fromDate.getDate() - 7;
 		fromDate.setDate(prevDate);
 		fromDate.setHours(19)
 		fromDate.setMinutes(0)
 		fromDate.setSeconds(0)
 		fromDate.setMilliseconds(0)
 		var categoriesLocal = [];
-		for(var i=0;i<4;i++){
+		for (var i = 0; i < 7; i++) {
 			var tempDate = new Date(fromDate);
 			var newDate = fromDate.getDate();
 			tempDate.setDate(newDate + i);
@@ -49,7 +53,7 @@ export default class ReportContainer extends Component {
 		}
 
 		this.categories = categoriesLocal;
-		
+
 		axios.post('http://localhost:9090/PVPUI/FetchGraphReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
 			headers: {
 			}
@@ -96,6 +100,12 @@ export default class ReportContainer extends Component {
 
 			var groupedGraphData = groupBy(graphNewData, [{ field: "connectionName" }, { field: "runDate" }]);
 			//console.log(groupedGraphData)
+			var connectionNamesArray = new Array();
+			groupedGraphData.map(object => {
+				connectionNamesArray.push(object.value)
+			})
+
+			this.props.holdConnectionNamesArray(connectionNamesArray);
 
 			groupedGraphData.map(object => {
 				var connectionName = object.value;
@@ -116,22 +126,22 @@ export default class ReportContainer extends Component {
 				var temp = {};
 				temp.connectionName = connectionObject.value;
 				temp.data = [];
-				temp.categories=[];
-				
-				this.categories.map(runDate=>{
+				temp.categories = [];
 
-					var index = connectionObject.items.map((obj)=>{return obj.value}).indexOf(runDate)
-					if(index === -1){
+				this.categories.map(runDate => {
+
+					var index = connectionObject.items.map((obj) => { return obj.value }).indexOf(runDate)
+					if (index === -1) {
 
 						temp.data.push(0)
 					}
-					else{
+					else {
 
 						temp.data.push(connectionObject.items[index].readPassCount.sum)
 					}
 				})
 
-		
+
 
 
 				finalGraphData.push(temp)
@@ -140,7 +150,7 @@ export default class ReportContainer extends Component {
 
 			this.setState({
 				graphData: finalGraphData,
-				
+
 			})
 		}).catch(e => {
 			console.log(e)
@@ -153,29 +163,49 @@ export default class ReportContainer extends Component {
 			this.state.graphData.map((dataObject) => {
 				console.log(dataObject.categories)
 				return (
+					<div className="col-lg-2" style={{ margin: "1em" }}>
+						<Chart >
+							<ChartTitle text={dataObject.connectionName} />
 
-					<Chart>
-						<ChartTitle text={dataObject.connectionName} />
-						<ChartCategoryAxis>
-							<ChartCategoryAxisItem title={{ text: 'Dates' }} categories={this.categories} />
-						</ChartCategoryAxis>
-						<ChartSeries>
-							<ChartSeriesItem type="line" data={dataObject.data} />
-							
-						</ChartSeries>
-					</Chart>
+							<ChartSeries>
+								<ChartSeriesItem type="line" data={dataObject.data} />
+
+							</ChartSeries>
+						</Chart>
+					</div>
+
+				)
+			})
+		)
+		var sparkLine = this.state.graphData.length === 0 ? '' : (
+			this.state.graphData.map((dataObject) => {
+				console.log(dataObject.categories)
+				return (
+
+					<div className="col-lg-2" style={{ margin: "2em" }}>{dataObject.connectionName}
+
+						<Sparkline data={dataObject.data} type="line" style={{ lineHeight: '5em', }} />
+					</div>
+
 				)
 			})
 		)
 		return (
 			<div>
-			<div className = "row justify-content-center">
-				<div className="col-lg-6">
-				{graphs}
-				</div>
+			<div className="row justify-content-center" style={{marginTop:'1em'}}>
+				<div className="col-lg-2"><h5>Read Report</h5></div>
+				<div className="col-lg-2">
+					<NavLink  to={{
+						pathname: `/reports/details`,
+
+					}}><Button style={{ color: 'black' }}>Detailed Report</Button></NavLink>
+
 				</div>
 			</div>
-
+			<div className="row">
+				{graphs}
+			</div>
+			</div>
 		)
 	}
 

@@ -2,53 +2,54 @@ import React, { Component } from 'react';
 import { Input } from '@progress/kendo-react-inputs';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
+import { Link, NavLink } from 'react-router-dom';
 export default class LoginForm extends Component {
 	constructor(props) {
 
 		super(props);
-		this.state={
-			username : '',
-			password : ''
+		this.state = {
+			username: '',
+			password: ''
 		}
 	}
 
-	login(event){
+	login(event) {
 
-		axios.post('http://localhost:9090/PVPUI/AuthenticateUser', `userDetails=${JSON.stringify({username : this.state.username, password : this.state.password})}`, {
+		axios.post('http://localhost:9090/PVPUI/AuthenticateUser', `userDetails=${JSON.stringify({ username: this.state.username, password: this.state.password })}`, {
 			headers: {
 			}
 
 
-		}).then(response=>{
-			if(response.data === true){
+		}).then(response => {
+			if (response.data === true) {
 				this.props.authenticateUser();
 			}
-			else{
+			else {
 
 				alert('Invalid username or password')
 			}
 		})
 	}
-	setUserName(event){
+	setUserName(event) {
 		this.setState({
-			username : event.target.value
+			username: event.target.value
 		})
 	}
-	setPassword(event){
+	setPassword(event) {
 		this.setState({
-			password : event.target.value
+			password: event.target.value
 		})
 	}
 
 	render() {
 
-		var redirect = this.props.isUserAuthenticated ? <Redirect to={{pathname:"/"}}/> : ''
+		var redirect = this.props.isUserAuthenticated ? <Redirect to={{ pathname: "/" }} /> : ''
 		console.log(this.props)
 		return (
 
 
-			<div className="row justify-content-center align-items-center" style={{height:"40em"}}>
-			{redirect}
+			<div className="row justify-content-center align-items-center" style={{ height: "40em" }}>
+				{redirect}
 				<div className="col-lg-4 align-items-center">
 					<div className="card">
 						<div className="card-block">
@@ -81,8 +82,16 @@ export default class LoginForm extends Component {
 							</form>
 						</div>
 					</div>
-				</div>
+					<div className="row justify-content-center" style={{marginTop : '1em'}}>
+						<h5>OR</h5>
+						</div>
+					<div className="row justify-content-center">
+					<NavLink to={{
+							pathname: `/reports`,
 
+						}}>View Reports</NavLink>
+						</div>
+				</div>
 			</div>
 		);
 	}

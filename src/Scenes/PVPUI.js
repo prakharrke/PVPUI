@@ -129,7 +129,7 @@ export default class PVPUI extends Component {
 			<div className="container-fluid">
 
 
-				<nav className="navbar navbar-expand-lg navbar-light bg-light">
+				<nav className="navbar navbar-expand-lg">
 					<ConnectionCreation
 						isLoading={this.isLoading.bind(this)}
 						isNotLoading={this.isNotLoading.bind(this)}
@@ -152,6 +152,7 @@ export default class PVPUI extends Component {
 				<Button className="float-lg-right"
 					style={{ textAlign: "center", margin: "1em" }}
 					onClick={this.toggleBaseline.bind(this)}
+					primary={true}
 				>
 					{this.state.createBaseline ? "Generate MLV" : "Create Baseline"}
 				</Button>

@@ -8754,9 +8754,7 @@ th.k-sorted {
 .k-form-inline {
   font-size: 14px;
   line-height: 1.42857;
-  padding: 16px;
-  color: #d9d9d9;
-  background:#404040 }
+  padding: 16px; }
   .k-form fieldset,
   .k-form-inline fieldset {
     border-width: 1px 0 0;

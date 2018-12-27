@@ -13,7 +13,7 @@ export default class ConnectionCreation extends Component {
 		this.state = {
 
 			pluginList: [],
-			secondarySelectedPlugin : '',
+			secondarySelectedPlugin: '',
 			secondaryConnections: []
 		}
 		this.selectedPlugin = ""
@@ -57,6 +57,41 @@ export default class ConnectionCreation extends Component {
 	}
 
 	setPlugin = (event) => {
+		this.props.modelNotCreated();
+		axios.post('http://localhost:9090/PVPUI/LoadModel', `details=${JSON.stringify({ connectionID: -1, pluginName: event.target.value })}`, {
+			headers: {
+			}
+
+
+		}).then((response) => {
+
+			var parsedJson = JSON.parse(atob(response.data))
+
+			var objectList = new Array();
+			objectList = parsedJson.objectList;
+			var connectionID = parsedJson.connectionID;
+
+			if (objectList.length != 0) {
+				var secondaryConnections = new Array()
+				secondaryConnections = this.state.secondaryConnections;
+				secondaryConnections[0] = {};
+				secondaryConnections[0]['pluginName'] = this.state.selectedPlugin;
+				secondaryConnections[0]['modelCreated'] = true;
+				secondaryConnections[0]['index'] = secondaryConnections.length;
+				secondaryConnections[0]['objectList'] = objectList
+				secondaryConnections[0]['connectionID'] = connectionID
+				this.props.setObjectList(objectList);
+				this.props.setConnInfoList(secondaryConnections);
+				this.props.modelCreated();
+				this.props.isNotLoading();
+				this.setState({
+					secondaryConnections: secondaryConnections
+				})
+			}else{
+				this.props.modelCreated();
+				alert("Model not saved. Please created")
+			}
+		})
 
 		this.setState({
 
@@ -90,6 +125,7 @@ export default class ConnectionCreation extends Component {
 			}
 
 		}).catch((e) => {
+			this.props.isNotLoading();
 			console.log(e);
 			alert(e);
 		})
@@ -114,21 +150,24 @@ export default class ConnectionCreation extends Component {
 
 			var objectList = new Array();
 			objectList = parsedJson.objectList;
-			var secondaryConnections = this.state.secondaryConnections;
-			secondaryConnections.push({
-			pluginName: this.state.selectedPlugin,
-			modelCreated: true,
-			index: secondaryConnections.length,
-			objectList : objectList
-			})
+			var connectionID = parsedJson.connectionID;
+			var secondaryConnections = new Array()
+			secondaryConnections = this.state.secondaryConnections;
+			secondaryConnections[0] = {};
+			secondaryConnections[0]['pluginName'] = this.state.selectedPlugin;
+			secondaryConnections[0]['modelCreated'] = true;
+			secondaryConnections[0]['index'] = secondaryConnections.length;
+			secondaryConnections[0]['objectList'] = objectList
+			secondaryConnections[0]['connectionID'] = connectionID
 			this.props.setObjectList(objectList);
 			this.props.setConnInfoList(secondaryConnections);
 			this.props.modelCreated();
 			this.setState({
-				secondaryConnections : secondaryConnections
+				secondaryConnections: secondaryConnections
 			})
 
 		}).catch(e => {
+			this.props.isNotLoading();
 			console.log(e)
 			alert(e)
 		})
@@ -198,11 +237,12 @@ export default class ConnectionCreation extends Component {
 		}).then((response) => {
 			this.props.isNotLoading();
 			var parsedJson = JSON.parse(atob(response.data))
-
+			var connectionID = parsedJson.connectionID;
 			var objectList = new Array();
 			objectList = parsedJson.objectList;
 			var secondaryConnections = this.state.secondaryConnections;
 			secondaryConnections[index]['objectList'] = objectList
+			secondaryConnections[index]['connectionID'] = connectionID;
 			console.log(secondaryConnections[index]['objectList'])
 			this.setState({
 				secondaryConnections: secondaryConnections
@@ -215,7 +255,7 @@ export default class ConnectionCreation extends Component {
 	render() {
 		console.log(this.state.secondaryConnections)
 		var secondayConnectionsElement = this.state.secondaryConnections.map((secondaryConnection, index) => {
-			if(index === 0) return ''
+			if (index === 0) return ''
 			return (
 
 				<form className="form-inline" style={{ width: "90%" }}>
@@ -224,13 +264,13 @@ export default class ConnectionCreation extends Component {
 						<DropDownList data={this.state.pluginList} index={index} onChange={this.selectPluginForNewConnection.bind(this)} defaultValue="Select Plugin" value={secondaryConnection.pluginName} style={{ width: "100%" }} />
 					</div>
 					<div className="d-flex justify-content-end" style={{ width: "50%" }}>
-						<Button primary={false} index={index} style={{ margin: '1em' }} onClick={this.testSecondaryConnection.bind(this)}>Test Connection</Button>
-						<Button primary={false} index={index} style={{ margin: '1em' }} onClick={this.createModelForSecondaryConnection.bind(this)}>Create Model</Button>
+						<Button primary={true} index={index} style={{ margin: '1em' }} onClick={this.testSecondaryConnection.bind(this)}>Test Connection</Button>
+						<Button primary={true} index={index} style={{ margin: '1em' }} onClick={this.createModelForSecondaryConnection.bind(this)}>Create Model</Button>
 					</div>
 				</form>
 
 			)
-		
+
 		})
 
 
@@ -252,11 +292,11 @@ export default class ConnectionCreation extends Component {
 					<div className="col-lg-8 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
 						<PanelBar >
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>New Connections</i>}>
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Add Connections</i>}>
 								<div className="row justify-content-center" style={{ width: "100%" }}>
 									<div className="row justify-content-center">
 										<div className="col-lg-2">
-											<Button primary={true} style={{ margin: '1em' }} onClick={this.createNewConnection.bind(this)}>New Connection</Button>
+											<Button primary={true} style={{ margin: '1em' }} onClick={this.createNewConnection.bind(this)}>Add Connection</Button>
 										</div>
 
 									</div>
