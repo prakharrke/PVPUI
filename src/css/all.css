@@ -587,7 +587,7 @@ kendo-sortable {
     position: fixed; }
   .k-animation-container-relative {
     position: relative;
-    display: inline-block; }
+    display: block; }
 
 .k-push-right-enter, .k-push-right-appear {
   transform: translate(-100%, 0); }

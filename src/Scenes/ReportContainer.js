@@ -3,7 +3,13 @@ import { TabStrip, TabStripTab } from '@progress/kendo-react-layout';
 import axios from 'axios';
 import { groupBy, process, aggregateBy } from '@progress/kendo-data-query';
 import { Button } from '@progress/kendo-react-buttons';
-import {Link,NavLink} from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
+import PLMSummaryReport from './Components/PLMSummaryReport'
+import ALMSummaryReport from './Components/ALMSummaryReport'
+import DBSummaryReport from './Components/DBSummaryReport'
+import OthersSummaryReport from './Components/OthersSummaryReport'
+import ERPSummaryReport from './Components/ERPSummaryReport'
+import * as Constants from '../Constants';
 import 'hammerjs';
 import {
 	Chart,
@@ -21,6 +27,12 @@ export default class ReportContainer extends Component {
 		this.state = {
 			currentDate: new Date(),
 			graphData: [],
+			selected : 0,
+			PLM : [],
+			ALM : [],
+			DB : [],
+			ERP : [],
+			others : []
 
 		}
 
@@ -61,7 +73,7 @@ export default class ReportContainer extends Component {
 
 		}).then((response) => {
 
-			console.log(response.data)
+			//console.log(response.data)
 			var graphReportData = response.data;
 			var graphNewData = new Array();
 			var categories = new Array();
@@ -119,7 +131,7 @@ export default class ReportContainer extends Component {
 				})
 			})
 
-			console.log(groupedGraphData);
+			//console.log(groupedGraphData);
 
 			// FILLING FINAL_GRAPH_DATA BASED ON THE GROUPED DATA 
 			groupedGraphData.map((connectionObject, index) => {
@@ -145,11 +157,77 @@ export default class ReportContainer extends Component {
 
 
 				finalGraphData.push(temp)
+				//console.log('CHECK')
+				//console.log(finalGraphData)
+
+			})
+			var PLM = new Array();
+			var ALM = new Array();
+			var DB = new Array();
+			var ERP = new Array();
+			var others = new Array();
+			console.log(finalGraphData)
+			finalGraphData.map(object => {
+				var pushed = false;
+				if (!pushed) {
+					Constants.ALM.map(type => {
+						//console.log(object.connectionName.toLowerCase().includes(type.toLowerCase()))
+						//console.log(object.connectionName.toLowerCase())
+						console.log(type.toLowerCase())
+						if (pushed == false && object.connectionName.toLowerCase().includes(type.toLowerCase()) && object.connectionName != '') {
+							//console.log("pushed")
+							pushed = true;
+							ALM.push(object);
+							return
+						}
+					})
+				}
+				if (!pushed) {
+					Constants.PLM.map(type => {
+
+						if (pushed == false && object.connectionName.toLowerCase().includes(type.toLowerCase()) && object.connectionName != '' && type != '') {
+							pushed = true;
+							PLM.push(object);
+							return
+						}
+					})
+				}
+				if (!pushed) {
+					Constants.DB.map(type => {
+
+						if (pushed == false && object.connectionName.toLowerCase().includes(type.toLowerCase()) && object.connectionName != '' && type != '') {
+							pushed = true;
+							DB.push(object);
+							return
+						}
+					})
+				}
+				if (!pushed) {
+					Constants.ERP.map(type => {
+
+						if (pushed == false && object.connectionName.toLowerCase().includes(type.toLowerCase()) && object.connectionName != '' && type != '') {
+							pushed = true;
+							ERP.push(object);
+							return
+						}
+					})
+				}
+				if (!pushed) {
+
+					others.push(object)
+
+					pushed = true;
+				}
 
 			})
 
 			this.setState({
 				graphData: finalGraphData,
+				PLM : PLM,
+				ALM : ALM,
+				DB : DB,
+				ERP :ERP,
+				others : others
 
 			})
 		}).catch(e => {
@@ -158,10 +236,14 @@ export default class ReportContainer extends Component {
 
 	}
 
+	handleSelect = (e) => {
+		this.setState({ selected: e.selected })
+	}
+
 	render() {
-		var graphs = this.state.graphData.length === 0 ? '' : (
+		/*var graphs = this.state.graphData.length === 0 ? '' : (
 			this.state.graphData.map((dataObject) => {
-				console.log(dataObject.categories)
+				//console.log(dataObject.categories)
 				return (
 					<div className="col-lg-2" style={{ margin: "1em" }}>
 						<Chart >
@@ -189,22 +271,44 @@ export default class ReportContainer extends Component {
 
 				)
 			})
-		)
+		)*/
 		return (
 			<div>
-			<div className="row justify-content-center" style={{marginTop:'1em'}}>
-				<div className="col-lg-2"><h5>Read Report</h5></div>
-				<div className="col-lg-2">
-					<NavLink  to={{
-						pathname: `/reports/details`,
+				<div className="row justify-content-center" style={{ marginTop: '1em' }}>
+					<div className="col-lg-2"><h5>Read Report</h5></div>
+					<div className="col-lg-2">
+						<NavLink to={{
+							pathname: `/reports/details`,
 
-					}}><Button style={{ color: 'black' }}>Detailed Report</Button></NavLink>
+						}}><Button primary={true} style={{ color: 'black' }}>Detailed Report</Button></NavLink>
 
+					</div>
 				</div>
-			</div>
-			<div className="row">
-				{graphs}
-			</div>
+				<div className="row">
+				<div className="col-lg-12">
+					<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
+						<TabStripTab title="PLM">
+							<PLMSummaryReport PLM={this.state.PLM} />
+						</TabStripTab>
+						<TabStripTab title="ALM">
+						<ALMSummaryReport ALM={this.state.ALM} />
+						</TabStripTab>
+						<TabStripTab title="DB">
+						<DBSummaryReport DB={this.state.DB} />
+						</TabStripTab>
+						<TabStripTab title="ERP">
+				 		<ERPSummaryReport ERP={this.state.ERP} />
+				 	</TabStripTab>
+				 	<TabStripTab title="Others">
+				 		<OthersSummaryReport others={this.state.others} />
+				 	</TabStripTab>
+				 
+				 
+
+					</TabStrip>
+					</div>
+					
+				</div>
 			</div>
 		)
 	}

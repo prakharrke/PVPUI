@@ -1507,6 +1507,12 @@ export default class MLVGenerator extends Component {
 		})
 
 	}
+	parseMLVLevelWise(mlv){
+		console.log()
+		
+		
+		return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
+	}
 	createMLV(event) {
 		event.preventDefault();
 		this.isLoading();
@@ -1531,7 +1537,7 @@ export default class MLVGenerator extends Component {
 			this.setState({
 				...this.state,
 				isLoading: false,
-				mlv: response.data
+				mlv: this.parseMLVLevelWise(response.data)
 			})
 
 			this.props.addMLV(response.data)
@@ -2483,16 +2489,16 @@ export default class MLVGenerator extends Component {
 								</Button>
 							</div>
 						</div>
-						<div className="row">
+						<div className="row" style={{marginTop : '1em'}}>
 							<div className="col-lg-12">
-								<Input
-
-									label="MLV"
-									value={this.state.mlv}
-									style={{ width: "100%", textAlign: "center", margin: "1em", height: "10em" }}
-
-
-								/>
+								
+								<textarea 
+								label="MLV"
+								class="form-control rounded-0" 
+								id="exampleFormControlTextarea1" 
+								rows="5" value={this.state.mlv} 
+								>
+								</textarea>
 							</div>
 						</div>
 

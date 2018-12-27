@@ -19,7 +19,7 @@ export default class CreateBaseline extends Component {
 			testCaseSummary: '',
 			testCaseDescription: '',
 			runFlag: '',
-			mlv: this.props.mlv,
+			mlv: this.parseMLVLevelWise(this.props.mlv),
 			testFilter: '',
 			resultSheet: '',
 			viewOnview: '',
@@ -44,6 +44,12 @@ export default class CreateBaseline extends Component {
 
 			}
 		}
+	}
+	parseMLVLevelWise(mlv){
+		console.log()
+		
+		
+		return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
 	}
 
 
@@ -102,7 +108,7 @@ export default class CreateBaseline extends Component {
 	addMLV(event) {
 		this.setState({
 			...this.state,
-			mlv: event.target.value
+			mlv: this.parseMLVLevelWise(event.target.value)
 		})
 	}
 	// * METHOD TO ADD TEST CASE FILTER

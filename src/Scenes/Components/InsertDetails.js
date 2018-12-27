@@ -37,7 +37,10 @@ export default class InsertDetails extends Component {
 					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
 						<PanelBar >
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source</i>}></PanelBarItem>
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source</i>}>
+							
+							
+							</PanelBarItem>
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Insert MLV</i>}></PanelBarItem>
 						</PanelBar>
 
