@@ -57,7 +57,7 @@ export default class ConnectionCreation extends Component {
 	}
 
 	setPlugin = (event) => {
-		this.props.modelNotCreated();
+		this.props.isLoading();
 		axios.post('http://localhost:9090/PVPUI/LoadModel', `details=${JSON.stringify({ connectionID: -1, pluginName: event.target.value })}`, {
 			headers: {
 			}
@@ -68,9 +68,11 @@ export default class ConnectionCreation extends Component {
 			var parsedJson = JSON.parse(atob(response.data))
 
 			var objectList = new Array();
+			console.log(parsedJson)
 			objectList = parsedJson.objectList;
 			var connectionID = parsedJson.connectionID;
-
+			console.log('test')
+			console.log(objectList)
 			if (objectList.length != 0) {
 				var secondaryConnections = new Array()
 				secondaryConnections = this.state.secondaryConnections;
@@ -88,8 +90,10 @@ export default class ConnectionCreation extends Component {
 					secondaryConnections: secondaryConnections
 				})
 			}else{
-				this.props.modelCreated();
-				alert("Model not saved. Please created")
+				//alert('Here')
+				this.props.modelNotCreated();
+				this.props.isNotLoading();
+				alert("Model not saved. Please create model")
 			}
 		})
 
@@ -138,7 +142,7 @@ export default class ConnectionCreation extends Component {
 			alert('Please select a plugin to connect to');
 			return
 		}
-		this.props.modelNotCreated();
+		this.props.isLoading();
 		axios.post('http://localhost:9090/PVPUI/CreateModel', `selectedPlugin=${this.state.selectedPlugin}`, {
 			headers: {
 			}
@@ -162,6 +166,7 @@ export default class ConnectionCreation extends Component {
 			this.props.setObjectList(objectList);
 			this.props.setConnInfoList(secondaryConnections);
 			this.props.modelCreated();
+			this.props.isNotLoading();
 			this.setState({
 				secondaryConnections: secondaryConnections
 			})

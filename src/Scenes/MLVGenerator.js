@@ -7,6 +7,7 @@ import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import LoadingPanel from './Components/LoadingPanel'
 import { Button } from '@progress/kendo-react-buttons';
 import axios from 'axios';
+import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 import * as helpers from '../MLVObject'
 import * as Constants from '../Constants.js'
 import * as helper from '../helper'
@@ -16,7 +17,7 @@ const delay = 50;
 export default class MLVGenerator extends Component {
 
 	constructor(props) {
-
+		
 		super(props);
 		if (Object.keys(this.props.oldState).length != 0) {
 
@@ -74,6 +75,10 @@ export default class MLVGenerator extends Component {
 
 			}
 
+	}
+	componentDidMount(){
+		console.log('COMPONENT WILL MOUNT')
+		console.log(this.props)
 	}
 
 
@@ -1513,6 +1518,15 @@ export default class MLVGenerator extends Component {
 		
 		return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
 	}
+
+	saveMLVToParent(event){
+		if(this.props.parent === 'fetchFromAnotherSource'){
+			this.props.saveMLVForFetchFromAnotherSource(this.state.mlv)
+		}
+		if(this.props.parent === 'insertMLV'){
+			this.props.saveInsertMLV(this.state.mlv)
+		}
+	}
 	createMLV(event) {
 		event.preventDefault();
 		this.isLoading();
@@ -1539,8 +1553,8 @@ export default class MLVGenerator extends Component {
 				isLoading: false,
 				mlv: this.parseMLVLevelWise(response.data)
 			})
-
-			this.props.addMLV(response.data)
+			if(this.props.parent == undefined)
+				this.props.addMLV(response.data)
 		})
 
 
@@ -1636,8 +1650,9 @@ export default class MLVGenerator extends Component {
 	// * COMPONENT WILL UNMOUNT METHOD, TO TRANSFER ITS STATE TO PARENT COMPONENT (PVPUI COMPONENT)
 
 	componentWillUnmount() {
+		if(this.props.parent == undefined)
 
-		this.props.loadMLVGeneratorState(this.state);
+			this.props.loadMLVGeneratorState(this.state);
 	}
 
 
@@ -1739,7 +1754,10 @@ export default class MLVGenerator extends Component {
 
 
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
+		var redirect = this.state.redirect? (<Redirect to={{
+						pathname: `/${this.state.location.pathname}`,
 
+					}} />) : ''
 
 
 
@@ -2501,6 +2519,15 @@ export default class MLVGenerator extends Component {
 								</textarea>
 							</div>
 						</div>
+						{ this.props.parent != undefined &&
+						<div className="row" style={{ marginTop: '1em' }}>
+							<div className="col-lg-6">
+								<Button onClick={this.saveMLVToParent.bind(this)}>
+									Save
+								</Button>
+							</div>
+						</div>
+					}
 
 					</div>
 				</div>
