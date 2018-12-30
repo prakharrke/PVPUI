@@ -15,15 +15,15 @@ export default class WriteBaseline extends Component {
 			testCaseSummary: '',
 			testCaseDescription: '',
 			mountMLVGenerator: false,
-			operation : '',
-			fetchFromAnotherSource : false,
-			fetchFromAnotherSourceMLV : '',
-			insertMLVs : {
-				currentIndex : 0,
-				insertMLVArray : []
+			operation: '',
+			fetchFromAnotherSource: false,
+			fetchFromAnotherSourceMLV: '',
+			insertMLVs: {
+				currentIndex: 0,
+				insertMLVArray: []
 			}
 
-			
+
 		}
 	}
 	handleSelect(event) {
@@ -46,143 +46,184 @@ export default class WriteBaseline extends Component {
 		this.setState({
 			...this.state,
 			mountMLVGenerator: true,
-			operation : operation
-			
+			operation: operation
+
 		})
 
 	}
-	
+
 	saveMLVForFetchFromAnotherSource(mlv) {
-	
+
 		this.setState({
 			...this.state,
-			fetchFromAnotherSourceMLV : mlv,
-			mountMLVGenerator : false
+			fetchFromAnotherSourceMLV: mlv,
+			mountMLVGenerator: false
 		})
 	}
 
-	toggleFetchFromAnotherSource(){
+	toggleFetchFromAnotherSource() {
 		this.setState({
 			...this.state,
-			fetchFromAnotherSource : !this.state.fetchFromAnotherSource
+			fetchFromAnotherSource: !this.state.fetchFromAnotherSource
 		})
 	}
 
 	// * METHOD TO ADD EMPTY INSERT_MLV
-	addInsertMLV(){
+	addInsertMLV() {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray.push({
-			mlv : '',
-			index : insertMLVArray.length,
-			ID : '',
-			PID : '',
-			LEV : '',
-			values : ''
+			mlv: '',
+			index: insertMLVArray.length,
+			ID: '',
+			PID: '',
+			LEV: '',
+			values: '',
+			attributes: []
 		})
 
 		this.setState({
 			...this.state,
-			insertMLVs : {
+			insertMLVs: {
 				...this.state.insertMLVs,
-				insertMLVArray : insertMLVArray
+				insertMLVArray: insertMLVArray
 			}
 		})
 	}
 
 	// * METHOD TO GENERATE INSERT MLV
-	generateInsertMLV(index){
-		
+	generateInsertMLV(index) {
+
 		this.setState({
 			...this.state,
-			insertMLVs : {
+			insertMLVs: {
 				...this.state.insertMLVs,
-				currentIndex : index
+				currentIndex: index
 			},
-			mountMLVGenerator : true,
-			operation : 'insertMLV'
+			mountMLVGenerator: true,
+			operation: 'insertMLV'
 		})
+	}
+
+	parseMLVLevelWise(mlv){
+		console.log()
+		
+		
+		return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
 	}
 
 	// * METHOD TO RECEIVE MLV FROM MLV GENERATOR AND SAVE IT
-	saveInsertMLV(mlv,index){
-		if(index === undefined){
-		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
-		insertMLVArray[this.state.insertMLVs.currentIndex].mlv = mlv
-	
-		this.setState({
-			...this.state,
-			insertMLVs : {
-				...this.state.insertMLVs,
-				insertMLVArray  : insertMLVArray
-			},
-			mountMLVGenerator : false
-		})
-	}
-	else{
-		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
-		insertMLVArray[index].mlv = mlv
-	
-		this.setState({
-			...this.state,
-			insertMLVs : {
-				...this.state.insertMLVs,
-				insertMLVArray  : insertMLVArray
-			},
-			mountMLVGenerator : false
-		})
-	}
+	saveInsertMLV(mlv, index) {
+		if (index === undefined) {
+			var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+			insertMLVArray[this.state.insertMLVs.currentIndex].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					insertMLVArray[this.state.insertMLVs.currentIndex].attributes = temp;
+					//this.props.setAttributesForInsertMLV(object.index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				insertMLVs: {
+					...this.state.insertMLVs,
+					insertMLVArray: insertMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+		else {
+			var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+			insertMLVArray[index].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					insertMLVArray[this.state.insertMLVs.currentIndex].attributes = temp;
+					//this.props.setAttributesForInsertMLV(object.index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				insertMLVs: {
+					...this.state.insertMLVs,
+					insertMLVArray: insertMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
 	}
 
-	setInsertID(index, value){
+	setInsertID(index, value) {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].ID = value
 
 		this.setState({
 			...this.state,
-			insertMLVs : {
+			insertMLVs: {
 				...this.state.insertMLVs,
-				insertMLVArray : insertMLVArray
+				insertMLVArray: insertMLVArray
 			}
 		})
 	}
-	setInsertPID(index, value){
+	setInsertPID(index, value) {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].PID = value
 		this.setState({
 			...this.state,
-			insertMLVs : {
+			insertMLVs: {
 				...this.state.insertMLVs,
-				insertMLVArray : insertMLVArray
+				insertMLVArray: insertMLVArray
 			}
 		})
 	}
-	setInsertLEV(index, value){
+	setInsertLEV(index, value) {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].LEV = value
 		this.setState({
 			...this.state,
-			insertMLVs : {
+			insertMLVs: {
 				...this.state.insertMLVs,
-				insertMLVArray : insertMLVArray
+				insertMLVArray: insertMLVArray
 			}
 		})
 	}
 
-	setInsertValues(index, values){
+	setInsertValues(index, values) {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].values = values;
 		this.setState({
 			...this.state,
-			insertMLVs : {
+			insertMLVs: {
 				...this.state.insertMLVs,
-				insertMLVArray : insertMLVArray
+				insertMLVArray: insertMLVArray
 			}
 		})
 
+	}
+
+	// * METHOD TO SET ATTRIBUTES FOR INSERT_MLV
+	setAttributesForInsertMLV(index, attributes) {
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray[index].attributes = attributes;
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
 	}
 
 
@@ -244,6 +285,7 @@ export default class WriteBaseline extends Component {
 									setInsertLEV={this.setInsertLEV.bind(this)}
 									saveInsertMLV={this.saveInsertMLV.bind(this)}
 									setInsertValues={this.setInsertValues.bind(this)}
+									setAttributesForInsertMLV={this.setAttributesForInsertMLV.bind(this)}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Update">

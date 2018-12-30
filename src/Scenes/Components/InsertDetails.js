@@ -61,15 +61,8 @@ export default class InsertDetails extends Component {
 	render() {
 		console.log(this.props.insertMLVArray)
 		var insertMLVArrayElement = this.props.insertMLVArray.map(object => {
-			var attributeColumns = new Array();
-			if(object.mlv!=''){
-				try {
-				var temp = object.mlv.split('attributes=')[1].split(';')[0].split(',')
-				attributeColumns = temp;
-			} catch{
-				alert('Error parsing MLV')
-			}
-		}
+			
+			
 			return (
 				<div>
 				<div className="row justify-content-center">
@@ -97,7 +90,7 @@ export default class InsertDetails extends Component {
 				<div className="row justify-content-center">
 					<div className="col-lg-4">
 						<DropDownList
-						data={attributeColumns}
+						data={object.attributes}
 						label="ID"
 						id={object.index}
 						style={{width : '100%',margin:'1em'}}
@@ -108,7 +101,7 @@ export default class InsertDetails extends Component {
 					</div>
 					<div className="col-lg-4">
 						<DropDownList
-						data={attributeColumns}
+						data={object.attributes}
 						label="PID"
 						id={object.index}
 						style={{width : '100%',margin:'1em'}}
@@ -118,7 +111,7 @@ export default class InsertDetails extends Component {
 					</div>
 					<div className="col-lg-4">
 						<DropDownList
-						data={attributeColumns}
+						data={object.attributes}
 						label="LEV"
 						id={object.index}
 						style={{width : '100%',margin:'1em'}}
@@ -127,7 +120,20 @@ export default class InsertDetails extends Component {
 						/>
 					</div>
 				</div>
+				<div className="row justify-content-center">
+					<div className="col-lg-10" style={{margin:"1em"}}>
+						<textarea
+							
+							class="form-control rounded-0"
+							rows="2"
+							id={object.index}
+							value={'('+object.attributes+')'}
+							
+						>
 
+						</textarea>
+					</div>
+				</div>
 				<div className="row justify-content-center">
 					<div className="col-lg-10" style={{margin:"1em"}}>
 						<textarea
@@ -147,7 +153,7 @@ export default class InsertDetails extends Component {
 			)
 		})
 		return (
-			<div row="justify-content-center" style={{ marginTop: "1em", width: "110em" }}>
+			<div row="justify-content-center" style={{ marginTop: "1em", width: "100%" }}>
 				<div className="row justify-content-center">
 					<div className="col-lg-4">
 						<Button

@@ -4,6 +4,8 @@ import PVPUI from './Scenes/PVPUI';
 import LoginForm from './Scenes/loginForm'
 import ReportContainer from './Scenes/ReportContainer'
 import Report from './Scenes/Report2'
+import ParseMLV from './Scenes/parseMLV'
+
 const PrivateRoute = ({ component: Component, ...rest }) => {
 
 	console.log(rest)
@@ -57,6 +59,7 @@ export default class Routes extends Component {
 			<HashRouter basename="/PVPUI" >
 
 				<Switch>
+				<Route path="/parseMLV" component={ParseMLV}/>
 				<Route  path='/reports/details' render = {props=>{return (<Report connectionNames={this.state.connectionNames}/>)}} />
 				<Route path='/reports' render = {props=>{return (<ReportContainer holdConnectionNamesArray={this.holdConnectionNamesArray.bind(this)}/>)}} />
 				<Route  path='/login' render={props=>{return (<LoginForm authenticateUser={this.authenticateUser.bind(this)} isUserAuthenticated={this.state.isUserAuthenticated} />)}} />

@@ -852,7 +852,7 @@ export default class CreateBaseline extends Component {
 								style={{ height: "40em", overflowX: "scroll" }}
 								data={this.state.resultSetList}
 								resizable={true}
-
+								scrollable="scrollable"
 							>
 								{
 									columnsElement
