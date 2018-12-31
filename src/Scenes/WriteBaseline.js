@@ -21,6 +21,10 @@ export default class WriteBaseline extends Component {
 			insertMLVs: {
 				currentIndex: 0,
 				insertMLVArray: []
+			},
+			fetchMLVForinsert :{
+				mlv : '',
+				filter : ''
 			}
 
 
@@ -77,7 +81,7 @@ export default class WriteBaseline extends Component {
 			ID: '',
 			PID: '',
 			LEV: '',
-			values: '',
+			values: [[]],
 			attributes: []
 		})
 
@@ -120,8 +124,12 @@ export default class WriteBaseline extends Component {
 			if (mlv != '') {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					var attributeValues = new Array(temp.length)
+					var attributeCollectiveValues = new Array();
+					attributeCollectiveValues.push(attributeValues.fill(''))
 					insertMLVArray[this.state.insertMLVs.currentIndex].attributes = temp;
-					//this.props.setAttributesForInsertMLV(object.index, attributeColumns)
+					insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
 				} catch{
 					alert('Error parsing MLV')
 				}
@@ -144,7 +152,11 @@ export default class WriteBaseline extends Component {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
 					insertMLVArray[this.state.insertMLVs.currentIndex].attributes = temp;
-					//this.props.setAttributesForInsertMLV(object.index, attributeColumns)
+					var attributeValues = new Array(temp.length)
+					var attributeCollectiveValues = new Array();
+					attributeCollectiveValues.push(attributeValues.fill(''))
+					insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
 				} catch{
 					alert('Error parsing MLV')
 				}
@@ -215,6 +227,7 @@ export default class WriteBaseline extends Component {
 
 	// * METHOD TO SET ATTRIBUTES FOR INSERT_MLV
 	setAttributesForInsertMLV(index, attributes) {
+		console.log(attributes)
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].attributes = attributes;
 		this.setState({
@@ -226,14 +239,75 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
+	addAttributeInsertValue(index, attributeIndex, groupIndex, value){
+
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray[index].values[groupIndex][attributeIndex]=value;
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+	}
+	addAttributeInsertValueGroup(index){
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		var attributeLength = insertMLVArray[index].attributes.length;
+		var attributeValues = new Array(attributeLength)
+		insertMLVArray[index].values.push(attributeValues.fill(''))
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+
+	}
+
+	// * GENERATE FETCH MLV FOR INSERT
+	generateFetchMLVForInsert(){
+		this.setState({
+			...this.state,
+			mountMLVGenerator: true,
+			operation : 'fetchMLVForInsert'
+		})
+	}
+	saveFetchMLVForInsert(mlv){
+
+		this.setState({
+			...this.state,
+			fetchMLVForinsert : {
+				...this.state.fetchMLVForinsert,
+				mlv : mlv
+			},
+			mountMLVGenerator: false
+		})
+	}
+	setFilterForFetchMLVForInsert(filter){
+
+		this.setState({
+			...this.state,
+			fetchMLVForinsert : {
+				...this.state.fetchMLVForinsert,
+				filter : filter
+			}
+		})
+	}
+
 
 	render() {
+		console.log(this.state)
 		var mlvGenerator = this.state.mountMLVGenerator ? (
 			<MLVGenerator connInfoList={this.props.connInfoList}
 				oldState={{}}
 				parent={this.state.operation}
 				saveMLVForFetchFromAnotherSource={this.saveMLVForFetchFromAnotherSource.bind(this)}
-				saveInsertMLV={this.saveInsertMLV.bind(this)} />
+				saveInsertMLV={this.saveInsertMLV.bind(this)}
+				saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
+
+				 />
 		) : ''
 
 		console.log(mlvGenerator)
@@ -286,6 +360,12 @@ export default class WriteBaseline extends Component {
 									saveInsertMLV={this.saveInsertMLV.bind(this)}
 									setInsertValues={this.setInsertValues.bind(this)}
 									setAttributesForInsertMLV={this.setAttributesForInsertMLV.bind(this)}
+									addAttributeInsertValue={this.addAttributeInsertValue.bind(this)}
+									addAttributeInsertValueGroup={this.addAttributeInsertValueGroup.bind(this)}
+									saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
+									setFilterForFetchMLVForInsert={this.setFilterForFetchMLVForInsert.bind(this)}
+									generateFetchMLVForInsert={this.generateFetchMLVForInsert.bind(this)}
+									fetchMLVForinsert={this.state.fetchMLVForinsert}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Update">

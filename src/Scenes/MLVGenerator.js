@@ -32,7 +32,7 @@ export default class MLVGenerator extends Component {
 				tempObject: '',
 				selectedObjectList: [],
 				loading: false,
-				objectList: this.props.connInfoList[0].objectLlist,
+				objectList: this.props.connInfoList[0].objectList,
 				connInfoList: this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
@@ -1535,6 +1535,9 @@ export default class MLVGenerator extends Component {
 		if (this.props.parent === 'insertMLV') {
 			this.props.saveInsertMLV(this.state.mlv)
 		}
+		if(this.props.parent === 'fetchMLVForInsert'){
+			this.props.saveFetchMLVForInsert(this.state.mlv)
+		}
 	}
 	createMLV(event) {
 		event.preventDefault();
@@ -2616,12 +2619,12 @@ export default class MLVGenerator extends Component {
 	relationNameRegex = new RegExp(/(?<=relname\s*?=)(.*?)(?=;)/);
 	isRecursionTrueRegex = new RegExp(/(?<=CONTAINS_PARENT_ITEM\s*?=)(.*?)(?=;)/);
 	relationshipRegex = new RegExp(/(?<=relationship\s*?=)(.*?)(?=;)/);
-	relationTypeRegex = new RegExp(/(?<=relation_type\s*?=)(.*?)(?=;)/);
+	relationTypeRegex = new RegExp(/(?<=relationtype\s*?=)(.*?)(?=;)/);
 	predicateRegex = new RegExp(/(?<=predicate\s*?=)(.*?)(?=;)/);
 	parseMLV(event) {
 		var mlv = event.target.value.replace('Level', "Level".fontcolor("red"));
 		
-		try{
+		
 		if (event.target.value != '') {
 			var mlvState = {};
 			var selectedObjectList = new Array();
@@ -2707,8 +2710,11 @@ export default class MLVGenerator extends Component {
 				var attributeValuesArray = new Array();
 				console.log(attvaluesArray)
 				attvaluesArray.map(attvalue => {
-					if (attvalue != "null") {
-						var attributeName = attvalue.split('.')[1].trim()
+					if (attvalue.trim() != "null") {
+						if(attvalue.includes('.'))
+							var attributeName = attvalue.split('.')[1].trim()
+						else
+							var attributeName = attvalue;
 						var temp = {
 							attributeName: attributeName,
 							columnName: attributeNames[attributeIndex],
@@ -2738,6 +2744,7 @@ export default class MLVGenerator extends Component {
 					var parentObjectID = selectedObjectList[parentIndex].objectID;
 					var isRecursionTrue = relationString.match(this.isRecursionTrueRegex)[0].trim();
 					var relationship = relationString.match(this.relationshipRegex)[0].trim();
+					console.log(relationString.match(this.relationTypeRegex));
 					var relationType = relationString.match(this.relationTypeRegex)[0].trim();
 					var relation = {
 
@@ -2816,9 +2823,7 @@ export default class MLVGenerator extends Component {
 				...mlvState
 			})
 		}
-	}catch{
-		alert('Alert Parsing MLV')
-	}
+	
 
 	}
 
