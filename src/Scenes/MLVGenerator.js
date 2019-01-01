@@ -2708,16 +2708,18 @@ export default class MLVGenerator extends Component {
 				// * GET ATTRIBUTE_NAMES FROM attvalues expression
 				var attvaluesArray = levelString.match(this.attributeNamesRegex)[0].split(',');
 				var attributeValuesArray = new Array();
-				console.log(attvaluesArray)
-				attvaluesArray.map(attvalue => {
+				attvaluesArray.map((attvalue, index) => {
 					if (attvalue.trim() != "null") {
-						if(attvalue.includes('.'))
+						if(attvalue.includes('.') && attvalue.split('.')[0].trim() === source){
+							console.log(attvalue.split('.')[0].trim())
+							console.log(source)
 							var attributeName = attvalue.split('.')[1].trim()
+						}
 						else
 							var attributeName = attvalue;
 						var temp = {
 							attributeName: attributeName,
-							columnName: attributeNames[attributeIndex],
+							columnName: attributeNames[index],
 							ID: attributeName + '_' + new Date().getTime()
 						}
 						attributeValuesArray.push(temp);
