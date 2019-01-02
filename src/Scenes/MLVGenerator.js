@@ -136,7 +136,12 @@ export default class MLVGenerator extends Component {
 */
 
 	componentWillUpdate() {
-
+		/*console.log("CHECK")
+		console.log(this.state.selectedConnectionID)
+		console.log(this.props.connInfoList)
+		alert(this.props.connInfoList[this.props.connInfoList.map(object=>{return object.connectionID}).indexOf(this.state.selectedConnectionID)].objectList)
+		*/
+		
 		if (this.state.selectedObject.objectName === 'Selected Sources') {
 
 			//console.log('already set')
@@ -153,6 +158,8 @@ export default class MLVGenerator extends Component {
 				attributeListForSelectedObject: [],
 			})
 		}
+
+
 	}
 
 	componentDidUpdate() {
@@ -188,7 +195,7 @@ export default class MLVGenerator extends Component {
 		// * UPDATING OBJECTLIST FROM CONNINFO AFTER CHANGE IN BASE CONNECTION
 
 		if (!this.state.objectList.every(object => { return this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.includes(object) })) {
-
+			alert('in loop')
 			this.setState({
 				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList
 			})
@@ -1535,8 +1542,14 @@ export default class MLVGenerator extends Component {
 		if (this.props.parent === 'insertMLV') {
 			this.props.saveInsertMLV(this.state.mlv)
 		}
-		if(this.props.parent === 'fetchMLVForInsert'){
+		if (this.props.parent === 'fetchMLVForInsert') {
 			this.props.saveFetchMLVForInsert(this.state.mlv)
+		}
+		if(this.props.parent === 'fetchFromAnotherSourceForUpdate'){
+			this.props.saveMLVForFetchFromAnotherSourceForUpdate(this.state.mlv)
+		}
+		if(this.props.parent === 'updateMLV'){
+			this.props.saveUpdateMLV(this.state.mlv)
 		}
 	}
 	createMLV(event) {
@@ -2514,13 +2527,14 @@ export default class MLVGenerator extends Component {
 						</PanelBar>
 						<div className="row" style={{ marginTop: '1em' }}>
 							<div className="col-lg-6">
-								<Button onClick={this.showGridView.bind(this)}>
-									Grid View
+
+								<Button onClick={this.createMLV.bind(this)}>
+									Generate MLV
 								</Button>
 							</div>
 							<div className="col-lg-6">
-								<Button onClick={this.createMLV.bind(this)}>
-									Generate MLV
+								<Button onClick={this.showGridView.bind(this)}>
+									Grid View
 								</Button>
 							</div>
 						</div>
@@ -2621,10 +2635,11 @@ export default class MLVGenerator extends Component {
 	relationshipRegex = new RegExp(/(?<=relationship\s*?=)(.*?)(?=;)/);
 	relationTypeRegex = new RegExp(/(?<=relationtype\s*?=)(.*?)(?=;)/);
 	predicateRegex = new RegExp(/(?<=predicate\s*?=)(.*?)(?=;)/);
+	attributeSplitReges = new RegExp();
 	parseMLV(event) {
 		var mlv = event.target.value.replace('Level', "Level".fontcolor("red"));
-		
-		
+
+
 		if (event.target.value != '') {
 			var mlvState = {};
 			var selectedObjectList = new Array();
@@ -2710,7 +2725,7 @@ export default class MLVGenerator extends Component {
 				var attributeValuesArray = new Array();
 				attvaluesArray.map((attvalue, index) => {
 					if (attvalue.trim() != "null") {
-						if(attvalue.includes('.') && attvalue.split('.')[0].trim() === source){
+						if (attvalue.includes('.') && attvalue.split('.')[0].trim() === source) {
 							console.log(attvalue.split('.')[0].trim())
 							console.log(source)
 							var attributeName = attvalue.split('.')[1].trim()
@@ -2825,7 +2840,7 @@ export default class MLVGenerator extends Component {
 				...mlvState
 			})
 		}
-	
+
 
 	}
 

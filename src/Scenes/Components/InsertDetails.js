@@ -3,6 +3,7 @@ import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import { Button } from '@progress/kendo-react-buttons';
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
+import * as Constants from '../../Constants.js';
 export default class InsertDetails extends Component {
 	constructor(props) {
 		super(props);
@@ -26,9 +27,17 @@ export default class InsertDetails extends Component {
 	}
 	addInsertMLV(event) {
 		event.preventDefault();
+		if (this.props.fetchFromAnotherSource && this.props.insertMLVArray.length === 1) {
+			alert('Only one insert MLV is allowed with fetch from another source')
+			return
+		}
 		this.props.addInsertMLV()
 
 
+	}
+	deleteInsertMLV(event) {
+		event.preventDefault();
+		this.props.deleteInsertMLV(event.target.id)
 	}
 
 	generateInsertMLV(event) {
@@ -81,6 +90,21 @@ export default class InsertDetails extends Component {
 		this.props.addAttributeInsertValueGroup(event.target.id)
 
 	}
+	deleteAttributeInsertValueGroup(event) {
+		if(this.props.insertMLVArray[event.target.id].values.length === 1){
+			alert('At least one value set is required')
+			return
+		}
+		
+		this.props.deleteAttributeInsertValueGroup(event.target.id, `attributeGroupIndex_${event.target.id}`)
+
+		if(this.props.insertMLVArray[event.target.id].values.length === this.state[`attributeGroupIndex_${event.target.id}`]){
+			this.setState({
+				[`attributeGroupIndex_${event.target.id}`] : this.state[`attributeGroupIndex_${event.target.id}`] - 1
+			})
+		}
+			
+	}
 	moveRightAttributeInsertValueGroup(event) {
 		event.preventDefault();
 		var attributeLength = this.props.insertMLVArray[event.target.id].values.length
@@ -102,21 +126,39 @@ export default class InsertDetails extends Component {
 
 	// * GENERATE FETCH MLV FOR INSERT
 
-	generateFetchMLVForInsert(event){
+	generateFetchMLVForInsert(event) {
 
 		this.props.generateFetchMLVForInsert();
 
 	}
+	// * METHOD TO ADD TEST CASE FILTER
+	addFilterForFetchMLVForInsert(event) {
+		//console.log(event.target.value)
+		this.props.addFilterForFetchMLVForInsert(event.target.value)
+	}
+	editFilterForFetchMLVForInsert(event) {
+		this.props.editFilterForFetchMLVForInsert(event.target.value)
+	}
+	toggleRSInsert(event) {
+		event.preventDefault();
+		this.props.toggleRSInsert();
+	}
+	toggleBulkInsert(event) {
+		event.preventDefault();
+		this.props.toggleBulkInsert();
 
+	}
 
 
 	render() {
 
-		var insertMLVArrayElement = this.props.insertMLVArray.map(object => {
+		var insertMLVArrayElement = this.props.insertMLVArray.map((object, index) => {
 
 
 			return (
-				<div>
+
+				<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Insert MLV ' + (index + 1)}</i>}>
+
 					<div className="row justify-content-center">
 						<div className="col-lg-1" style={{ margin: '1em' }}>
 							<Button
@@ -137,6 +179,14 @@ export default class InsertDetails extends Component {
 							>
 
 							</textarea>
+						</div>
+						<div className="col-lg-1" style={{ margin: '1em' }}>
+							<Button
+								primary={true}
+								id={object.index}
+								onClick={this.deleteInsertMLV.bind(this)}
+							>Delete
+								</Button>
 						</div>
 					</div>
 					<div className="row justify-content-center">
@@ -207,6 +257,14 @@ export default class InsertDetails extends Component {
 											style={{ margin: '1em' }}
 											onClick={this.addAttributeInsertValueGroup.bind(this)}
 										>{'+'}</Button>
+									</div>
+									<div className="col-lg-1">
+										<Button
+											primary={true}
+											id={object.index}
+											style={{ margin: '1em' }}
+											onClick={this.deleteAttributeInsertValueGroup.bind(this)}
+										>{'X'}</Button>
 									</div>
 									<div className="col-lg-1">
 										<Button
@@ -284,7 +342,9 @@ export default class InsertDetails extends Component {
 							</div>
 						)
 					}
-				</div>
+
+				</PanelBarItem>
+
 			)
 		})
 		return (
@@ -332,15 +392,22 @@ export default class InsertDetails extends Component {
 										<Button primary={true} onClick={this.addInsertMLV.bind(this)}>Add</Button>
 									</div>
 								</div>
-								{insertMLVArrayElement}
+								<div className="row justify-content-center" style={{ width: "100%" }}>
+									<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
+
+										<PanelBar >
+											{insertMLVArrayElement}
+										</PanelBar>
+									</div>
+								</div>
 							</PanelBarItem>
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch MLV</i>}>
 
 								<div className="row justify-content-center">
 									<div className="col-lg-1" style={{ margin: '1em' }}>
-										<Button 
-										primary={true} 
-										onClick={this.generateFetchMLVForInsert.bind(this)}
+										<Button
+											primary={true}
+											onClick={this.generateFetchMLVForInsert.bind(this)}
 										>Generate</Button>
 									</div>
 									<div className="col-lg-9" style={{ margin: '1em' }}>
@@ -349,11 +416,110 @@ export default class InsertDetails extends Component {
 										</textarea>
 									</div>
 								</div>
+								<div className="row justify-content-center">
+									<div className="col-lg-10" tabIndex="0">
+										<Input
+
+											placeholder="Filter"
+											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+											onChange={this.editFilterForFetchMLVForInsert.bind(this)}
+											value={this.props.fetchMLVForinsert.filter}
+										/>
+									</div>
+								</div>
+								<div className="row">
+
+									<div className="col-lg-5">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+											onDoubleClick={this.addFilterForFetchMLVForInsert.bind(this)}
+										>
+											{this.props.fetchMLVForinsert.attributes.map((attributeName) => {
+												return (
+													<option value={attributeName}>{attributeName}</option>
+
+												)
+											})}
+										</select>
+									</div>
+									<div className="col-lg-2">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+											onDoubleClick={this.addFilterForFetchMLVForInsert.bind(this)}
+										>
+											{
+												Constants.Constants.MLVOperators.map((operator) => {
+
+													return (
+
+														<option value={operator}>{operator}</option>
+													)
+												})
+											}
+										</select>
+									</div>
+									<div className="col-lg-5">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											onDoubleClick={this.addFilterForFetchMLVForInsert.bind(this)}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+										>
+											{
+												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+													return (
+
+														<option value={func}>{func}</option>
+													)
+												})
+											}
+										</select>
+
+									</div>
+								</div>
 
 							</PanelBarItem>
 						</PanelBar>
-
-
+						{
+							this.props.insertMLVArray.length < 2 &&
+							<div className="row justify-content-center">
+								<div className="col-lg-2">
+									<Button
+										style={{ margin: "1em" }}
+										onClick={this.toggleRSInsert.bind(this)}
+									>
+										RS Insert
+									</Button>
+									<Switch
+										style={{ margin: "1em" }}
+										checked={this.props.rsInsertFlag}
+									/>
+								</div>
+								<div className="col-lg-2">
+									<Button
+										style={{ margin: "1em" }}
+										onClick={this.toggleBulkInsert.bind(this)}
+									>
+										Bulk Insert
+									</Button>
+									<Switch
+										style={{ margin: "1em" }}
+										checked={this.props.bulkInsertFlag}
+									/>
+								</div>
+							</div>
+						}
 					</div>
 				</div>
 			</div>

@@ -12,3 +12,27 @@
  Level level1 { inflate=all; src=[ExcelData.xlsx].EMPLOYEE ; attvalues=null,null,null,null,null,[ExcelData.xlsx].EMPLOYEE.A,[ExcelData.xlsx].EMPLOYEE.B,[ExcelData.xlsx].EMPLOYEE.C,[ExcelData.xlsx].EMPLOYEE.D,[ExcelData.xlsx].EMPLOYEE.E,[ExcelData.xlsx].EMPLOYEE.F,[ExcelData.xlsx].EMPLOYEE.G,[ExcelData.xlsx].EMPLOYEE.H,[ExcelData.xlsx].EMPLOYEE.I,null,null,null,null,null; DELIMITER='*level1*' ; MLVLEVELNAME='level1'; }
 
  Level level2 { inflate=all; src=[ExcelDataXLS.xls].ADDRESS ; attvalues=null,null,null,null,null,null,null,null,null,null,null,null,null,null,[ExcelDataXLS.xls].ADDRESS.A,[ExcelDataXLS.xls].ADDRESS.B,[ExcelDataXLS.xls].ADDRESS.C,[ExcelDataXLS.xls].ADDRESS.D,[ExcelDataXLS.xls].ADDRESS.E; DELIMITER='*level2*' ; MLVLEVELNAME='level2'; }}
+
+
+
+
+// DEPT MLV
+
+{VIEWNAME=test; MLV_VERSION=[Version6.0];CACHE_OUTPUT;attributes=level_0_Regex__xlsx_DEPT_A_0,level_0_Regex__xlsx_DEPT_B_1,level_0_Regex__xlsx_DEPT_D_2,level_0_Regex__xlsx_DEPT_C_3,level_0_Regex__xlsx_DEPT_E_4,level_0_Regex__xlsx_DEPT_eQFileName_5,level_0_Regex__xlsx_DEPT_eQRecordNumber_6,level_0_Regex__xlsx_DEPT_eQRelativeFolder_7,level_0_Regex__xlsx_DEPT_eQSheetName_8;
+
+ Level level0 { inflate=all; src=[Regex .xlsx].DEPT ; attvalues=[Regex .xlsx].DEPT.A,[Regex .xlsx].DEPT.B,[Regex .xlsx].DEPT.D,[Regex .xlsx].DEPT.C,[Regex .xlsx].DEPT.E,[Regex .xlsx].DEPT.eQFileName,[Regex .xlsx].DEPT.eQRecordNumber,[Regex .xlsx].DEPT.eQRelativeFolder,[Regex .xlsx].DEPT.eQSheetName; DELIMITER='*level0*' ; MLVLEVELNAME='level0'; }}
+
+ // EMPLOYEE MLV
+
+ {VIEWNAME=test; MLV_VERSION=[Version6.0];CACHE_OUTPUT;attributes=level_0_ExcelData_xlsx_EMPLOYEE_A_0,level_0_ExcelData_xlsx_EMPLOYEE_B_1,level_0_ExcelData_xlsx_EMPLOYEE_C_2,level_0_ExcelData_xlsx_EMPLOYEE_D_3,level_0_ExcelData_xlsx_EMPLOYEE_E_4,level_0_ExcelData_xlsx_EMPLOYEE_F_5,level_0_ExcelData_xlsx_EMPLOYEE_G_6,level_0_ExcelData_xlsx_EMPLOYEE_H_7;
+
+ Level level0 { inflate=all; src=[ExcelData.xlsx].EMPLOYEE ; attvalues=[ExcelData.xlsx].EMPLOYEE.A,[ExcelData.xlsx].EMPLOYEE.B,[ExcelData.xlsx].EMPLOYEE.C,[ExcelData.xlsx].EMPLOYEE.D,[ExcelData.xlsx].EMPLOYEE.E,[ExcelData.xlsx].EMPLOYEE.F,[ExcelData.xlsx].EMPLOYEE.G,[ExcelData.xlsx].EMPLOYEE.H; DELIMITER='*level0*' ; MLVLEVELNAME='level0'; }}
+
+
+// DEPT, EMPLOYEE MLV
+
+{VIEWNAME=test; MLV_VERSION=[Version6.0];CACHE_OUTPUT;attributes=level_0_Regex__xlsx_DEPT_A_0,level_0_Regex__xlsx_DEPT_B_1,level_0_Regex__xlsx_DEPT_C_2,level_0_Regex__xlsx_DEPT_D_3,level_0_Regex__xlsx_DEPT_E_4,level_1_addNativeObject_xlsx_EMPLOYEE_A_0,level_1_addNativeObject_xlsx_EMPLOYEE_B_1,level_1_addNativeObject_xlsx_EMPLOYEE_C_2,level_1_addNativeObject_xlsx_EMPLOYEE_D_3;
+
+ Level level0 { inflate=all; src=[Regex .xlsx].DEPT ; attvalues=[Regex .xlsx].DEPT.A,[Regex .xlsx].DEPT.B,[Regex .xlsx].DEPT.C,[Regex .xlsx].DEPT.D,[Regex .xlsx].DEPT.E,null,null,null,null; DELIMITER='*level0*' ; MLVLEVELNAME='level0'; }
+
+ Level level1 { inflate=all; src=[addNativeObject.xlsx].EMPLOYEE ; attvalues=null,null,null,null,null,[addNativeObject.xlsx].EMPLOYEE.A,[addNativeObject.xlsx].EMPLOYEE.B,[addNativeObject.xlsx].EMPLOYEE.C,[addNativeObject.xlsx].EMPLOYEE.D; DELIMITER='*level1*' ; MLVLEVELNAME='level1'; }}

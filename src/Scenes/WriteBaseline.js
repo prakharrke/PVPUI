@@ -4,6 +4,7 @@ import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import { Button } from '@progress/kendo-react-buttons';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import InsertDetails from './Components/InsertDetails'
+import UpdateDetails from './Components/UpdateDetails'
 import MLVGenerator from './MLVGenerator';
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 export default class WriteBaseline extends Component {
@@ -17,15 +18,28 @@ export default class WriteBaseline extends Component {
 			mountMLVGenerator: false,
 			operation: '',
 			fetchFromAnotherSource: false,
+			fetchFromAnotherSourceForUpdateFlag: false,
 			fetchFromAnotherSourceMLV: '',
+			fetchFromAnotherSourceForUpdate: {
+				mlv: '',
+				attributes: [],
+				filter: ''
+			},
 			insertMLVs: {
 				currentIndex: 0,
 				insertMLVArray: []
 			},
-			fetchMLVForinsert :{
-				mlv : '',
-				filter : ''
-			}
+			updateMLVs: {
+				currentIndex: 0,
+				updateMLVArray: []
+			},
+			fetchMLVForinsert: {
+				mlv: '',
+				filter: '',
+				attributes: []
+			},
+			rsInsertFlag: false,
+			bulkInsertFlag: false
 
 
 		}
@@ -46,6 +60,10 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLV(operation) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -94,8 +112,28 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
+	deleteInsertMLV(index) {
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray.splice(index, 1);
+		insertMLVArray.map((object, index) => {
+			object.index = index
+		})
+
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+	}
+
 	// * METHOD TO GENERATE INSERT MLV
 	generateInsertMLV(index) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
 
 		this.setState({
 			...this.state,
@@ -108,10 +146,11 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
-	parseMLVLevelWise(mlv){
+
+	parseMLVLevelWise(mlv) {
 		console.log()
-		
-		
+
+
 		return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
 	}
 
@@ -145,17 +184,18 @@ export default class WriteBaseline extends Component {
 			})
 		}
 		else {
+
 			var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 			insertMLVArray[index].mlv = this.parseMLVLevelWise(mlv)
 			var attributeColumns = new Array();
 			if (mlv != '') {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
-					insertMLVArray[this.state.insertMLVs.currentIndex].attributes = temp;
+					insertMLVArray[index].attributes = temp;
 					var attributeValues = new Array(temp.length)
 					var attributeCollectiveValues = new Array();
 					attributeCollectiveValues.push(attributeValues.fill(''))
-					insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					insertMLVArray[index].values = attributeCollectiveValues
 					//this.setAttributesForInsertMLV(index, attributeColumns)
 				} catch{
 					alert('Error parsing MLV')
@@ -239,10 +279,10 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
-	addAttributeInsertValue(index, attributeIndex, groupIndex, value){
+	addAttributeInsertValue(index, attributeIndex, groupIndex, value) {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
-		insertMLVArray[index].values[groupIndex][attributeIndex]=value;
+		insertMLVArray[index].values[groupIndex][attributeIndex] = value;
 		this.setState({
 			...this.state,
 			insertMLVs: {
@@ -251,7 +291,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	addAttributeInsertValueGroup(index){
+	addAttributeInsertValueGroup(index) {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var attributeLength = insertMLVArray[index].attributes.length;
 		var attributeValues = new Array(attributeLength)
@@ -265,49 +305,281 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
+	deleteAttributeInsertValueGroup(index, groupIndex) {
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray[index].values.splice(groupIndex, 1);
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+
+	}
 
 	// * GENERATE FETCH MLV FOR INSERT
-	generateFetchMLVForInsert(){
+	generateFetchMLVForInsert() {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
 		this.setState({
 			...this.state,
 			mountMLVGenerator: true,
-			operation : 'fetchMLVForInsert'
+			operation: 'fetchMLVForInsert'
 		})
 	}
-	saveFetchMLVForInsert(mlv){
-
+	saveFetchMLVForInsert(mlv) {
+		var attributes = mlv.split('attributes=')[1].split(';')[0].split(',')
 		this.setState({
 			...this.state,
-			fetchMLVForinsert : {
+			fetchMLVForinsert: {
 				...this.state.fetchMLVForinsert,
-				mlv : mlv
+				mlv: mlv,
+				attributes: attributes
 			},
 			mountMLVGenerator: false
 		})
 	}
-	setFilterForFetchMLVForInsert(filter){
+	addFilterForFetchMLVForInsert(value) {
 
 		this.setState({
 			...this.state,
-			fetchMLVForinsert : {
+			fetchMLVForinsert: {
 				...this.state.fetchMLVForinsert,
-				filter : filter
+				filter: this.state.fetchMLVForinsert.filter + value
 			}
 		})
+	}
+	editFilterForFetchMLVForInsert(value) {
+
+		this.setState({
+			...this.state,
+			fetchMLVForinsert: {
+				...this.state.fetchMLVForinsert,
+				filter: value
+			}
+		})
+	}
+	toggleRSInsert() {
+		this.setState({
+			...this.state,
+			rsInsertFlag: !this.state.rsInsertFlag
+		})
+	}
+	toggleBulkInsert() {
+		this.setState({
+			...this.state,
+			bulkInsertFlag: !this.state.bulkInsertFlag
+		})
+	}
+
+	// ****************** UPDATE_DETAILS METHODS *******************************
+	toggleFetchFromAnotherSourceForUpdate() {
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForUpdateFlag: !this.state.fetchFromAnotherSourceForUpdateFlag
+		})
+	}
+	generateMLVFetchFromAnotherSourceForUpdate(operation) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+		console.log(operation)
+		this.setState({
+			...this.state,
+			mountMLVGenerator: true,
+			operation: operation
+
+		})
+
+	}
+	saveMLVForFetchFromAnotherSourceForUpdate(mlv) {
+		if (mlv != '') {
+			try {
+
+				var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+				this.setState({
+					...this.state,
+					fetchFromAnotherSourceForUpdate: {
+						...this.state.fetchFromAnotherSourceForUpdate,
+						mlv: mlv,
+						attributes : temp
+					},
+					mountMLVGenerator: false
+				})
+			} catch{
+
+				alert('Error Parsing MLV')
+				return
+			}
+
+		}
+
+	}
+	addFilterForFetchFromAnotherSourceForUpdate(value) {
+
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForUpdate: {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				filter: this.state.fetchFromAnotherSourceForUpdate.filter + value
+			}
+		})
+	}
+	editFilterForFetchFromAnotherSourceForUpdate(value) {
+
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForUpdate: {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				filter: value
+			}
+		})
+	}
+	// * METHOD TO ADD EMPTY UPDATE_MLV
+	addUpdateMLV() {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray.push({
+			mlv: '',
+			index: updateMLVArray.length,
+			ID: '',
+			PID: '',
+			LEV: '',
+			values: [],
+			attributes: ['MLVLEFTOBJ','MLVRIGHTOBJ','MLVOBJECT']
+		})
+
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	// * METHOD TO GENERATE UPDATE MLV
+	generateUpdateMLV(index) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				currentIndex: index
+			},
+			mountMLVGenerator: true,
+			operation: 'updateMLV'
+		})
+	}
+		// * METHOD TO RECEIVE MLV FROM MLV GENERATOR AND SAVE IT
+	saveUpdateMLV(mlv, index) {
+		if (index === undefined) {
+			var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+			updateMLVArray[this.state.updateMLVs.currentIndex].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					updateMLVArray[this.state.updateMLVs.currentIndex].attributes = temp;
+					//insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				updateMLVs: {
+					...this.state.updateMLVs,
+					updateMLVArray: updateMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+		else {
+
+			var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+			updateMLVArray[index].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					updateMLVArray[index].attributes = temp;
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					//insertMLVArray[index].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				updateMLVs: {
+					...this.state.updateMLVs,
+					updateMLVArray: updateMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+	}
+		deleteUpdateMLV(index) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray.splice(index, 1);
+		updateMLVArray.map((object, index) => {
+			object.index = index
+		})
+
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	addUpdateValuePair(index){
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].values.push({
+			attributeName : '',
+			value : '',
+		})
+
+		this.setState({
+			...this.state,
+			updateMLVs : {
+				...this.state.updateMLVs,
+				updateMLVArray : updateMLVArray
+			}
+		})
+
 	}
 
 
 	render() {
 		console.log(this.state)
-		var mlvGenerator = this.state.mountMLVGenerator ? (
+		var mlvGenerator = this.state.mountMLVGenerator && this.props.connInfoList.length > 0 ? (
 			<MLVGenerator connInfoList={this.props.connInfoList}
 				oldState={{}}
 				parent={this.state.operation}
 				saveMLVForFetchFromAnotherSource={this.saveMLVForFetchFromAnotherSource.bind(this)}
 				saveInsertMLV={this.saveInsertMLV.bind(this)}
 				saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
-
-				 />
+				saveMLVForFetchFromAnotherSourceForUpdate={this.saveMLVForFetchFromAnotherSourceForUpdate.bind(this)}
+				saveUpdateMLV={this.saveUpdateMLV.bind(this)}
+			/>
 		) : ''
 
 		console.log(mlvGenerator)
@@ -362,14 +634,35 @@ export default class WriteBaseline extends Component {
 									setAttributesForInsertMLV={this.setAttributesForInsertMLV.bind(this)}
 									addAttributeInsertValue={this.addAttributeInsertValue.bind(this)}
 									addAttributeInsertValueGroup={this.addAttributeInsertValueGroup.bind(this)}
+									deleteAttributeInsertValueGroup={this.deleteAttributeInsertValueGroup.bind(this)}
 									saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
-									setFilterForFetchMLVForInsert={this.setFilterForFetchMLVForInsert.bind(this)}
+									addFilterForFetchMLVForInsert={this.addFilterForFetchMLVForInsert.bind(this)}
+									editFilterForFetchMLVForInsert={this.editFilterForFetchMLVForInsert.bind(this)}
 									generateFetchMLVForInsert={this.generateFetchMLVForInsert.bind(this)}
 									fetchMLVForinsert={this.state.fetchMLVForinsert}
+									toggleRSInsert={this.toggleRSInsert.bind(this)}
+									toggleBulkInsert={this.toggleBulkInsert.bind(this)}
+									rsInsertFlag={this.state.rsInsertFlag}
+									bulkInsertFlag={this.state.bulkInsertFlag}
+									deleteInsertMLV={this.deleteInsertMLV.bind(this)}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Update">
-
+								<UpdateDetails
+									toggleFetchFromAnotherSourceForUpdate={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
+									fetchFromAnotherSourceForUpdateFlag={this.state.fetchFromAnotherSourceForUpdateFlag}
+									generateMLVFetchFromAnotherSourceForUpdate={this.generateMLVFetchFromAnotherSourceForUpdate.bind(this)}
+									fetchFromAnotherSourceForUpdate={this.state.fetchFromAnotherSourceForUpdate}
+									saveMLVForFetchFromAnotherSourceForUpdate={this.saveMLVForFetchFromAnotherSourceForUpdate.bind(this)}
+									addFilterForFetchFromAnotherSourceForUpdate={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+									editFilterForFetchFromAnotherSourceForUpdate={this.editFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+									updateMLVArray={this.state.updateMLVs.updateMLVArray}
+									addUpdateMLV={this.addUpdateMLV.bind(this)}
+									generateUpdateMLV={this.generateUpdateMLV.bind(this)}
+									saveUpdateMLV={this.saveUpdateMLV.bind(this)}
+									deleteUpdateMLV={this.deleteUpdateMLV.bind(this)}
+									addUpdateValuePair={this.addUpdateValuePair.bind(this)}
+								/>
 							</TabStripTab>
 							<TabStripTab title="Delete">
 

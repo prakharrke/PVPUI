@@ -98,7 +98,19 @@ export default class PVPUI extends Component {
 
 	
 	 onSelect = (event) => {
-        this.props.history.push(event.target.props.route);
+	 	switch(event.target.props.route){
+	 		case '/mlvGenerator' : 
+	 		if(this.state.connInfoList.length > 0)
+	 			this.props.history.push(event.target.props.route);
+	 		else
+	 			alert('Please choose base connection first')
+	 			return
+	 		break;
+	 		default :
+	 		this.props.history.push(event.target.props.route);
+
+	 	}
+
     }
 
 
