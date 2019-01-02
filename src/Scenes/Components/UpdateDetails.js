@@ -51,6 +51,12 @@ export default class UpdateDetails extends Component {
 		event.preventDefault();
 		this.props.addUpdateValuePair(event.target.id)
 	}
+	setSelectedAttributeForUpdate(event){
+		this.props.setSelectedAttribute(event.target.props.id, event.target.props.attributeIndex, event.target.value)
+	}
+	setValueForSelectedAttributeForUpdate(event){
+		this.props.setValueForSelectedAttributeForUpdate(event.target.props.id, event.target.props.attributeIndex, event.target.value)
+	}
 
 	render() {
 		var updateMLVArrayElement = this.props.updateMLVArray.map((object, index) => {
@@ -114,8 +120,9 @@ export default class UpdateDetails extends Component {
 															data={object.attributes}
 															label="Column Name"
 															id={object.index}
+															attributeIndex = {index}
 															style={{ width: '100%', margin: '1em' }}
-														//onChange={this.setInsertID.bind(this)}
+														onChange={this.setSelectedAttributeForUpdate.bind(this)}
 														value={valueObject.attributeName}
 														/>
 													</div>
@@ -125,8 +132,9 @@ export default class UpdateDetails extends Component {
 															data={object.attributes}
 															label="Value"
 															id={object.index}
+															attributeIndex = {index}
 															style={{ width: '100%', margin: '2em' }}
-															//onChange={this.setInsertLEV.bind(this)}
+															onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
 															value={valueObject.value}
 														/>
 													</div>

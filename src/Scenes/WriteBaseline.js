@@ -566,6 +566,29 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
+	setSelectedAttribute(index,attributeIndex,attributeName){
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].values[attributeIndex].attributeName=attributeName;
+		this.setState({
+			...this.state,
+			updateMLVs : {
+				...this.state.updateMLVs,
+				updateMLVArray : updateMLVArray
+			}
+		})
+
+	}
+	setValueForSelectedAttributeForUpdate(index,attributeIndex,value){
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].values[attributeIndex].value=value;
+		this.setState({
+			...this.state,
+			updateMLVs : {
+				...this.state.updateMLVs,
+				updateMLVArray : updateMLVArray
+			}
+		})
+	}
 
 
 	render() {
@@ -662,6 +685,8 @@ export default class WriteBaseline extends Component {
 									saveUpdateMLV={this.saveUpdateMLV.bind(this)}
 									deleteUpdateMLV={this.deleteUpdateMLV.bind(this)}
 									addUpdateValuePair={this.addUpdateValuePair.bind(this)}
+									setSelectedAttribute={this.setSelectedAttribute.bind(this)}
+									setValueForSelectedAttributeForUpdate={this.setValueForSelectedAttributeForUpdate.bind(this)}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Delete">
