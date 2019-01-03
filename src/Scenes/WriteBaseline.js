@@ -5,6 +5,8 @@ import { Button } from '@progress/kendo-react-buttons';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import InsertDetails from './Components/InsertDetails'
 import UpdateDetails from './Components/UpdateDetails'
+import DeleteDetails from './Components/deleteDetails'
+import DeleteAllDetails from './Components/DeleteAllDetails'
 import MLVGenerator from './MLVGenerator';
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 export default class WriteBaseline extends Component {
@@ -19,8 +21,14 @@ export default class WriteBaseline extends Component {
 			operation: '',
 			fetchFromAnotherSource: false,
 			fetchFromAnotherSourceForUpdateFlag: false,
+			fetchFromAnotherSourceForDeleteFlag : false,
 			fetchFromAnotherSourceMLV: '',
 			fetchFromAnotherSourceForUpdate: {
+				mlv: '',
+				attributes: [],
+				filter: ''
+			},
+			fetchFromAnotherSourceForDelete: {
 				mlv: '',
 				attributes: [],
 				filter: ''
@@ -33,7 +41,25 @@ export default class WriteBaseline extends Component {
 				currentIndex: 0,
 				updateMLVArray: []
 			},
+			deleteMLVs: {
+				currentIndex: 0,
+				deleteMLVArray: []
+			},
+			deleteAllMLVs: {
+				currentIndex: 0,
+				deleteAllMLVArray: []
+			},
 			fetchMLVForinsert: {
+				mlv: '',
+				filter: '',
+				attributes: []
+			},
+			fetchMLVForUpdate: {
+				mlv: '',
+				filter: '',
+				attributes: []
+			},
+			fetchMLVForDelete: {
 				mlv: '',
 				filter: '',
 				attributes: []
@@ -406,7 +432,7 @@ export default class WriteBaseline extends Component {
 					fetchFromAnotherSourceForUpdate: {
 						...this.state.fetchFromAnotherSourceForUpdate,
 						mlv: mlv,
-						attributes : temp
+						attributes: temp
 					},
 					mountMLVGenerator: false
 				})
@@ -448,8 +474,11 @@ export default class WriteBaseline extends Component {
 			ID: '',
 			PID: '',
 			LEV: '',
+			PIN: '',
 			values: [],
-			attributes: ['MLVLEFTOBJ','MLVRIGHTOBJ','MLVOBJECT']
+			filter: '',
+			attributes: ['MLVLEFTOBJ', 'MLVRIGHTOBJ', 'MLVOBJECT'],
+
 		})
 
 		this.setState({
@@ -477,7 +506,7 @@ export default class WriteBaseline extends Component {
 			operation: 'updateMLV'
 		})
 	}
-		// * METHOD TO RECEIVE MLV FROM MLV GENERATOR AND SAVE IT
+	// * METHOD TO RECEIVE MLV FROM MLV GENERATOR AND SAVE IT
 	saveUpdateMLV(mlv, index) {
 		if (index === undefined) {
 			var updateMLVArray = this.state.updateMLVs.updateMLVArray;
@@ -535,7 +564,7 @@ export default class WriteBaseline extends Component {
 			})
 		}
 	}
-		deleteUpdateMLV(index) {
+	deleteUpdateMLV(index) {
 		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
 		updateMLVArray.splice(index, 1);
 		updateMLVArray.map((object, index) => {
@@ -550,42 +579,588 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	addUpdateValuePair(index){
+	addUpdateValuePair(index) {
 		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
 		updateMLVArray[index].values.push({
-			attributeName : '',
-			value : '',
+			attributeName: '',
+			value: '',
 		})
 
 		this.setState({
 			...this.state,
-			updateMLVs : {
+			updateMLVs: {
 				...this.state.updateMLVs,
-				updateMLVArray : updateMLVArray
+				updateMLVArray: updateMLVArray
 			}
 		})
 
 	}
-	setSelectedAttribute(index,attributeIndex,attributeName){
+	setSelectedAttribute(index, attributeIndex, attributeName) {
 		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
-		updateMLVArray[index].values[attributeIndex].attributeName=attributeName;
+		updateMLVArray[index].values[attributeIndex].attributeName = attributeName;
 		this.setState({
 			...this.state,
-			updateMLVs : {
+			updateMLVs: {
 				...this.state.updateMLVs,
-				updateMLVArray : updateMLVArray
+				updateMLVArray: updateMLVArray
 			}
 		})
 
 	}
-	setValueForSelectedAttributeForUpdate(index,attributeIndex,value){
+	setValueForSelectedAttributeForUpdate(index, attributeIndex, value) {
 		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
-		updateMLVArray[index].values[attributeIndex].value=value;
+		updateMLVArray[index].values[attributeIndex].value = value;
 		this.setState({
 			...this.state,
-			updateMLVs : {
+			updateMLVs: {
 				...this.state.updateMLVs,
-				updateMLVArray : updateMLVArray
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	deleteSelectedAttributeForUpdate(index, attributeIndex) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].values.splice(attributeIndex, 1);
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+
+	}
+	setIDForUpdate(index, value) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].ID = value
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	setPIDForUpdate(index, value) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].PID = value
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	setLEVForUpdate(index, value) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].LEV = value
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	setPINForUpdate(index, value) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].PIN = value
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	addFilterForUpdate(index, value) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].filter = updateMLVArray[index].filter + value
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+
+	editFilterForUpdate(index, value) {
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].filter = value
+		this.setState({
+			...this.state,
+			updateMLVs: {
+				...this.state.updateMLVs,
+				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	generateFetchMLVForUpdate(operation) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+		console.log(operation)
+		this.setState({
+			...this.state,
+			mountMLVGenerator: true,
+			operation: operation
+
+		})
+
+	}
+	saveFetchMLVForUpdate(mlv) {
+		if (mlv != '') {
+			try {
+
+				var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+				this.setState({
+					...this.state,
+					fetchMLVForUpdate: {
+						...this.state.fetchMLVForUpdate,
+						mlv: mlv,
+						attributes: temp
+					},
+					mountMLVGenerator: false
+				})
+			} catch{
+
+				alert('Error Parsing MLV')
+				return
+			}
+
+		}else{
+			this.setState({
+					...this.state,
+					fetchMLVForUpdate: {
+						...this.state.fetchMLVForUpdate,
+						mlv: mlv,
+						attributes: []
+					},
+					mountMLVGenerator: false
+				})
+		}
+
+	}
+	addFilterForFetchMLVForUpdate(value) {
+
+		this.setState({
+			...this.state,
+			fetchMLVForUpdate: {
+				...this.state.fetchMLVForUpdate,
+				filter: this.state.fetchMLVForUpdate.filter + value
+			}
+		})
+	}
+	editFilterForFetchMLVForUpdate(value) {
+
+		this.setState({
+			...this.state,
+			fetchMLVForUpdate: {
+				...this.state.fetchMLVForUpdate,
+				filter: value
+			}
+		})
+	}
+
+	// ********************************** DELETE METHODS **********************************************
+	toggleFetchFromAnotherSourceForDelete(){
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDeleteFlag : !this.state.fetchFromAnotherSourceForDeleteFlag
+		})
+	}
+	generateMLVFetchFromAnotherSourceForDelete(operation) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+		console.log(operation)
+		this.setState({
+			...this.state,
+			mountMLVGenerator: true,
+			operation: operation
+
+		})
+
+	}
+	saveMLVForFetchFromAnotherSourceForDelete(mlv) {
+		if (mlv != '') {
+			try {
+
+				var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+				this.setState({
+					...this.state,
+					fetchFromAnotherSourceForDelete: {
+						...this.state.fetchFromAnotherSourceForDelete,
+						mlv: mlv,
+						attributes: temp
+					},
+					mountMLVGenerator: false
+				})
+			} catch{
+
+				alert('Error Parsing MLV')
+				return
+			}
+
+		}else {
+			this.setState({
+					...this.state,
+					fetchFromAnotherSourceForDelete: {
+						...this.state.fetchFromAnotherSourceForDelete,
+						mlv: mlv,
+						attributes: []
+					},
+					mountMLVGenerator: false
+				})
+		}
+
+	}
+	addFilterForFetchFromAnotherSourceForDelete(value) {
+
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDelete: {
+				...this.state.fetchFromAnotherSourceForDelete,
+				filter: this.state.fetchFromAnotherSourceForDelete.filter + value
+			}
+		})
+	}
+	editFilterForFetchFromAnotherSourceForDelete(value) {
+
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDelete: {
+				...this.state.fetchFromAnotherSourceForDelete,
+				filter: value
+			}
+		})
+	}
+	// * METHOD TO ADD EMPTY DELETE_MLV
+	addDeleteMLV() {
+		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+		deleteMLVArray.push({
+			mlv: '',
+			index: deleteMLVArray.length,
+			filter: '',
+			attributes: ['MLVLEFTOBJ', 'MLVRIGHTOBJ', 'MLVOBJECT'],
+
+		})
+
+		this.setState({
+			...this.state,
+			deleteMLVs: {
+				...this.state.deleteMLVs,
+				deleteMLVArray: deleteMLVArray
+			}
+		})
+	}
+	generateDeleteMLV(index) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+
+		this.setState({
+			...this.state,
+			deleteMLVs: {
+				...this.state.deleteMLVs,
+				currentIndex: index
+			},
+			mountMLVGenerator: true,
+			operation: 'deleteMLV'
+		})
+	}
+	saveDeleteMLV(mlv, index) {
+		if (index === undefined) {
+			var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+			deleteMLVArray[this.state.deleteMLVs.currentIndex].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					deleteMLVArray[this.state.deleteMLVs.currentIndex].attributes = temp;
+					//insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				deleteMLVs: {
+					...this.state.deleteMLVs,
+					deleteMLVArray: deleteMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+		else {
+
+			var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+			deleteMLVArray[index].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					deleteMLVArray[index].attributes = temp;
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					//insertMLVArray[index].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				deleteMLVs: {
+					...this.state.deleteMLVs,
+					deleteMLVArray: deleteMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+	}
+
+	deleteDeleteMLV(index) {
+		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+		deleteMLVArray.splice(index, 1);
+		deleteMLVArray.map((object, index) => {
+			object.index = index
+		})
+
+		this.setState({
+			...this.state,
+			deleteMLVs: {
+				...this.state.deleteMLVs,
+				deleteMLVArray: deleteMLVArray
+			}
+		})
+	}
+	addFilterForDelete(index,value){
+		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+		deleteMLVArray[index].filter = deleteMLVArray[index].filter + value
+		this.setState({
+			...this.state,
+			deleteMLVs: {
+				...this.state.deleteMLVs,
+				deleteMLVArray: deleteMLVArray
+			}
+		})
+	}
+	editFilterForDelete(index, value){
+		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+		deleteMLVArray[index].filter = value
+		this.setState({
+			...this.state,
+			deleteMLVs: {
+				...this.state.deleteMLVs,
+				deleteMLVArray: deleteMLVArray
+			}
+		})
+	}
+	generateFetchMLVForDelete(operation) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+		console.log(operation)
+		this.setState({
+			...this.state,
+			mountMLVGenerator: true,
+			operation: operation
+
+		})
+
+	}
+	saveFetchMLVForDelete(mlv) {
+		if (mlv != '') {
+			try {
+
+				var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+				this.setState({
+					...this.state,
+					fetchMLVForDelete: {
+						...this.state.fetchMLVForDelete,
+						mlv: mlv,
+						attributes: temp
+					},
+					mountMLVGenerator: false
+				})
+			} catch{
+
+				alert('Error Parsing MLV')
+				return
+			}
+
+		}else{
+			this.setState({
+					...this.state,
+					fetchMLVForDelete: {
+						...this.state.fetchMLVForDelete,
+						mlv: mlv,
+						attributes: []
+					},
+					mountMLVGenerator: false
+				})
+		}
+
+	}
+	addFilterForFetchMLVForDelete(value){
+		this.setState({
+			...this.state,
+			fetchMLVForDelete: {
+				...this.state.fetchMLVForDelete,
+				filter: this.state.fetchMLVForDelete.filter + value
+			}
+		})
+	}
+	editFilterForFetchMLVForDelete(value){
+		this.setState({
+			...this.state,
+			fetchMLVForDelete: {
+				...this.state.fetchMLVForDelete,
+				filter: value
+			}
+		})
+	}
+
+	//************************** DELETE_ALL METHODS ***************************************
+		addDeleteAllMLV() {
+		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+		deleteAllMLVArray.push({
+			mlv: '',
+			index: deleteAllMLVArray.length,
+			filter: '',
+			attributes: ['MLVLEFTOBJ', 'MLVRIGHTOBJ', 'MLVOBJECT'],
+
+		})
+
+		this.setState({
+			...this.state,
+			deleteAllMLVs: {
+				...this.state.deleteAllMLVs,
+				deleteAllMLVArray: deleteAllMLVArray
+			}
+		})
+	}
+	generateDeleteAllMLV(index) {
+		if (this.props.connInfoList.length < 1) {
+			alert('Please choose base connection first')
+			return
+		}
+
+		this.setState({
+			...this.state,
+			deleteAllMLVs: {
+				...this.state.deleteAllMLVs,
+				currentIndex: index
+			},
+			mountMLVGenerator: true,
+			operation: 'deleteAllMLV'
+		})
+	}
+		saveDeleteAllMLV(mlv, index) {
+		if (index === undefined) {
+			var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+			deleteAllMLVArray[this.state.deleteAllMLVs.currentIndex].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					deleteAllMLVArray[this.state.deleteAllMLVs.currentIndex].attributes = temp;
+					//insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				deleteAllMLVs: {
+					...this.state.deleteAllMLVs,
+					deleteAllMLVArray: deleteAllMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+		else {
+
+			var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+			deleteAllMLVArray[index].mlv = this.parseMLVLevelWise(mlv)
+			var attributeColumns = new Array();
+			if (mlv != '') {
+				try {
+					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					deleteAllMLVArray[index].attributes = temp;
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					//insertMLVArray[index].values = attributeCollectiveValues
+					//this.setAttributesForInsertMLV(index, attributeColumns)
+				} catch{
+					alert('Error parsing MLV')
+				}
+			}
+
+			this.setState({
+				...this.state,
+				deleteAllMLVs: {
+					...this.state.deleteAllMLVs,
+					deleteAllMLVArray: deleteAllMLVArray
+				},
+				mountMLVGenerator: false
+			})
+		}
+	}
+	deleteDeleteAllMLV(index) {
+		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+		deleteAllMLVArray.splice(index, 1);
+		deleteAllMLVArray.map((object, index) => {
+			object.index = index
+		})
+
+		this.setState({
+			...this.state,
+			deleteAllMLVs: {
+				...this.state.deleteMLVs,
+				deleteAllMLVArray: deleteAllMLVArray
+			}
+		})
+	}
+	addFilterForDeleteAll(index,value){
+		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+		deleteAllMLVArray[index].filter = deleteAllMLVArray[index].filter + value
+		this.setState({
+			...this.state,
+			deleteAllMLVs: {
+				...this.state.deleteAllMLVs,
+				deleteAllMLVArray: deleteAllMLVArray
+			}
+		})
+	}
+	editFilterForDeleteAll(index, value){
+		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+		deleteAllMLVArray[index].filter = value
+		this.setState({
+			...this.state,
+			deleteAllMLVs: {
+				...this.state.deleteAllMLVs,
+				deleteAllMLVArray: deleteAllMLVArray
 			}
 		})
 	}
@@ -602,6 +1177,12 @@ export default class WriteBaseline extends Component {
 				saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
 				saveMLVForFetchFromAnotherSourceForUpdate={this.saveMLVForFetchFromAnotherSourceForUpdate.bind(this)}
 				saveUpdateMLV={this.saveUpdateMLV.bind(this)}
+				saveFetchMLVForUpdate={this.saveFetchMLVForUpdate.bind(this)}
+				saveMLVForFetchFromAnotherSourceForDelete={this.saveMLVForFetchFromAnotherSourceForDelete.bind(this)}
+				saveDeleteMLV={this.saveDeleteMLV.bind(this)}
+				saveFetchMLVForDelete={this.saveFetchMLVForDelete.bind(this)}
+				saveDeleteAllMLV={this.saveDeleteAllMLV.bind(this)}
+
 			/>
 		) : ''
 
@@ -687,13 +1268,55 @@ export default class WriteBaseline extends Component {
 									addUpdateValuePair={this.addUpdateValuePair.bind(this)}
 									setSelectedAttribute={this.setSelectedAttribute.bind(this)}
 									setValueForSelectedAttributeForUpdate={this.setValueForSelectedAttributeForUpdate.bind(this)}
+									deleteSelectedAttributeForUpdate={this.deleteSelectedAttributeForUpdate.bind(this)}
+									setIDForUpdate={this.setIDForUpdate.bind(this)}
+									setPIDForUpdate={this.setPIDForUpdate.bind(this)}
+									setLEVForUpdate={this.setLEVForUpdate.bind(this)}
+									setPINForUpdate={this.setPINForUpdate.bind(this)}
+									addFilterForUpdate={this.addFilterForUpdate.bind(this)}
+									editFilterForUpdate={this.editFilterForUpdate.bind(this)}
+									generateFetchMLVForUpdate={this.generateFetchMLVForUpdate.bind(this)}
+									saveFetchMLVForUpdate={this.saveFetchMLVForUpdate.bind(this)}
+									fetchMLVForUpdate={this.state.fetchMLVForUpdate}
+									addFilterForFetchMLVForUpdate={this.addFilterForFetchMLVForUpdate.bind(this)}
+									editFilterForFetchMLVForUpdate={this.editFilterForFetchMLVForUpdate.bind(this)}
+
 								/>
 							</TabStripTab>
 							<TabStripTab title="Delete">
+								<DeleteDetails
+									deleteMLVs={this.state.deleteMLVs}
+									addDeleteMLV={this.addDeleteMLV.bind(this)}
+									generateDeleteMLV={this.generateDeleteMLV.bind(this)}
+									saveDeleteMLV={this.saveDeleteMLV.bind(this)}
+									deleteDeleteMLV={this.deleteDeleteMLV.bind(this)}
+									addFilterForDelete={this.addFilterForDelete.bind(this)}
+									editFilterForDelete={this.editFilterForDelete.bind(this)}
+									fetchMLVForDelete={this.state.fetchMLVForDelete}
+									generateFetchMLVForDelete={this.generateFetchMLVForDelete.bind(this)}
+									saveFetchMLVForDelete={this.saveFetchMLVForDelete.bind(this)}
+									addFilterForFetchMLVForDelete={this.addFilterForFetchMLVForDelete.bind(this)}
+									editFilterForFetchMLVForDelete={this.editFilterForFetchMLVForDelete.bind(this)}
+									toggleFetchFromAnotherSourceForDelete={this.toggleFetchFromAnotherSourceForDelete.bind(this)}
+									fetchFromAnotherSourceForDeleteFlag={this.state.fetchFromAnotherSourceForDeleteFlag}
+									fetchFromAnotherSourceForDelete={this.state.fetchFromAnotherSourceForDelete}
+									saveMLVForFetchFromAnotherSourceForDelete={this.saveMLVForFetchFromAnotherSourceForDelete.bind(this)}
+									addFilterForFetchFromAnotherSourceForDelete={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
+									editFilterForFetchFromAnotherSourceForDelete={this.editFilterForFetchFromAnotherSourceForDelete.bind(this)}
+									generateMLVFetchFromAnotherSourceForDelete={this.generateMLVFetchFromAnotherSourceForDelete.bind(this)}
 
+								/>
 							</TabStripTab>
 							<TabStripTab title="Delete All">
-
+								<DeleteAllDetails
+								deleteAllMLVs={this.state.deleteAllMLVs}
+								addDeleteAllMLV={this.addDeleteAllMLV.bind(this)}
+								generateDeleteAllMLV={this.generateDeleteAllMLV.bind(this)}
+								saveDeleteAllMLV={this.saveDeleteAllMLV.bind(this)}
+								deleteDeleteAllMLV={this.deleteDeleteAllMLV.bind(this)}
+								addFilterForDeleteAll={this.addFilterForDeleteAll.bind(this)}
+								editFilterForDeleteAll={this.editFilterForDeleteAll.bind(this)}
+								/>
 							</TabStripTab>
 						</TabStrip>
 					</div>

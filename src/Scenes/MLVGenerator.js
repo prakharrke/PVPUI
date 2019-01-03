@@ -32,7 +32,7 @@ export default class MLVGenerator extends Component {
 				tempObject: '',
 				selectedObjectList: [],
 				loading: false,
-				objectList: [],
+				objectList: this.props.connInfoList[0].objectList,
 				connInfoList: this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
@@ -1550,6 +1550,21 @@ export default class MLVGenerator extends Component {
 		}
 		if(this.props.parent === 'updateMLV'){
 			this.props.saveUpdateMLV(this.state.mlv)
+		}
+		if(this.props.parent == 'fetchMLVForUpdate'){
+			this.props.saveFetchMLVForUpdate(this.state.mlv)
+		}
+		if(this.props.parent === 'deleteMLV'){
+			this.props.saveDeleteMLV(this.state.mlv)
+		}
+		if(this.props.parent === 'fetchMLVForDelete'){
+			this.props.saveFetchMLVForDelete(this.state.mlv)
+		}
+		if(this.props.parent === 'deleteAllMLV'){
+			this.props.saveDeleteAllMLV(this.state.mlv)
+		}
+		if(this.props.parent === 'fetchFromAnotherSourceForDelete'){
+			this.props.saveMLVForFetchFromAnotherSourceForDelete(this.state.mlv)
 		}
 	}
 	createMLV(event) {
