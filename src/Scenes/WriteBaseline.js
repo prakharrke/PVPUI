@@ -174,10 +174,11 @@ export default class WriteBaseline extends Component {
 
 
 	parseMLVLevelWise(mlv) {
-		console.log()
-
-
-		return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
+		
+		if(mlv != undefined)
+			return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
+		else 
+			return ''
 	}
 
 	// * METHOD TO RECEIVE MLV FROM MLV GENERATOR AND SAVE IT
