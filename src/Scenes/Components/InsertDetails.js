@@ -25,6 +25,13 @@ export default class InsertDetails extends Component {
 	setFetchFromSourceMLV(event) {
 		this.props.saveMLVForFetchFromAnotherSource(event.target.value)
 	}
+	addFilterForFetchFromAnotherSourceForInsert(event) {
+		//console.log(event.target.value)
+		this.props.addFilterForFetchFromAnotherSourceForInsert(event.target.value)
+	}
+	editFilterForFetchFromAnotherSourceForInsert(event) {
+		this.props.editFilterForFetchFromAnotherSourceForInsert(event.target.value)
+	}
 	addInsertMLV(event) {
 		event.preventDefault();
 		if (this.props.fetchFromAnotherSource && this.props.insertMLVArray.length === 1) {
@@ -91,19 +98,19 @@ export default class InsertDetails extends Component {
 
 	}
 	deleteAttributeInsertValueGroup(event) {
-		if(this.props.insertMLVArray[event.target.id].values.length === 1){
+		if (this.props.insertMLVArray[event.target.id].values.length === 1) {
 			alert('At least one value set is required')
 			return
 		}
-		
+
 		this.props.deleteAttributeInsertValueGroup(event.target.id, `attributeGroupIndex_${event.target.id}`)
 
-		if(this.props.insertMLVArray[event.target.id].values.length === this.state[`attributeGroupIndex_${event.target.id}`]){
+		if (this.props.insertMLVArray[event.target.id].values.length === this.state[`attributeGroupIndex_${event.target.id}`]) {
 			this.setState({
-				[`attributeGroupIndex_${event.target.id}`] : this.state[`attributeGroupIndex_${event.target.id}`] - 1
+				[`attributeGroupIndex_${event.target.id}`]: this.state[`attributeGroupIndex_${event.target.id}`] - 1
 			})
 		}
-			
+
 	}
 	moveRightAttributeInsertValueGroup(event) {
 		event.preventDefault();
@@ -147,6 +154,14 @@ export default class InsertDetails extends Component {
 		event.preventDefault();
 		this.props.toggleBulkInsert();
 
+	}
+	addAttributeValuePairForInsert(event) {
+		event.preventDefault();
+		this.props.addAttributeValuePairForInsert(event.target.id);
+	}
+	setSelectedAttributeForInsert(event){
+
+		this.props.setSelectedAttributeForInsert(event.target.props.id, event.target.props.attributeIndex, event.target.value)
 	}
 
 
@@ -240,69 +255,123 @@ export default class InsertDetails extends Component {
 					{this.state.rawData ?
 						(
 
-							<div>
-								<div className="row justify-content-center">
-									<div className="col-lg-1">
-										<Button
-											primary={true}
-											id={object.index}
-											style={{ margin: '1em' }}
-											onClick={this.moveLeftAttributeInsertValueGroup.bind(this)}
-										>{'<'}</Button>
-									</div>
-									<div className="col-lg-1">
-										<Button
-											primary={true}
-											id={object.index}
-											style={{ margin: '1em' }}
-											onClick={this.addAttributeInsertValueGroup.bind(this)}
-										>{'+'}</Button>
-									</div>
-									<div className="col-lg-1">
-										<Button
-											primary={true}
-											id={object.index}
-											style={{ margin: '1em' }}
-											onClick={this.deleteAttributeInsertValueGroup.bind(this)}
-										>{'X'}</Button>
-									</div>
-									<div className="col-lg-1">
-										<Button
-											primary={true}
-											id={object.index}
-											style={{ margin: '1em' }}
-											onClick={this.moveRightAttributeInsertValueGroup.bind(this)}
-										>{'>'}</Button>
-									</div>
-								</div>
-								<div className="row justify-content-center">
-									<div className="col-lg-1">
-										{this.state[`attributeGroupIndex_${object.index}`] != undefined &&
-											this.state[`attributeGroupIndex_${object.index}`] + 1 + ' of ' + object.values.length}
-									</div>
+							<div className="row justify-content-center" style={{ width: "100%" }}>
+								<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
 
-								</div>
-								<div className="row justify-content-center">
-
-									<div className="col-lg-6">
-										{this.state[`attributeGroupIndex_${object.index}`] != undefined &&
-											object.values[this.state[`attributeGroupIndex_${object.index}`]].map((value, index) => {
-												return (
-													<Input
-														groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+									<PanelBar >
+										<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Update Values'}</i>}>
+											<div className="row justify-content-center">
+												<div className="col-lg-1">
+													<Button
+														primary={true}
 														id={object.index}
-														attributeIndex={index}
-														label={object.attributes[index]}
-														style={{ width: '100%', margin: '1em' }}
-														value={value}
-														onChange={this.addAttributeInsertValue.bind(this)}
-													/>
-												)
-											})
-										}
-									</div>
+														style={{ margin: '1em' }}
+														onClick={this.addAttributeValuePairForInsert.bind(this)}
+													>Add</Button>
+												</div>
+											</div>
+											<div className="row justify-content-center">
+												<div className="col-lg-1">
+													<Button
+														primary={true}
+														id={object.index}
+														style={{ margin: '1em' }}
+														onClick={this.moveLeftAttributeInsertValueGroup.bind(this)}
+													>{'<'}</Button>
+												</div>
+												<div className="col-lg-1">
+													<Button
+														primary={true}
+														id={object.index}
+														style={{ margin: '1em' }}
+														onClick={this.addAttributeInsertValueGroup.bind(this)}
+													>{'+'}</Button>
+												</div>
+												<div className="col-lg-1">
+													<Button
+														primary={true}
+														id={object.index}
+														style={{ margin: '1em' }}
+														onClick={this.deleteAttributeInsertValueGroup.bind(this)}
+													>{'X'}</Button>
+												</div>
+												<div className="col-lg-1">
+													<Button
+														primary={true}
+														id={object.index}
+														style={{ margin: '1em' }}
+														onClick={this.moveRightAttributeInsertValueGroup.bind(this)}
+													>{'>'}</Button>
+												</div>
+											</div>
+											<div className="row justify-content-center">
+												<div className="col-lg-1">
+													{this.state[`attributeGroupIndex_${object.index}`] != undefined &&
+														this.state[`attributeGroupIndex_${object.index}`] + 1 + ' of ' + object.values.length}
+												</div>
+
+											</div>
+
+
+											{	this.state[`attributeGroupIndex_${object.index}`] != undefined ?
+												object.values[this.state[`attributeGroupIndex_${object.index}`]].map((valueObject, index) => {
+													return (
+
+														<div className="row justify-content-center">
+															<div className="col-lg-6">
+																<DropDownList
+																	data={object.attributes}
+																	label="Column Name"
+																	groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																	id={object.index}
+																	attributeIndex={index}
+																	style={{ width: '100%', margin: '1em' }}
+																	onChange={this.setSelectedAttributeForInsert.bind(this)}
+																	value={valueObject.attributeName}
+																/>
+															</div>
+															<div className="col-lg-6">
+																<Input
+																	
+																	label="Value"
+																	groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																	id={object.index}
+																	attributeIndex={index}
+																	style={{ width: '100%', margin: '2em' }}
+																	onChange={this.addAttributeInsertValue.bind(this)}
+																	value={valueObject.value}
+																/>
+															</div>
+														</div>
+
+													)
+												}) : ''
+											}
+
+											{/*<div className="col-lg-6">
+																									{this.state[`attributeGroupIndex_${object.index}`] != undefined &&
+																										object.values[this.state[`attributeGroupIndex_${object.index}`]].map((value, index) => {
+																											return (
+																												<Input
+																													groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																													id={object.index}
+																													attributeIndex={index}
+																													label={object.attributes[index]}
+																													style={{ width: '100%', margin: '1em' }}
+																													value={value}
+																													onChange={this.addAttributeInsertValue.bind(this)}
+																												/>
+																											)
+																										})
+																									}
+																								</div>*/}
+
+										</PanelBarItem>
+									</PanelBar>
 								</div>
 							</div>
+
+
 						)
 
 
@@ -359,7 +428,7 @@ export default class InsertDetails extends Component {
 						</Button>
 						<Switch
 							style={{ margin: "1em" }}
-							checked={this.props.fetchFromAnotherSource}
+							checked={this.props.fetchFromAnotherSourceForInsertFlag}
 						/>
 					</div>
 
@@ -369,7 +438,7 @@ export default class InsertDetails extends Component {
 
 						<PanelBar >
 
-							{this.props.fetchFromAnotherSource ?
+							{this.props.fetchFromAnotherSourceForInsertFlag ?
 								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source</i>}>
 
 									<div className="row justify-content-center">
@@ -377,12 +446,83 @@ export default class InsertDetails extends Component {
 											<Button primary={true} onClick={this.generateMLVFetchFromAnotherSource.bind(this)}>Generate</Button>
 										</div>
 										<div className="col-lg-9" style={{ margin: '1em' }}>
-											<textarea placeholder="MLV*" class="form-control rounded-0" rows="5" value={this.props.fetchFromAnotherSourceMLV} onChange={this.setFetchFromSourceMLV.bind(this)}>
+											<textarea placeholder="MLV*" class="form-control rounded-0" rows="5" value={this.props.fetchFromAnotherSourceForInsert.mlv} onChange={this.setFetchFromSourceMLV.bind(this)}>
 
 											</textarea>
 										</div>
 									</div>
+									<div className="row justify-content-center">
+									<div className="col-lg-10" tabIndex="0">
+										<Input
 
+											placeholder="Filter"
+											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+											onChange={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
+											value={this.props.fetchFromAnotherSourceForInsert.filter}
+										/>
+									</div>
+								</div>
+								<div className="row">
+
+									<div className="col-lg-5">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+											onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+										>
+											{this.props.fetchFromAnotherSourceForInsert.attributes.map((attributeName) => {
+												return (
+													<option value={attributeName}>{attributeName}</option>
+
+												)
+											})}
+										</select>
+									</div>
+									<div className="col-lg-2">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+											onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+										>
+											{
+												Constants.Constants.MLVOperators.map((operator) => {
+
+													return (
+
+														<option value={operator}>{operator}</option>
+													)
+												})
+											}
+										</select>
+									</div>
+									<div className="col-lg-5">
+										<select
+											multiple
+											className="form-control"
+											size={10}
+											onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+											id="totalAttributes"
+											style={{ overflowX: "scroll" }}
+										>
+											{
+												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+													return (
+
+														<option value={func}>{func}</option>
+													)
+												})
+											}
+										</select>
+
+									</div>
+								</div>
 
 								</PanelBarItem> : ''}
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Insert MLV</i>}>

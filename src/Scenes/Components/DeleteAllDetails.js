@@ -16,21 +16,24 @@ export default class DeleteAllDetails extends Component {
 		event.preventDefault();
 		this.props.addDeleteAllMLV();
 	}
-	generateDeleteAllMLV(event){
+	generateDeleteAllMLV(event) {
 		this.props.generateDeleteAllMLV(event.target.id)
 	}
-	saveDeleteAllMLV(event){
-		this.props.saveDeleteAllMLV( event.target.value, event.target.id)
+	saveDeleteAllMLV(event) {
+		this.props.saveDeleteAllMLV(event.target.value, event.target.id)
 	}
-	deleteDeleteAllMLV(event){
+	deleteDeleteAllMLV(event) {
 		event.preventDefault();
 		this.props.deleteDeleteAllMLV(event.target.id)
 	}
-	addFilterForDeleteAll(event){
+	addFilterForDeleteAll(event) {
 		this.props.addFilterForDeleteAll(event.target.id, event.target.value)
 	}
-	editFilterForDeleteAll(event){
+	editFilterForDeleteAll(event) {
 		this.props.editFilterForDeleteAll(event.target.props.id, event.target.value)
+	}
+	generateBaseline(){
+		this.props.generateBaseline()
 	}
 
 	render() {
@@ -38,37 +41,37 @@ export default class DeleteAllDetails extends Component {
 
 			return (
 				<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Delete MLV ' + (index + 1)}</i>}>
-				<div className="row justify-content-center">
-					<div className="col-lg-1" style={{ margin: '1em' }}>
-						<Button
-							primary={true}
-							id={object.index}
-							onClick={this.generateDeleteAllMLV.bind(this)}
-						>Generate
+					<div className="row justify-content-center">
+						<div className="col-lg-1" style={{ margin: '1em' }}>
+							<Button
+								primary={true}
+								id={object.index}
+								onClick={this.generateDeleteAllMLV.bind(this)}
+							>Generate
 						</Button>
-					</div>
-					<div className="col-lg-9" style={{ margin: '1em' }}>
-						<textarea
-							placeholder="MLV*"
-							class="form-control rounded-0"
-							rows="5"
-							id={object.index}
-							value={object.mlv}
-							onChange={this.saveDeleteAllMLV.bind(this)}
-						>
+						</div>
+						<div className="col-lg-9" style={{ margin: '1em' }}>
+							<textarea
+								placeholder="MLV*"
+								class="form-control rounded-0"
+								rows="5"
+								id={object.index}
+								value={object.mlv}
+								onChange={this.saveDeleteAllMLV.bind(this)}
+							>
 
-						</textarea>
-					</div>
-					<div className="col-lg-1" style={{ margin: '1em' }}>
-						<Button
-							primary={true}
-							id={object.index}
-							onClick={this.deleteDeleteAllMLV.bind(this)}
-						>Delete
+							</textarea>
+						</div>
+						<div className="col-lg-1" style={{ margin: '1em' }}>
+							<Button
+								primary={true}
+								id={object.index}
+								onClick={this.deleteDeleteAllMLV.bind(this)}
+							>Delete
 						</Button>
+						</div>
 					</div>
-				</div>
-						<div className="row justify-content-center">
+					<div className="row justify-content-center">
 						<div className="col-lg-10" tabIndex="0">
 							<Input
 
@@ -152,7 +155,7 @@ export default class DeleteAllDetails extends Component {
 
 		})
 		return (
-
+			<div>
 			<div className="row justify-content-center">
 				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
@@ -166,7 +169,7 @@ export default class DeleteAllDetails extends Component {
 										onClick={this.addDeleteAllMLV.bind(this)}
 									>Add
 											</Button>
-											
+
 								</div>
 							</div>
 							<div className="row justify-content-center" style={{ width: "100%" }}>
@@ -178,9 +181,22 @@ export default class DeleteAllDetails extends Component {
 								</div>
 							</div>
 						</PanelBarItem>
-						
+
 					</PanelBar>
 				</div>
+			</div>
+			<div className="row justify-content-end">
+				<div className="col-lg-2 d-flex justify-content-end">
+					<Button
+					className="float-right"
+						primary={true}
+						//id={object.index}
+						onClick={this.generateBaseline.bind(this)}
+						style={{margin : '1em'}}
+					>Generate Baseline
+					</Button>
+				</div>
+			</div>
 			</div>
 		)
 	}

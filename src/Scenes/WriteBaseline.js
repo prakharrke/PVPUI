@@ -3,26 +3,33 @@ import { TabStrip, TabStripTab } from '@progress/kendo-react-layout';
 import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import { Button } from '@progress/kendo-react-buttons';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
 import InsertDetails from './Components/InsertDetails'
 import UpdateDetails from './Components/UpdateDetails'
 import DeleteDetails from './Components/deleteDetails'
 import DeleteAllDetails from './Components/DeleteAllDetails'
 import MLVGenerator from './MLVGenerator';
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
+import axios from 'axios';
 export default class WriteBaseline extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
+			baselineFilesList: [],
 			selected: 0,
 			testCaseSummary: '',
 			testCaseDescription: '',
 			mountMLVGenerator: false,
 			operation: '',
-			fetchFromAnotherSource: false,
+			fetchFromAnotherSourceForInsertFlag: false,
 			fetchFromAnotherSourceForUpdateFlag: false,
-			fetchFromAnotherSourceForDeleteFlag : false,
-			fetchFromAnotherSourceMLV: '',
+			fetchFromAnotherSourceForDeleteFlag: false,
+			fetchFromAnotherSourceForInsert: {
+				mlv: '',
+				attributes: [],
+				filter: ''
+			},
 			fetchFromAnotherSourceForUpdate: {
 				mlv: '',
 				attributes: [],
@@ -65,10 +72,29 @@ export default class WriteBaseline extends Component {
 				attributes: []
 			},
 			rsInsertFlag: false,
-			bulkInsertFlag: false
+			bulkInsertFlag: false,
+			selectedBaseline: '',
+			newBaselineName: '',
 
 
 		}
+	}
+
+	componentWillMount() {
+
+		axios.post('http://localhost:9090/PVPUI/GetWriteBaselineFilesList', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+
+			console.log(response.data)
+			//this.isNotLoading();
+			this.setState({
+				baslineFilesList: response.data
+			})
+		})
 	}
 	handleSelect(event) {
 		this.setState({
@@ -102,17 +128,63 @@ export default class WriteBaseline extends Component {
 
 	saveMLVForFetchFromAnotherSource(mlv) {
 
-		this.setState({
-			...this.state,
-			fetchFromAnotherSourceMLV: mlv,
-			mountMLVGenerator: false
-		})
+		if (mlv != '') {
+			try {
+
+				var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+				this.setState({
+					...this.state,
+					fetchFromAnotherSourceForInsert: {
+						...this.state.fetchFromAnotherSourceForInsert,
+						mlv: mlv,
+						attributes: temp
+					},
+					mountMLVGenerator: false
+				})
+			} catch{
+
+				alert('Error Parsing MLV')
+				return
+			}
+
+		}
+		else{
+			this.setState({
+					...this.state,
+					fetchFromAnotherSourceForInsert: {
+						...this.state.fetchFromAnotherSourceForInsert,
+						mlv: mlv,
+						attributes: []
+					},
+					mountMLVGenerator: false
+				})
+		}
 	}
 
 	toggleFetchFromAnotherSource() {
 		this.setState({
 			...this.state,
-			fetchFromAnotherSource: !this.state.fetchFromAnotherSource
+			fetchFromAnotherSourceForInsertFlag: !this.state.fetchFromAnotherSourceForInsertFlag
+		})
+	}
+	addFilterForFetchFromAnotherSourceForInsert(value) {
+
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForInsert: {
+				...this.state.fetchFromAnotherSourceForInsert,
+				filter: this.state.fetchFromAnotherSourceForInsert.filter + value
+			}
+		})
+	}
+	editFilterForFetchFromAnotherSourceForInsert(value) {
+
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForInsert: {
+				...this.state.fetchFromAnotherSourceForInsert,
+				filter: value
+			}
 		})
 	}
 
@@ -174,10 +246,10 @@ export default class WriteBaseline extends Component {
 
 
 	parseMLVLevelWise(mlv) {
-		
-		if(mlv != undefined)
+
+		if (mlv != undefined)
 			return mlv.replace(new RegExp('Level', 'g'), '\n\r Level')
-		else 
+		else
 			return ''
 	}
 
@@ -191,10 +263,10 @@ export default class WriteBaseline extends Component {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
 					var attributeValues = new Array(temp.length)
-					var attributeCollectiveValues = new Array();
-					attributeCollectiveValues.push(attributeValues.fill(''))
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
 					insertMLVArray[this.state.insertMLVs.currentIndex].attributes = temp;
-					insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
+					//insertMLVArray[this.state.insertMLVs.currentIndex].values = attributeCollectiveValues
 					//this.setAttributesForInsertMLV(index, attributeColumns)
 				} catch{
 					alert('Error parsing MLV')
@@ -219,10 +291,10 @@ export default class WriteBaseline extends Component {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
 					insertMLVArray[index].attributes = temp;
-					var attributeValues = new Array(temp.length)
-					var attributeCollectiveValues = new Array();
-					attributeCollectiveValues.push(attributeValues.fill(''))
-					insertMLVArray[index].values = attributeCollectiveValues
+					//var attributeValues = new Array(temp.length)
+					//var attributeCollectiveValues = new Array();
+					//attributeCollectiveValues.push(attributeValues.fill(''))
+					//insertMLVArray[index].values = attributeCollectiveValues
 					//this.setAttributesForInsertMLV(index, attributeColumns)
 				} catch{
 					alert('Error parsing MLV')
@@ -291,12 +363,48 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
+	// * METHOD TO ADD ATTRIBUTE VALUE PAIR FOR INSERT
+
+	addAttributeValuePairForInsert(index) {
+		alert(index)
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		var values = insertMLVArray[index].values;
+
+		insertMLVArray[index].values.map((value) => {
+
+			value.push({
+				attributeName: '',
+				value: ''
+			})
+		})
+
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+	}
 
 	// * METHOD TO SET ATTRIBUTES FOR INSERT_MLV
 	setAttributesForInsertMLV(index, attributes) {
-		console.log(attributes)
+
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].attributes = attributes;
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+	}
+	setSelectedAttributeForInsert(index, attributeIndex, value) {
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray[index].values.map((attributeValueArray, index) => {
+			attributeValueArray[attributeIndex].attributeName = value
+		})
 		this.setState({
 			...this.state,
 			insertMLVs: {
@@ -309,7 +417,7 @@ export default class WriteBaseline extends Component {
 	addAttributeInsertValue(index, attributeIndex, groupIndex, value) {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
-		insertMLVArray[index].values[groupIndex][attributeIndex] = value;
+		insertMLVArray[index].values[groupIndex][attributeIndex].value = value;
 		this.setState({
 			...this.state,
 			insertMLVs: {
@@ -320,9 +428,17 @@ export default class WriteBaseline extends Component {
 	}
 	addAttributeInsertValueGroup(index) {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
-		var attributeLength = insertMLVArray[index].attributes.length;
-		var attributeValues = new Array(attributeLength)
-		insertMLVArray[index].values.push(attributeValues.fill(''))
+		//var attributeLength = insertMLVArray[index].attributes.length;
+		//var attributeValues = new Array(attributeLength)
+		//insertMLVArray[index].values.push(attributeValues.fill(''))
+		var attributeValuePair = new Array();
+		insertMLVArray[index].values[0].map(object => {
+			attributeValuePair.push({
+				attributeName: object.attributeName,
+				value: ''
+			})
+		})
+		insertMLVArray[index].values.push(attributeValuePair)
 		this.setState({
 			...this.state,
 			insertMLVs: {
@@ -732,16 +848,16 @@ export default class WriteBaseline extends Component {
 				return
 			}
 
-		}else{
+		} else {
 			this.setState({
-					...this.state,
-					fetchMLVForUpdate: {
-						...this.state.fetchMLVForUpdate,
-						mlv: mlv,
-						attributes: []
-					},
-					mountMLVGenerator: false
-				})
+				...this.state,
+				fetchMLVForUpdate: {
+					...this.state.fetchMLVForUpdate,
+					mlv: mlv,
+					attributes: []
+				},
+				mountMLVGenerator: false
+			})
 		}
 
 	}
@@ -767,10 +883,10 @@ export default class WriteBaseline extends Component {
 	}
 
 	// ********************************** DELETE METHODS **********************************************
-	toggleFetchFromAnotherSourceForDelete(){
+	toggleFetchFromAnotherSourceForDelete() {
 		this.setState({
 			...this.state,
-			fetchFromAnotherSourceForDeleteFlag : !this.state.fetchFromAnotherSourceForDeleteFlag
+			fetchFromAnotherSourceForDeleteFlag: !this.state.fetchFromAnotherSourceForDeleteFlag
 		})
 	}
 	generateMLVFetchFromAnotherSourceForDelete(operation) {
@@ -807,16 +923,16 @@ export default class WriteBaseline extends Component {
 				return
 			}
 
-		}else {
+		} else {
 			this.setState({
-					...this.state,
-					fetchFromAnotherSourceForDelete: {
-						...this.state.fetchFromAnotherSourceForDelete,
-						mlv: mlv,
-						attributes: []
-					},
-					mountMLVGenerator: false
-				})
+				...this.state,
+				fetchFromAnotherSourceForDelete: {
+					...this.state.fetchFromAnotherSourceForDelete,
+					mlv: mlv,
+					attributes: []
+				},
+				mountMLVGenerator: false
+			})
 		}
 
 	}
@@ -948,7 +1064,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	addFilterForDelete(index,value){
+	addFilterForDelete(index, value) {
 		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
 		deleteMLVArray[index].filter = deleteMLVArray[index].filter + value
 		this.setState({
@@ -959,7 +1075,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	editFilterForDelete(index, value){
+	editFilterForDelete(index, value) {
 		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
 		deleteMLVArray[index].filter = value
 		this.setState({
@@ -1004,20 +1120,20 @@ export default class WriteBaseline extends Component {
 				return
 			}
 
-		}else{
+		} else {
 			this.setState({
-					...this.state,
-					fetchMLVForDelete: {
-						...this.state.fetchMLVForDelete,
-						mlv: mlv,
-						attributes: []
-					},
-					mountMLVGenerator: false
-				})
+				...this.state,
+				fetchMLVForDelete: {
+					...this.state.fetchMLVForDelete,
+					mlv: mlv,
+					attributes: []
+				},
+				mountMLVGenerator: false
+			})
 		}
 
 	}
-	addFilterForFetchMLVForDelete(value){
+	addFilterForFetchMLVForDelete(value) {
 		this.setState({
 			...this.state,
 			fetchMLVForDelete: {
@@ -1026,7 +1142,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	editFilterForFetchMLVForDelete(value){
+	editFilterForFetchMLVForDelete(value) {
 		this.setState({
 			...this.state,
 			fetchMLVForDelete: {
@@ -1037,7 +1153,7 @@ export default class WriteBaseline extends Component {
 	}
 
 	//************************** DELETE_ALL METHODS ***************************************
-		addDeleteAllMLV() {
+	addDeleteAllMLV() {
 		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
 		deleteAllMLVArray.push({
 			mlv: '',
@@ -1071,7 +1187,7 @@ export default class WriteBaseline extends Component {
 			operation: 'deleteAllMLV'
 		})
 	}
-		saveDeleteAllMLV(mlv, index) {
+	saveDeleteAllMLV(mlv, index) {
 		if (index === undefined) {
 			var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
 			deleteAllMLVArray[this.state.deleteAllMLVs.currentIndex].mlv = this.parseMLVLevelWise(mlv)
@@ -1143,7 +1259,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	addFilterForDeleteAll(index,value){
+	addFilterForDeleteAll(index, value) {
 		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
 		deleteAllMLVArray[index].filter = deleteAllMLVArray[index].filter + value
 		this.setState({
@@ -1154,7 +1270,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	editFilterForDeleteAll(index, value){
+	editFilterForDeleteAll(index, value) {
 		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
 		deleteAllMLVArray[index].filter = value
 		this.setState({
@@ -1165,6 +1281,35 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+
+	selectBaseline(event) {
+		this.setState({
+			selectedBaseline: event.target.value
+		})
+	}
+
+	addNewBaseline(event) {
+		this.setState({
+			newBaselineName: event.target.value
+		})
+	}
+
+	// ************************* METHOD TO GENERATE BASELINE ***********************************
+	generateBaseline() {
+		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (JSON.stringify(this.state)), {
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+
+
+		}).then(response => {
+
+		}).catch(error => {
+			alert(error)
+		})
+	}
+
+
 
 
 	render() {
@@ -1217,6 +1362,30 @@ export default class WriteBaseline extends Component {
 						</form>
 					</div>
 				</div>
+				<div className="row justify-content-center">
+					<div className="col-lg-6 justify-content-center">
+						<DropDownList
+							style={{ margin: "1em", width: "100%" }}
+							data={this.state.baslineFilesList}
+							label="Select baseline file"
+							onChange={this.selectBaseline.bind(this)}
+							value={this.state.selectedBaseline}
+						/>
+						<Input
+
+							label="Add a new baseline instead.."
+							value={this.state.newBaselineName}
+							style={{ width: "100%", textAlign: "center", margin: "1em" }}
+							onChange={this.addNewBaseline.bind(this)}
+
+						/>
+
+
+					</div>
+
+
+
+				</div>
 				<div className="row">
 					<div className="col-lg-12">
 						<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
@@ -1225,8 +1394,8 @@ export default class WriteBaseline extends Component {
 								<InsertDetails
 									generateMLV={this.generateMLV.bind(this)}
 									saveMLVForFetchFromAnotherSource={this.saveMLVForFetchFromAnotherSource.bind(this)}
-									fetchFromAnotherSourceMLV={this.state.fetchFromAnotherSourceMLV}
-									fetchFromAnotherSource={this.state.fetchFromAnotherSource}
+									fetchFromAnotherSourceForInsert={this.state.fetchFromAnotherSourceForInsert}
+									fetchFromAnotherSourceForInsertFlag={this.state.fetchFromAnotherSourceForInsertFlag}
 									toggleFetchFromAnotherSource={this.toggleFetchFromAnotherSource.bind(this)}
 									insertMLVArray={this.state.insertMLVs.insertMLVArray}
 									addInsertMLV={this.addInsertMLV.bind(this)}
@@ -1250,6 +1419,10 @@ export default class WriteBaseline extends Component {
 									rsInsertFlag={this.state.rsInsertFlag}
 									bulkInsertFlag={this.state.bulkInsertFlag}
 									deleteInsertMLV={this.deleteInsertMLV.bind(this)}
+									addAttributeValuePairForInsert={this.addAttributeValuePairForInsert.bind(this)}
+									setSelectedAttributeForInsert={this.setSelectedAttributeForInsert.bind(this)}
+									addFilterForFetchFromAnotherSourceForInsert={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+									editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Update">
@@ -1310,13 +1483,14 @@ export default class WriteBaseline extends Component {
 							</TabStripTab>
 							<TabStripTab title="Delete All">
 								<DeleteAllDetails
-								deleteAllMLVs={this.state.deleteAllMLVs}
-								addDeleteAllMLV={this.addDeleteAllMLV.bind(this)}
-								generateDeleteAllMLV={this.generateDeleteAllMLV.bind(this)}
-								saveDeleteAllMLV={this.saveDeleteAllMLV.bind(this)}
-								deleteDeleteAllMLV={this.deleteDeleteAllMLV.bind(this)}
-								addFilterForDeleteAll={this.addFilterForDeleteAll.bind(this)}
-								editFilterForDeleteAll={this.editFilterForDeleteAll.bind(this)}
+									deleteAllMLVs={this.state.deleteAllMLVs}
+									addDeleteAllMLV={this.addDeleteAllMLV.bind(this)}
+									generateDeleteAllMLV={this.generateDeleteAllMLV.bind(this)}
+									saveDeleteAllMLV={this.saveDeleteAllMLV.bind(this)}
+									deleteDeleteAllMLV={this.deleteDeleteAllMLV.bind(this)}
+									addFilterForDeleteAll={this.addFilterForDeleteAll.bind(this)}
+									editFilterForDeleteAll={this.editFilterForDeleteAll.bind(this)}
+									generateBaseline={this.generateBaseline.bind(this)}
 								/>
 							</TabStripTab>
 						</TabStrip>
