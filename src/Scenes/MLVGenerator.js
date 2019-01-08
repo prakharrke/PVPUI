@@ -1543,7 +1543,7 @@ export default class MLVGenerator extends Component {
 			this.props.saveInsertMLV(this.state.mlv)
 		}
 		if (this.props.parent === 'fetchMLVForInsert') {
-			this.props.saveFetchMLVForInsert(this.state.mlv)
+			this.props.saveFetchMLVForInsert(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
 		if(this.props.parent === 'fetchFromAnotherSourceForUpdate'){
 			this.props.saveMLVForFetchFromAnotherSourceForUpdate(this.state.mlv)
@@ -1552,13 +1552,13 @@ export default class MLVGenerator extends Component {
 			this.props.saveUpdateMLV(this.state.mlv)
 		}
 		if(this.props.parent == 'fetchMLVForUpdate'){
-			this.props.saveFetchMLVForUpdate(this.state.mlv)
+			this.props.saveFetchMLVForUpdate(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
 		if(this.props.parent === 'deleteMLV'){
 			this.props.saveDeleteMLV(this.state.mlv)
 		}
 		if(this.props.parent === 'fetchMLVForDelete'){
-			this.props.saveFetchMLVForDelete(this.state.mlv)
+			this.props.saveFetchMLVForDelete(this.state.mlv,  this.props.connInfoList[0].pluginName)
 		}
 		if(this.props.parent === 'deleteAllMLV'){
 			this.props.saveDeleteAllMLV(this.state.mlv)

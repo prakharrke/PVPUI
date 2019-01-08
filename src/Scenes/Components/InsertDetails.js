@@ -34,7 +34,7 @@ export default class InsertDetails extends Component {
 	}
 	addInsertMLV(event) {
 		event.preventDefault();
-		if (this.props.fetchFromAnotherSource && this.props.insertMLVArray.length === 1) {
+		if (this.props.fetchFromAnotherSourceForInsertFlag && this.props.insertMLVArray.length === 1) {
 			alert('Only one insert MLV is allowed with fetch from another source')
 			return
 		}
@@ -138,6 +138,9 @@ export default class InsertDetails extends Component {
 		this.props.generateFetchMLVForInsert();
 
 	}
+	saveFetchMLVForInsert(event) {
+		this.props.saveFetchMLVForInsert(event.target.value)
+	}
 	// * METHOD TO ADD TEST CASE FILTER
 	addFilterForFetchMLVForInsert(event) {
 		//console.log(event.target.value)
@@ -159,9 +162,13 @@ export default class InsertDetails extends Component {
 		event.preventDefault();
 		this.props.addAttributeValuePairForInsert(event.target.id);
 	}
-	setSelectedAttributeForInsert(event){
+	setSelectedAttributeForInsert(event) {
 
 		this.props.setSelectedAttributeForInsert(event.target.props.id, event.target.props.attributeIndex, event.target.value)
+	}
+
+	setInsertPIN(event) {
+		this.props.setInsertPIN(event.target.props.id, event.target.value)
 	}
 
 
@@ -205,7 +212,7 @@ export default class InsertDetails extends Component {
 						</div>
 					</div>
 					<div className="row justify-content-center">
-						<div className="col-lg-4">
+						<div className="col-lg-3">
 							<DropDownList
 								data={object.attributes}
 								label="ID"
@@ -216,7 +223,7 @@ export default class InsertDetails extends Component {
 							/>
 
 						</div>
-						<div className="col-lg-4">
+						<div className="col-lg-3">
 							<DropDownList
 								data={object.attributes}
 								label="PID"
@@ -226,7 +233,7 @@ export default class InsertDetails extends Component {
 								value={object.PID}
 							/>
 						</div>
-						<div className="col-lg-4">
+						<div className="col-lg-3">
 							<Input
 								data={object.attributes}
 								label="LEV"
@@ -234,6 +241,16 @@ export default class InsertDetails extends Component {
 								style={{ width: '100%', margin: '2em' }}
 								onChange={this.setInsertLEV.bind(this)}
 								value={object.LEV}
+							/>
+						</div>
+						<div className="col-lg-3">
+							<DropDownList
+								data={object.attributes}
+								label="PIN"
+								id={object.index}
+								style={{ width: '100%', margin: '1em' }}
+								onChange={this.setInsertPIN.bind(this)}
+								value={object.PIN}
 							/>
 						</div>
 					</div>
@@ -313,7 +330,7 @@ export default class InsertDetails extends Component {
 											</div>
 
 
-											{	this.state[`attributeGroupIndex_${object.index}`] != undefined ?
+											{this.state[`attributeGroupIndex_${object.index}`] != undefined ?
 												object.values[this.state[`attributeGroupIndex_${object.index}`]].map((valueObject, index) => {
 													return (
 
@@ -331,16 +348,31 @@ export default class InsertDetails extends Component {
 																/>
 															</div>
 															<div className="col-lg-6">
-																<Input
-																	
-																	label="Value"
-																	groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
-																	id={object.index}
-																	attributeIndex={index}
-																	style={{ width: '100%', margin: '2em' }}
-																	onChange={this.addAttributeInsertValue.bind(this)}
-																	value={valueObject.value}
-																/>
+
+																{this.props.fetchFromAnotherSourceForInsertFlag ?
+																	(
+																		<DropDownList
+																			data={this.props.fetchFromAnotherSourceForInsert.attributes}
+																			label="Column Name"
+																			groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																			id={object.index}
+																			attributeIndex={index}
+																			style={{ width: '100%', margin: '1em' }}
+																			onChange={this.addAttributeInsertValue.bind(this)}
+																			value={valueObject.value}
+																		/>
+																	)
+																	:
+																	(<Input
+
+																		label="Value"
+																		groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																		id={object.index}
+																		attributeIndex={index}
+																		style={{ width: '100%', margin: '2em' }}
+																		onChange={this.addAttributeInsertValue.bind(this)}
+																		value={valueObject.value}
+																	/>)}
 															</div>
 														</div>
 
@@ -452,77 +484,77 @@ export default class InsertDetails extends Component {
 										</div>
 									</div>
 									<div className="row justify-content-center">
-									<div className="col-lg-10" tabIndex="0">
-										<Input
+										<div className="col-lg-10" tabIndex="0">
+											<Input
 
-											placeholder="Filter"
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											onChange={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
-											value={this.props.fetchFromAnotherSourceForInsert.filter}
-										/>
+												placeholder="Filter"
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+												onChange={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
+												value={this.props.fetchFromAnotherSourceForInsert.filter}
+											/>
+										</div>
 									</div>
-								</div>
-								<div className="row">
+									<div className="row">
 
-									<div className="col-lg-5">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
-										>
-											{this.props.fetchFromAnotherSourceForInsert.attributes.map((attributeName) => {
-												return (
-													<option value={attributeName}>{attributeName}</option>
-
-												)
-											})}
-										</select>
-									</div>
-									<div className="col-lg-2">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
-										>
-											{
-												Constants.Constants.MLVOperators.map((operator) => {
-
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+											>
+												{this.props.fetchFromAnotherSourceForInsert.attributes.map((attributeName) => {
 													return (
+														<option value={attributeName}>{attributeName}</option>
 
-														<option value={operator}>{operator}</option>
 													)
-												})
-											}
-										</select>
+												})}
+											</select>
+										</div>
+										<div className="col-lg-2">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+											>
+												{
+													Constants.Constants.MLVOperators.map((operator) => {
+
+														return (
+
+															<option value={operator}>{operator}</option>
+														)
+													})
+												}
+											</select>
+										</div>
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+												{
+													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+														return (
+
+															<option value={func}>{func}</option>
+														)
+													})
+												}
+											</select>
+
+										</div>
 									</div>
-									<div className="col-lg-5">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-										>
-											{
-												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
-
-													return (
-
-														<option value={func}>{func}</option>
-													)
-												})
-											}
-										</select>
-
-									</div>
-								</div>
 
 								</PanelBarItem> : ''}
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Insert MLV</i>}>
@@ -551,7 +583,13 @@ export default class InsertDetails extends Component {
 										>Generate</Button>
 									</div>
 									<div className="col-lg-9" style={{ margin: '1em' }}>
-										<textarea placeholder="Fetch MLV*" class="form-control rounded-0" rows="5" value={this.props.fetchMLVForinsert.mlv}>
+										<textarea
+											placeholder="Fetch MLV*"
+											class="form-control rounded-0"
+											rows="5"
+											value={this.props.fetchMLVForinsert.mlv}
+											onChange={this.saveFetchMLVForInsert.bind(this)}
+										>
 
 										</textarea>
 									</div>

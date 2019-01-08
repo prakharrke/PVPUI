@@ -9,6 +9,7 @@ import UpdateDetails from './Components/UpdateDetails'
 import DeleteDetails from './Components/deleteDetails'
 import DeleteAllDetails from './Components/DeleteAllDetails'
 import MLVGenerator from './MLVGenerator';
+import LoadingPanel from './Components/LoadingPanel'
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 import axios from 'axios';
 export default class WriteBaseline extends Component {
@@ -16,6 +17,7 @@ export default class WriteBaseline extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			isLoading : false,
 			baselineFilesList: [],
 			selected: 0,
 			testCaseSummary: '',
@@ -59,17 +61,20 @@ export default class WriteBaseline extends Component {
 			fetchMLVForinsert: {
 				mlv: '',
 				filter: '',
-				attributes: []
+				attributes: [],
+				selectedPlugin : ''
 			},
 			fetchMLVForUpdate: {
 				mlv: '',
 				filter: '',
-				attributes: []
+				attributes: [],
+				selectedPlugin : ''
 			},
 			fetchMLVForDelete: {
 				mlv: '',
 				filter: '',
-				attributes: []
+				attributes: [],
+				selectedPlugin : ''
 			},
 			rsInsertFlag: false,
 			bulkInsertFlag: false,
@@ -197,6 +202,7 @@ export default class WriteBaseline extends Component {
 			ID: '',
 			PID: '',
 			LEV: '',
+			PIN : '',
 			values: [[]],
 			attributes: []
 		})
@@ -349,6 +355,17 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+	setInsertPIN(index, value){
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray[index].PIN = value
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+	}
 
 	setInsertValues(index, values) {
 
@@ -473,17 +490,23 @@ export default class WriteBaseline extends Component {
 			operation: 'fetchMLVForInsert'
 		})
 	}
-	saveFetchMLVForInsert(mlv) {
+	saveFetchMLVForInsert(mlv, selectedPlugin) {
+
+		try{
 		var attributes = mlv.split('attributes=')[1].split(';')[0].split(',')
 		this.setState({
 			...this.state,
 			fetchMLVForinsert: {
 				...this.state.fetchMLVForinsert,
 				mlv: mlv,
-				attributes: attributes
+				attributes: attributes,
+				selectedPlugin : selectedPlugin
 			},
 			mountMLVGenerator: false
 		})
+	}catch{
+		alert('Error Parsing MLV')
+	}
 	}
 	addFilterForFetchMLVForInsert(value) {
 
@@ -588,10 +611,13 @@ export default class WriteBaseline extends Component {
 		updateMLVArray.push({
 			mlv: '',
 			index: updateMLVArray.length,
-			ID: '',
-			PID: '',
-			LEV: '',
-			PIN: '',
+			ID: ' ',
+			PID: ' ',
+			LEV: ' ',
+			PIN: ' ',
+			MLVLEFTOBJ : ' ',
+			MLVRIGHTOBJ : ' ',
+			MLVOBJECT : '',
 			values: [],
 			filter: '',
 			attributes: ['MLVLEFTOBJ', 'MLVRIGHTOBJ', 'MLVOBJECT'],
@@ -828,7 +854,7 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
-	saveFetchMLVForUpdate(mlv) {
+	saveFetchMLVForUpdate(mlv, selectedPlugin) {
 		if (mlv != '') {
 			try {
 
@@ -838,7 +864,8 @@ export default class WriteBaseline extends Component {
 					fetchMLVForUpdate: {
 						...this.state.fetchMLVForUpdate,
 						mlv: mlv,
-						attributes: temp
+						attributes: temp,
+						selectedPlugin : selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -1100,7 +1127,7 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
-	saveFetchMLVForDelete(mlv) {
+	saveFetchMLVForDelete(mlv,selectedPlugin) {
 		if (mlv != '') {
 			try {
 
@@ -1110,7 +1137,8 @@ export default class WriteBaseline extends Component {
 					fetchMLVForDelete: {
 						...this.state.fetchMLVForDelete,
 						mlv: mlv,
-						attributes: temp
+						attributes: temp,
+						selectedPlugin : selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -1296,6 +1324,15 @@ export default class WriteBaseline extends Component {
 
 	// ************************* METHOD TO GENERATE BASELINE ***********************************
 	generateBaseline() {
+
+		if(this.state.selectedBaseline == '' && this.state.newBaselineName == ''){
+			alert('Please select baseline excel file')
+			return
+		}
+		this.setState({
+			...this.state,
+			isLoading : true
+		})
 		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (JSON.stringify(this.state)), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -1303,9 +1340,17 @@ export default class WriteBaseline extends Component {
 
 
 		}).then(response => {
-
+			alert(response.data)
+			this.setState({
+			...this.state,
+			isLoading : false
+		})
 		}).catch(error => {
 			alert(error)
+			this.setState({
+			...this.state,
+			isLoading : false
+		})
 		})
 	}
 
@@ -1313,6 +1358,7 @@ export default class WriteBaseline extends Component {
 
 
 	render() {
+		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 		console.log(this.state)
 		var mlvGenerator = this.state.mountMLVGenerator && this.props.connInfoList.length > 0 ? (
 			<MLVGenerator connInfoList={this.props.connInfoList}
@@ -1336,6 +1382,7 @@ export default class WriteBaseline extends Component {
 		return (
 
 			<div className="container-fluid" style={{ marginTop: "2em" }}>
+				{loadingComponent}
 				{mlvGenerator}
 				<div className="row">
 					<div className="col-lg-6">
@@ -1403,6 +1450,7 @@ export default class WriteBaseline extends Component {
 									setInsertID={this.setInsertID.bind(this)}
 									setInsertPID={this.setInsertPID.bind(this)}
 									setInsertLEV={this.setInsertLEV.bind(this)}
+									setInsertPIN={this.setInsertPIN.bind(this)}
 									saveInsertMLV={this.saveInsertMLV.bind(this)}
 									setInsertValues={this.setInsertValues.bind(this)}
 									setAttributesForInsertMLV={this.setAttributesForInsertMLV.bind(this)}

@@ -33,7 +33,12 @@ export default class UpdateDetails extends Component {
 		this.props.editFilterForFetchFromAnotherSourceForUpdate(event.target.value)
 	}
 	addUpdateMLV(event) {
+		if (this.props.fetchFromAnotherSourceForUpdateFlag && this.props.updateMLVArray.length === 1) {
+			alert('Only one update MLV is allowed with fetch from another source')
+			return
+		}
 		event.preventDefault();
+
 		this.props.addUpdateMLV();
 	}
 	generateUpdateMLV(event) {

@@ -438,6 +438,7 @@ export default class CreateBaseline extends Component {
 
 			console.log(response.data)
 			this.listOfResultSetList = response.data;
+			
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
 		})
 	}
