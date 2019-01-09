@@ -154,7 +154,7 @@ export default class CreateBaseline extends Component {
 			return
 		}
 		this.isLoading();
-		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter })}`, {
 			headers: {
 			}
 
@@ -438,7 +438,7 @@ export default class CreateBaseline extends Component {
 
 			console.log(response.data)
 			this.listOfResultSetList = response.data;
-			
+
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
 		})
 	}

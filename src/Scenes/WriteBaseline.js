@@ -478,6 +478,17 @@ export default class WriteBaseline extends Component {
 
 	}
 
+	copyInsertMLVToInsertFetch(){
+		this.setState({
+			...this.state,
+			fetchMLVForinsert : {
+				...this.state.fetchMLVForinsert,
+				mlv : this.state.insertMLVs.insertMLVArray[0].mlv,
+				attributes :  this.state.insertMLVs.insertMLVArray[0].attributes
+			}
+		})
+	}
+
 	// * GENERATE FETCH MLV FOR INSERT
 	generateFetchMLVForInsert() {
 		if (this.props.connInfoList.length < 1) {
@@ -629,6 +640,18 @@ export default class WriteBaseline extends Component {
 			updateMLVs: {
 				...this.state.updateMLVs,
 				updateMLVArray: updateMLVArray
+			}
+		})
+	}
+	copyInsertMLVToUpdate(index){
+		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
+		updateMLVArray[index].mlv = this.state.insertMLVs.insertMLVArray[0].mlv;
+		updateMLVArray[index].attributes = this.state.insertMLVs.insertMLVArray[0].attributes;
+		this.setState({
+			...this.state,
+			updateMLVs : {
+				...this.state.updateMLVs,
+				updateMLVArray : updateMLVArray
 			}
 		})
 	}
@@ -840,6 +863,16 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+	copyInsertMLVToUpdateFetch(){
+		this.setState({
+			...this.state,
+			fetchMLVForUpdate : {
+				...this.state.fetchMLVForinsert,
+				mlv : this.state.insertMLVs.insertMLVArray[0].mlv,
+				attributes :  this.state.insertMLVs.insertMLVArray[0].attributes
+			}
+		})
+	}
 	generateFetchMLVForUpdate(operation) {
 		if (this.props.connInfoList.length < 1) {
 			alert('Please choose base connection first')
@@ -1002,6 +1035,18 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+	copyInsertMLVToDelete(index){
+		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
+		deleteMLVArray[index].mlv = this.state.insertMLVs.insertMLVArray[0].mlv;
+		deleteMLVArray[index].attributes = this.state.insertMLVs.insertMLVArray[0].attributes;
+		this.setState({
+			...this.state,
+			deleteMLVs : {
+				...this.state.deleteMLVs,
+				deleteMLVArray : deleteMLVArray
+			}
+		})
+	}
 	generateDeleteMLV(index) {
 		if (this.props.connInfoList.length < 1) {
 			alert('Please choose base connection first')
@@ -1113,6 +1158,16 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+	copyInsertMLVToDeleteFetch(){
+		this.setState({
+			...this.state,
+			fetchMLVForDelete : {
+				...this.state.fetchMLVForDelete,
+				mlv : this.state.insertMLVs.insertMLVArray[0].mlv,
+				attributes : this.state.insertMLVs.insertMLVArray[0].attributes
+			}
+		})
+	}
 	generateFetchMLVForDelete(operation) {
 		if (this.props.connInfoList.length < 1) {
 			alert('Please choose base connection first')
@@ -1196,6 +1251,18 @@ export default class WriteBaseline extends Component {
 			deleteAllMLVs: {
 				...this.state.deleteAllMLVs,
 				deleteAllMLVArray: deleteAllMLVArray
+			}
+		})
+	}
+	copyInsertMLVToDeleteAll(index){
+		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
+		deleteAllMLVArray[index].mlv = this.state.insertMLVs.insertMLVArray[0].mlv;
+		deleteAllMLVArray[index].attributes = this.state.insertMLVs.insertMLVArray[0].attributes;
+		this.setState({
+			...this.state,
+			deleteAllMLVs : {
+				...this.state.deleteAllMLVs,
+				deleteAllMLVArray : deleteAllMLVArray
 			}
 		})
 	}
@@ -1467,10 +1534,12 @@ export default class WriteBaseline extends Component {
 									rsInsertFlag={this.state.rsInsertFlag}
 									bulkInsertFlag={this.state.bulkInsertFlag}
 									deleteInsertMLV={this.deleteInsertMLV.bind(this)}
+									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
 									addAttributeValuePairForInsert={this.addAttributeValuePairForInsert.bind(this)}
 									setSelectedAttributeForInsert={this.setSelectedAttributeForInsert.bind(this)}
 									addFilterForFetchFromAnotherSourceForInsert={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
 									editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
+									copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Update">
@@ -1502,6 +1571,9 @@ export default class WriteBaseline extends Component {
 									fetchMLVForUpdate={this.state.fetchMLVForUpdate}
 									addFilterForFetchMLVForUpdate={this.addFilterForFetchMLVForUpdate.bind(this)}
 									editFilterForFetchMLVForUpdate={this.editFilterForFetchMLVForUpdate.bind(this)}
+									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+									copyInsertMLVToUpdateFetch={this.copyInsertMLVToUpdateFetch.bind(this)}
+									copyInsertMLVToUpdate={this.copyInsertMLVToUpdate.bind(this)}
 
 								/>
 							</TabStripTab>
@@ -1526,6 +1598,9 @@ export default class WriteBaseline extends Component {
 									addFilterForFetchFromAnotherSourceForDelete={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
 									editFilterForFetchFromAnotherSourceForDelete={this.editFilterForFetchFromAnotherSourceForDelete.bind(this)}
 									generateMLVFetchFromAnotherSourceForDelete={this.generateMLVFetchFromAnotherSourceForDelete.bind(this)}
+									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+									copyInsertMLVToDeleteFetch={this.copyInsertMLVToDeleteFetch.bind(this)}
+									copyInsertMLVToDelete={this.copyInsertMLVToDelete.bind(this)}
 
 								/>
 							</TabStripTab>
@@ -1539,6 +1614,8 @@ export default class WriteBaseline extends Component {
 									addFilterForDeleteAll={this.addFilterForDeleteAll.bind(this)}
 									editFilterForDeleteAll={this.editFilterForDeleteAll.bind(this)}
 									generateBaseline={this.generateBaseline.bind(this)}
+									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+									copyInsertMLVToDeleteAll={this.copyInsertMLVToDeleteAll.bind(this)}
 								/>
 							</TabStripTab>
 						</TabStrip>

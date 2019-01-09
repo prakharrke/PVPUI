@@ -12,7 +12,7 @@ export default class DeleteDetails extends Component {
 
 		}
 	}
-	toggleFetchFromAnotherSourceForDelete(event){
+	toggleFetchFromAnotherSourceForDelete(event) {
 		event.preventDefault();
 		this.props.toggleFetchFromAnotherSourceForDelete();
 	}
@@ -64,12 +64,35 @@ export default class DeleteDetails extends Component {
 	addFilterForFetchMLVForDelete(event) {
 		this.props.addFilterForFetchMLVForDelete(event.target.value)
 	}
+	copyInsertMLVToDeleteFetch(event) {
+		event.preventDefault();
+		this.props.copyInsertMLVToDeleteFetch();
+	}
+	copyInsertMLVToDelete(event){
+		event.preventDefault();
+		this.props.copyInsertMLVToDelete(event.target.id)
+	}
 
 	render() {
 		var deleteMLVArrayElement = this.props.deleteMLVs.deleteMLVArray.map((object, index) => {
 
 			return (
 				<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Delete MLV ' + (index + 1)}</i>}>
+					{
+						this.props.insertMLVLength == 1 ? (
+							<div className="row justify-content-center">
+								<div className="col-lg-2">
+									<Button
+										primary={true}
+										style={{ margin: '1em' }}
+										id={object.index}
+										onClick={this.copyInsertMLVToDelete.bind(this)}
+									>Copy from insert</Button>
+								</div>
+							</div>
+
+						) : ""
+					}
 					<div className="row justify-content-center">
 						<div className="col-lg-1" style={{ margin: '1em' }}>
 							<Button
@@ -205,104 +228,104 @@ export default class DeleteDetails extends Component {
 					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
 						<PanelBar >
-						{this.props.fetchFromAnotherSourceForDeleteFlag ?
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source (For Bulk Delete)</i>}>
+							{this.props.fetchFromAnotherSourceForDeleteFlag ?
+								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source (For Bulk Delete)</i>}>
 
-								<div className="row justify-content-center">
-									<div className="col-lg-1" style={{ margin: '1em' }}>
-										<Button
-											primary={true}
-											onClick={this.generateMLVFetchFromAnotherSourceForDelete.bind(this)}
-										>Generate
+									<div className="row justify-content-center">
+										<div className="col-lg-1" style={{ margin: '1em' }}>
+											<Button
+												primary={true}
+												onClick={this.generateMLVFetchFromAnotherSourceForDelete.bind(this)}
+											>Generate
 										</Button>
+										</div>
+										<div className="col-lg-9" style={{ margin: '1em' }}>
+											<textarea
+												placeholder="MLV*"
+												class="form-control rounded-0"
+												rows="5"
+												value={this.props.fetchFromAnotherSourceForDelete.mlv}
+												onChange={this.setFetchFromSourceMLVForDelete.bind(this)}
+											>
+
+											</textarea>
+										</div>
 									</div>
-									<div className="col-lg-9" style={{ margin: '1em' }}>
-										<textarea
-											placeholder="MLV*"
-											class="form-control rounded-0"
-											rows="5"
-											value={this.props.fetchFromAnotherSourceForDelete.mlv}
-											onChange={this.setFetchFromSourceMLVForDelete.bind(this)}
-										>
+									<div className="row justify-content-center">
+										<div className="col-lg-10" tabIndex="0">
+											<Input
 
-										</textarea>
+												placeholder="Filter"
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+												onChange={this.editFilterForFetchFromAnotherSourceForDelete.bind(this)}
+												value={this.props.fetchFromAnotherSourceForDelete.filter}
+											/>
+										</div>
 									</div>
-								</div>
-								<div className="row justify-content-center">
-									<div className="col-lg-10" tabIndex="0">
-										<Input
+									<div className="row">
 
-											placeholder="Filter"
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											onChange={this.editFilterForFetchFromAnotherSourceForDelete.bind(this)}
-											value={this.props.fetchFromAnotherSourceForDelete.filter}
-										/>
-									</div>
-								</div>
-								<div className="row">
-
-									<div className="col-lg-5">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
-										>
-											{this.props.fetchFromAnotherSourceForDelete.attributes.map((attributeName) => {
-												return (
-													<option value={attributeName}>{attributeName}</option>
-
-												)
-											})}
-										</select>
-									</div>
-									<div className="col-lg-2">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
-										>
-											{
-												Constants.Constants.MLVOperators.map((operator) => {
-
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
+											>
+												{this.props.fetchFromAnotherSourceForDelete.attributes.map((attributeName) => {
 													return (
+														<option value={attributeName}>{attributeName}</option>
 
-														<option value={operator}>{operator}</option>
 													)
-												})
-											}
-										</select>
+												})}
+											</select>
+										</div>
+										<div className="col-lg-2">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
+											>
+												{
+													Constants.Constants.MLVOperators.map((operator) => {
+
+														return (
+
+															<option value={operator}>{operator}</option>
+														)
+													})
+												}
+											</select>
+										</div>
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+												{
+													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+														return (
+
+															<option value={func}>{func}</option>
+														)
+													})
+												}
+											</select>
+
+										</div>
 									</div>
-									<div className="col-lg-5">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-										>
-											{
-												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
-
-													return (
-
-														<option value={func}>{func}</option>
-													)
-												})
-											}
-										</select>
-
-									</div>
-								</div>
 
 
-							</PanelBarItem> : ''}
+								</PanelBarItem> : ''}
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Delete MLV</i>}>
 								<div className="row justify-content-center">
 									<div className="col-lg-1" style={{ margin: '1em' }}>
@@ -326,6 +349,20 @@ export default class DeleteDetails extends Component {
 							</PanelBarItem>
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch MLV</i>}>
 
+								{
+									this.props.insertMLVLength == 1 ? (
+										<div className="row justify-content-center">
+											<div className="col-lg-2">
+												<Button
+													primary={true}
+													style={{ margin: '1em' }}
+													onClick={this.copyInsertMLVToDeleteFetch.bind(this)}
+												>Copy from insert</Button>
+											</div>
+										</div>
+
+									) : ""
+								}
 								<div className="row justify-content-center">
 									<div className="col-lg-1" style={{ margin: '1em' }}>
 										<Button

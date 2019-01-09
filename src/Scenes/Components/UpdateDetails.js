@@ -86,24 +86,47 @@ export default class UpdateDetails extends Component {
 	editFilterForUpdate(event) {
 		this.props.editFilterForUpdate(event.target.props.id, event.target.value)
 	}
-	generateFetchMLVForUpdate(event){
+	generateFetchMLVForUpdate(event) {
 		event.preventDefault();
 		this.props.generateFetchMLVForUpdate('fetchMLVForUpdate')
 	}
-	saveFetchMLVForUpdate(event){
+	saveFetchMLVForUpdate(event) {
 		this.props.saveFetchMLVForUpdate(event.target.value)
 	}
-	addFilterForFetchMLVForUpdate(event){
+	addFilterForFetchMLVForUpdate(event) {
 		this.props.addFilterForFetchMLVForUpdate(event.target.value)
 	}
-	editFilterForFetchMLVForUpdate(event){
+	editFilterForFetchMLVForUpdate(event) {
 		this.props.editFilterForFetchMLVForUpdate(event.target.value)
+	}
+	copyInsertMLVToUpdateFetch(event) {
+		event.preventDefault();
+		this.props.copyInsertMLVToUpdateFetch();
+	}
+	copyInsertMLVToUpdate(event) {
+		event.preventDefault();
+		this.props.copyInsertMLVToUpdate(event.target.id);
 	}
 
 	render() {
 		var updateMLVArrayElement = this.props.updateMLVArray.map((object, index) => {
 			return (
 				<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Update MLV ' + (index + 1)}</i>}>
+					{
+						this.props.insertMLVLength == 1 ? (
+							<div className="row justify-content-center">
+								<div className="col-lg-2">
+									<Button
+										primary={true}
+										style={{ margin: '1em' }}
+										id={object.index}
+										onClick={this.copyInsertMLVToUpdate.bind(this)}
+									>Copy from insert</Button>
+								</div>
+							</div>
+
+						) : ""
+					}
 					<div className="row justify-content-center">
 						<div className="col-lg-1" style={{ margin: '1em' }}>
 							<Button
@@ -199,6 +222,8 @@ export default class UpdateDetails extends Component {
 
 												return (
 
+
+
 													<div className="row justify-content-center">
 														<div className="col-lg-5">
 															<DropDownList
@@ -233,6 +258,7 @@ export default class UpdateDetails extends Component {
 															</Button>
 														</div>
 													</div>
+
 
 												)
 											})
@@ -331,33 +357,164 @@ export default class UpdateDetails extends Component {
 
 			<div className="row justify-content-center" style={{ marginTop: "1em", width: "100%" }}>
 				<div className="col-lg-12">
-				<div className="row justify-content-center">
-					<div className="col-lg-4">
-						<Button
-							style={{ margin: "1em" }}
-							onClick={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
-						>
-							Fetch from another source
+					<div className="row justify-content-center">
+						<div className="col-lg-4">
+							<Button
+								style={{ margin: "1em" }}
+								onClick={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
+							>
+								Fetch from another source
 						</Button>
-						<Switch
-							style={{ margin: "1em" }}
-							checked={this.props.fetchFromAnotherSourceForUpdateFlag}
-						/>
+							<Switch
+								style={{ margin: "1em" }}
+								checked={this.props.fetchFromAnotherSourceForUpdateFlag}
+							/>
+						</div>
+
 					</div>
+					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
-				</div>
-				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
+						<PanelBar >
 
-					<PanelBar >
+							{this.props.fetchFromAnotherSourceForUpdateFlag ?
+								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source (For Bulk Update)</i>}>
 
-						{this.props.fetchFromAnotherSourceForUpdateFlag ?
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch From Another Source (For Bulk Update)</i>}>
+									<div className="row justify-content-center">
+										<div className="col-lg-1" style={{ margin: '1em' }}>
+											<Button
+												primary={true}
+												onClick={this.generateMLVFetchFromAnotherSourceForUpdate.bind(this)}
+											>Generate
+										</Button>
+										</div>
+										<div className="col-lg-9" style={{ margin: '1em' }}>
+											<textarea
+												placeholder="MLV*"
+												class="form-control rounded-0"
+												rows="5"
+												value={this.props.fetchFromAnotherSourceForUpdate.mlv}
+												onChange={this.setFetchFromSourceMLVForUpdate.bind(this)}
+											>
+
+											</textarea>
+										</div>
+									</div>
+									<div className="row justify-content-center">
+										<div className="col-lg-10" tabIndex="0">
+											<Input
+
+												placeholder="Filter"
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+												onChange={this.editFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+												value={this.props.fetchFromAnotherSourceForUpdate.filter}
+											/>
+										</div>
+									</div>
+									<div className="row">
+
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+											>
+												{this.props.fetchFromAnotherSourceForUpdate.attributes.map((attributeName) => {
+													return (
+														<option value={attributeName}>{attributeName}</option>
+
+													)
+												})}
+											</select>
+										</div>
+										<div className="col-lg-2">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+											>
+												{
+													Constants.Constants.MLVOperators.map((operator) => {
+
+														return (
+
+															<option value={operator}>{operator}</option>
+														)
+													})
+												}
+											</select>
+										</div>
+										<div className="col-lg-5">
+											<select
+												multiple
+												className="form-control"
+												size={10}
+												onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+												id="totalAttributes"
+												style={{ overflowX: "scroll" }}
+											>
+												{
+													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+														return (
+
+															<option value={func}>{func}</option>
+														)
+													})
+												}
+											</select>
+
+										</div>
+									</div>
+
+
+								</PanelBarItem> : ''}
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Update MLV</i>}>
 
 								<div className="row justify-content-center">
 									<div className="col-lg-1" style={{ margin: '1em' }}>
 										<Button
 											primary={true}
-											onClick={this.generateMLVFetchFromAnotherSourceForUpdate.bind(this)}
+											onClick={this.addUpdateMLV.bind(this)}
+										>Add
+										</Button>
+									</div>
+								</div>
+								<div className="row justify-content-center" style={{ width: "100%" }}>
+									<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
+
+										<PanelBar >
+											{updateMLVArrayElement}
+										</PanelBar>
+									</div>
+								</div>
+							</PanelBarItem>
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch MLV</i>}>
+
+								{
+									this.props.insertMLVLength == 1 ? (
+										<div className="row justify-content-center">
+											<div className="col-lg-2">
+												<Button
+													primary={true}
+													style={{ margin: '1em' }}
+													onClick={this.copyInsertMLVToUpdateFetch.bind(this)}
+												>Copy from insert</Button>
+											</div>
+										</div>
+
+									) : ""
+								}
+								<div className="row justify-content-center">
+									<div className="col-lg-1" style={{ margin: '1em' }}>
+										<Button
+											primary={true}
+											onClick={this.generateFetchMLVForUpdate.bind(this)}
 										>Generate
 										</Button>
 									</div>
@@ -366,130 +523,13 @@ export default class UpdateDetails extends Component {
 											placeholder="MLV*"
 											class="form-control rounded-0"
 											rows="5"
-											value={this.props.fetchFromAnotherSourceForUpdate.mlv}
-											onChange={this.setFetchFromSourceMLVForUpdate.bind(this)}
+											value={this.props.fetchMLVForUpdate.mlv}
+											onChange={this.saveFetchMLVForUpdate.bind(this)}
 										>
 
 										</textarea>
 									</div>
 								</div>
-								<div className="row justify-content-center">
-									<div className="col-lg-10" tabIndex="0">
-										<Input
-
-											placeholder="Filter"
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											onChange={this.editFilterForFetchFromAnotherSourceForUpdate.bind(this)}
-											value={this.props.fetchFromAnotherSourceForUpdate.filter}
-										/>
-									</div>
-								</div>
-								<div className="row">
-
-									<div className="col-lg-5">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
-										>
-											{this.props.fetchFromAnotherSourceForUpdate.attributes.map((attributeName) => {
-												return (
-													<option value={attributeName}>{attributeName}</option>
-
-												)
-											})}
-										</select>
-									</div>
-									<div className="col-lg-2">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
-										>
-											{
-												Constants.Constants.MLVOperators.map((operator) => {
-
-													return (
-
-														<option value={operator}>{operator}</option>
-													)
-												})
-											}
-										</select>
-									</div>
-									<div className="col-lg-5">
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-										>
-											{
-												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
-
-													return (
-
-														<option value={func}>{func}</option>
-													)
-												})
-											}
-										</select>
-
-									</div>
-								</div>
-
-
-							</PanelBarItem> : ''}
-						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Update MLV</i>}>
-
-							<div className="row justify-content-center">
-								<div className="col-lg-1" style={{ margin: '1em' }}>
-									<Button
-										primary={true}
-										onClick={this.addUpdateMLV.bind(this)}
-									>Add
-										</Button>
-								</div>
-							</div>
-							<div className="row justify-content-center" style={{ width: "100%" }}>
-								<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
-
-									<PanelBar >
-										{updateMLVArrayElement}
-									</PanelBar>
-								</div>
-							</div>
-						</PanelBarItem>
-						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch MLV</i>}>
-
-							<div className="row justify-content-center">
-								<div className="col-lg-1" style={{ margin: '1em' }}>
-									<Button
-										primary={true}
-										onClick={this.generateFetchMLVForUpdate.bind(this)}
-									>Generate
-										</Button>
-								</div>
-								<div className="col-lg-9" style={{ margin: '1em' }}>
-									<textarea
-										placeholder="MLV*"
-										class="form-control rounded-0"
-										rows="5"
-										value={this.props.fetchMLVForUpdate.mlv}
-										onChange={this.saveFetchMLVForUpdate.bind(this)}
-									>
-
-									</textarea>
-								</div>
-							</div>
 								<div className="row justify-content-center">
 									<div className="col-lg-10" tabIndex="0">
 										<Input
@@ -563,9 +603,9 @@ export default class UpdateDetails extends Component {
 									</div>
 								</div>
 
-						</PanelBarItem>
-					</PanelBar>
-				</div>
+							</PanelBarItem>
+						</PanelBar>
+					</div>
 				</div>
 			</div>
 		)

@@ -171,6 +171,11 @@ export default class InsertDetails extends Component {
 		this.props.setInsertPIN(event.target.props.id, event.target.value)
 	}
 
+	copyInsertMLVToInsertFetch(event){
+		event.preventDefault();
+		this.props.copyInsertMLVToInsertFetch();
+	}
+
 
 	render() {
 
@@ -574,7 +579,20 @@ export default class InsertDetails extends Component {
 								</div>
 							</PanelBarItem>
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Fetch MLV</i>}>
+								{
+									this.props.insertMLVLength == 1 ? (
+										<div className="row justify-content-center">
+											<div className="col-lg-2">
+												<Button
+											primary={true}
+											style={{ margin: '1em' }}
+											onClick={this.copyInsertMLVToInsertFetch.bind(this)}
+										>Copy from insert</Button>
+											</div>
+										</div>
 
+									) : ""
+								}
 								<div className="row justify-content-center">
 									<div className="col-lg-1" style={{ margin: '1em' }}>
 										<Button

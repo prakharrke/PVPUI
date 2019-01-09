@@ -28,6 +28,8 @@ export default class MLVGenerator extends Component {
 		}
 		else
 			this.state = {
+				filterOperator : 'contains',
+				exactSearch : false,
 				selectedConnectionID: -1,
 				tempObject: '',
 				selectedObjectList: [],
@@ -555,13 +557,34 @@ export default class MLVGenerator extends Component {
 
 	}
 
+	setExactSearch(){
+		if(this.state.exactSearch){
+			this.setState({
+				...this.state,
+				exactSearch : false,
+				filterOperator : 'contains',
+				objectList : this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice()
+			})
+
+			//this.totalObjectListFilter(event)
+
+		}else{
+			this.setState({
+				...this.state,
+				exactSearch : true,
+				filterOperator : 'eq',
+				objectList : this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice()
+			})
+		}
+	}
+
 	totalObjectListFilter(event) {
 
 		clearTimeout(this.timeout);
 		this.timeout = setTimeout(() => {
 
 			this.setState({
-				objectList: filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(), event.filter),
+				objectList: filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(),{logic : "and", filters : [{operator : this.state.filterOperator, value :event.filter.value}]}),
 				loading: false
 			});
 		}, delay);
@@ -1822,6 +1845,11 @@ export default class MLVGenerator extends Component {
 								/>
 							)
 						}
+						<Switch
+								style={{ margin: "1em" }}
+								checked={this.state.exactSearch}
+								onChange={this.setExactSearch.bind(this)}
+							/> Exact Search
 						<DropDownList
 
 							data={this.state.objectList}
@@ -1832,6 +1860,7 @@ export default class MLVGenerator extends Component {
 							filterable={true}
 							onFilterChange={this.totalObjectListFilter.bind(this)}
 						/>
+
 						<MultiSelect
 							placeholder="Selected Sources"
 							value={this.state.selectedObjectList}

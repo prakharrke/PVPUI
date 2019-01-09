@@ -32,8 +32,12 @@ export default class DeleteAllDetails extends Component {
 	editFilterForDeleteAll(event) {
 		this.props.editFilterForDeleteAll(event.target.props.id, event.target.value)
 	}
-	generateBaseline(){
+	generateBaseline() {
 		this.props.generateBaseline()
+	}
+	copyInsertMLVToDeleteAll(event){
+		event.preventDefault();
+		this.props.copyInsertMLVToDeleteAll(event.target.id)
 	}
 
 	render() {
@@ -41,6 +45,21 @@ export default class DeleteAllDetails extends Component {
 
 			return (
 				<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Delete MLV ' + (index + 1)}</i>}>
+					{
+						this.props.insertMLVLength == 1 ? (
+							<div className="row justify-content-center">
+								<div className="col-lg-2">
+									<Button
+										primary={true}
+										style={{ margin: '1em' }}
+										id={object.index}
+										onClick={this.copyInsertMLVToDeleteAll.bind(this)}
+									>Copy from insert</Button>
+								</div>
+							</div>
+
+						) : ""
+					}
 					<div className="row justify-content-center">
 						<div className="col-lg-1" style={{ margin: '1em' }}>
 							<Button
@@ -156,47 +175,47 @@ export default class DeleteAllDetails extends Component {
 		})
 		return (
 			<div>
-			<div className="row justify-content-center">
-				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
+				<div className="row justify-content-center">
+					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
-					<PanelBar >
-						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Delete MLV</i>}>
-							<div className="row justify-content-center">
-								<div className="col-lg-1" style={{ margin: '1em' }}>
-									<Button
-										primary={true}
-										//id={object.index}
-										onClick={this.addDeleteAllMLV.bind(this)}
-									>Add
+						<PanelBar >
+							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Delete MLV</i>}>
+								<div className="row justify-content-center">
+									<div className="col-lg-1" style={{ margin: '1em' }}>
+										<Button
+											primary={true}
+											//id={object.index}
+											onClick={this.addDeleteAllMLV.bind(this)}
+										>Add
 											</Button>
 
+									</div>
 								</div>
-							</div>
-							<div className="row justify-content-center" style={{ width: "100%" }}>
-								<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
+								<div className="row justify-content-center" style={{ width: "100%" }}>
+									<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
 
-									<PanelBar >
-										{deleteAllMLVArrayElement}
-									</PanelBar>
+										<PanelBar >
+											{deleteAllMLVArrayElement}
+										</PanelBar>
+									</div>
 								</div>
-							</div>
-						</PanelBarItem>
+							</PanelBarItem>
 
-					</PanelBar>
+						</PanelBar>
+					</div>
 				</div>
-			</div>
-			<div className="row justify-content-end">
-				<div className="col-lg-2 d-flex justify-content-end">
-					<Button
-					className="float-right"
-						primary={true}
-						//id={object.index}
-						onClick={this.generateBaseline.bind(this)}
-						style={{margin : '1em'}}
-					>Generate Baseline
+				<div className="row justify-content-end">
+					<div className="col-lg-2 d-flex justify-content-end">
+						<Button
+							className="float-right"
+							primary={true}
+							//id={object.index}
+							onClick={this.generateBaseline.bind(this)}
+							style={{ margin: '1em' }}
+						>Generate Baseline
 					</Button>
+					</div>
 				</div>
-			</div>
 			</div>
 		)
 	}
