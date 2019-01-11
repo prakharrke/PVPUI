@@ -238,15 +238,28 @@ export default class UpdateDetails extends Component {
 														</div>
 														<div className="col-lg-5">
 
-															<Input
-																data={object.attributes}
+															{this.props.fetchFromAnotherSourceForUpdateFlag ? (
+																<DropDownList
+																data={this.props.fetchFromAnotherSourceForUpdate.attributes}
 																label="Value"
 																id={object.index}
 																attributeIndex={index}
-																style={{ width: '100%', margin: '2em' }}
+																style={{ width: '100%', margin: '1em' }}
 																onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
 																value={valueObject.value}
 															/>
+															):
+
+																(<Input
+															data={object.attributes}
+															label="Value"
+															id={object.index}
+															attributeIndex={index}
+															style={{ width: '100%', margin: '2em' }}
+															onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
+															value={valueObject.value}
+															/>)
+}
 														</div>
 														<div className='col-lg-1'>
 															<Button

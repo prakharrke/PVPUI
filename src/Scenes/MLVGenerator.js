@@ -14,12 +14,13 @@ import * as Constants from '../Constants.js'
 import * as helper from '../helper'
 
 const delay = 50;
-
+const pageSize = 11;
 export default class MLVGenerator extends Component {
 
 	constructor(props) {
 
 		super(props);
+		this.filteredData = this.props.connInfoList[0].objectList.slice();
 		if (Object.keys(this.props.oldState).length != 0) {
 
 			this.state = {
@@ -28,13 +29,15 @@ export default class MLVGenerator extends Component {
 		}
 		else
 			this.state = {
-				filterOperator : 'contains',
-				exactSearch : false,
+				total: this.props.connInfoList[0].objectList.length,
+				skip: 0,
+				filterOperator: 'contains',
+				exactSearch: false,
 				selectedConnectionID: -1,
 				tempObject: '',
 				selectedObjectList: [],
 				loading: false,
-				objectList: this.props.connInfoList[0].objectList,
+				objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
 				connInfoList: this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
@@ -87,6 +90,7 @@ export default class MLVGenerator extends Component {
 	componentDidMount() {
 		//console.log('COMPONENT WILL MOUNT')
 		//console.log(this.props)
+		window.scrollTo(0, 0)
 	}
 
 
@@ -143,7 +147,7 @@ export default class MLVGenerator extends Component {
 		console.log(this.props.connInfoList)
 		alert(this.props.connInfoList[this.props.connInfoList.map(object=>{return object.connectionID}).indexOf(this.state.selectedConnectionID)].objectList)
 		*/
-		
+
 		if (this.state.selectedObject.objectName === 'Selected Sources') {
 
 			//console.log('already set')
@@ -197,9 +201,9 @@ export default class MLVGenerator extends Component {
 		// * UPDATING OBJECTLIST FROM CONNINFO AFTER CHANGE IN BASE CONNECTION
 
 		if (!this.state.objectList.every(object => { return this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.includes(object) })) {
-			alert('in loop')
+			this.filteredData = this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice();
 			this.setState({
-				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList
+				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
 			})
 		}
 	}
@@ -556,38 +560,49 @@ export default class MLVGenerator extends Component {
 
 
 	}
+	pageChange = (event) => {
+		console.log(event.page)
+		const skip = event.page.skip;
+		const take = event.page.take;
+		const newSubsetData = this.filteredData.slice(skip, skip + take);
+		console.log(newSubsetData);
+		this.setState({
+			objectList: newSubsetData,
+			skip: skip
+		});
+	}
 
-	setExactSearch(){
-		if(this.state.exactSearch){
+	setExactSearch() {
+		if (this.state.exactSearch) {
 			this.setState({
 				...this.state,
-				exactSearch : false,
-				filterOperator : 'contains',
-				objectList : this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice()
+				exactSearch: false,
+				filterOperator: 'contains',
+				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
 			})
 
 			//this.totalObjectListFilter(event)
 
-		}else{
+		} else {
 			this.setState({
 				...this.state,
-				exactSearch : true,
-				filterOperator : 'eq',
-				objectList : this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice()
+				exactSearch: true,
+				filterOperator: 'eq',
+				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
 			})
 		}
 	}
 
 	totalObjectListFilter(event) {
+		this.filteredData = filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(), { logic: "and", filters: [{ operator: this.state.filterOperator, value: event.filter.value }] });
+		const data = this.filteredData.slice(0, pageSize);
+		this.setState({
+			objectList: data,
+			total: this.filteredData.length,
+			skip: 0,
+			loading: false
+		});
 
-		clearTimeout(this.timeout);
-		this.timeout = setTimeout(() => {
-
-			this.setState({
-				objectList: filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(),{logic : "and", filters : [{operator : this.state.filterOperator, value :event.filter.value}]}),
-				loading: false
-			});
-		}, delay);
 
 		this.setState({
 			loading: true
@@ -794,6 +809,29 @@ export default class MLVGenerator extends Component {
 
 			return
 		}
+		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
+			var selectedObject = this.state.selectedObject;
+			var attributes = new Array();
+			attributes = this.state[selectedObject.objectID].attributes;
+			var attributesLength = attributes.length
+			attributes.push({
+				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				attributeName: event.target.value,
+				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+			})
+			this.setState({
+				[this.state.selectedObject.objectID]: {
+
+					...this.state[selectedObject.objectID],
+					attributes: attributes
+				},
+				customAttribute: ""
+			})
+		}
+	}
+
+	addCustomAttributeToAttributeList(event) {
+		
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
@@ -1364,7 +1402,8 @@ export default class MLVGenerator extends Component {
 					level: parentObject.level,
 					parentObject: parentObject.objectID,
 					type: "native",
-					native: selectedNativeRelation
+					native: selectedNativeRelation,
+					isRecursionTrue: false
 				}
 			},
 			[parentObject.objectID]: {
@@ -1560,7 +1599,7 @@ export default class MLVGenerator extends Component {
 
 	saveMLVToParent(event) {
 		if (this.props.parent === 'fetchFromAnotherSource') {
-			this.props.saveMLVForFetchFromAnotherSource(this.state.mlv)
+			this.props.saveMLVForFetchFromAnotherSource(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
 		if (this.props.parent === 'insertMLV') {
 			this.props.saveInsertMLV(this.state.mlv)
@@ -1568,25 +1607,25 @@ export default class MLVGenerator extends Component {
 		if (this.props.parent === 'fetchMLVForInsert') {
 			this.props.saveFetchMLVForInsert(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
-		if(this.props.parent === 'fetchFromAnotherSourceForUpdate'){
-			this.props.saveMLVForFetchFromAnotherSourceForUpdate(this.state.mlv)
+		if (this.props.parent === 'fetchFromAnotherSourceForUpdate') {
+			this.props.saveMLVForFetchFromAnotherSourceForUpdate(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
-		if(this.props.parent === 'updateMLV'){
+		if (this.props.parent === 'updateMLV') {
 			this.props.saveUpdateMLV(this.state.mlv)
 		}
-		if(this.props.parent == 'fetchMLVForUpdate'){
+		if (this.props.parent == 'fetchMLVForUpdate') {
 			this.props.saveFetchMLVForUpdate(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
-		if(this.props.parent === 'deleteMLV'){
+		if (this.props.parent === 'deleteMLV') {
 			this.props.saveDeleteMLV(this.state.mlv)
 		}
-		if(this.props.parent === 'fetchMLVForDelete'){
-			this.props.saveFetchMLVForDelete(this.state.mlv,  this.props.connInfoList[0].pluginName)
+		if (this.props.parent === 'fetchMLVForDelete') {
+			this.props.saveFetchMLVForDelete(this.state.mlv, this.props.connInfoList[0].pluginName)
 		}
-		if(this.props.parent === 'deleteAllMLV'){
+		if (this.props.parent === 'deleteAllMLV') {
 			this.props.saveDeleteAllMLV(this.state.mlv)
 		}
-		if(this.props.parent === 'fetchFromAnotherSourceForDelete'){
+		if (this.props.parent === 'fetchFromAnotherSourceForDelete') {
 			this.props.saveMLVForFetchFromAnotherSourceForDelete(this.state.mlv)
 		}
 	}
@@ -1846,10 +1885,10 @@ export default class MLVGenerator extends Component {
 							)
 						}
 						<Switch
-								style={{ margin: "1em" }}
-								checked={this.state.exactSearch}
-								onChange={this.setExactSearch.bind(this)}
-							/> Exact Search
+							style={{ margin: "1em" }}
+							checked={this.state.exactSearch}
+							onChange={this.setExactSearch.bind(this)}
+						/> Exact Search
 						<DropDownList
 
 							data={this.state.objectList}
@@ -1857,6 +1896,12 @@ export default class MLVGenerator extends Component {
 							style={{ width: '100%', marginTop: "1em" }}
 							value={this.state.tempObject}
 							label='Select Sources'
+							virtual={{
+								total: this.state.total,
+								pageSize: pageSize,
+								skip: this.state.skip
+							}}
+							onPageChange={this.pageChange.bind(this)}
 							filterable={true}
 							onFilterChange={this.totalObjectListFilter.bind(this)}
 						/>
@@ -1931,7 +1976,7 @@ export default class MLVGenerator extends Component {
 								</div>
 								<PanelBarItem title={<i style={{ fintSize: "14px" }}>Add custom Attrbutes</i>}>
 									<div className="row">
-										<div className="col-lg-11" tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
+										<div className="col-lg-11" tabIndex="0" onKeyDown={this.addCustomAttributeToAttributeList.bind(this)}>
 											<Input
 												value={this.state.customAttribute}
 												placeholder="Custom Attribute"

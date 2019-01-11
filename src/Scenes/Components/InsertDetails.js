@@ -176,6 +176,11 @@ export default class InsertDetails extends Component {
 		this.props.copyInsertMLVToInsertFetch();
 	}
 
+	executeInsert(event){
+		event.preventDefault();
+		this.props.executeInsert();
+	}
+
 
 	render() {
 
@@ -716,6 +721,17 @@ export default class InsertDetails extends Component {
 								</div>
 							</div>
 						}
+
+						<div className="row">
+							<div className="col-lg-1">
+								<Button
+										style={{ margin: "1em" }}
+										onClick={this.executeInsert.bind(this)}
+									>
+										Execute
+									</Button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

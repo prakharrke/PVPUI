@@ -30,17 +30,20 @@ export default class WriteBaseline extends Component {
 			fetchFromAnotherSourceForInsert: {
 				mlv: '',
 				attributes: [],
-				filter: ''
+				filter: '',
+				selectedPlugin : ''
 			},
 			fetchFromAnotherSourceForUpdate: {
 				mlv: '',
 				attributes: [],
-				filter: ''
+				filter: '',
+				selectedPlugin : ''
 			},
 			fetchFromAnotherSourceForDelete: {
 				mlv: '',
 				attributes: [],
-				filter: ''
+				filter: '',
+				selectedPlugin : ''
 			},
 			insertMLVs: {
 				currentIndex: 0,
@@ -131,7 +134,7 @@ export default class WriteBaseline extends Component {
 
 	}
 
-	saveMLVForFetchFromAnotherSource(mlv) {
+	saveMLVForFetchFromAnotherSource(mlv, selectedPlugin) {
 
 		if (mlv != '') {
 			try {
@@ -142,7 +145,8 @@ export default class WriteBaseline extends Component {
 					fetchFromAnotherSourceForInsert: {
 						...this.state.fetchFromAnotherSourceForInsert,
 						mlv: mlv,
-						attributes: temp
+						attributes: temp,
+						selectedPlugin : selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -552,6 +556,33 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
+	executeInsert(){
+		var insertDetails = {}
+		insertDetails['fetchFromAnotherSourceForInsert'] = this.state.fetchFromAnotherSourceForInsert;
+		insertDetails['insertMLVs'] = this.state.insertMLVs;
+		insertDetails['fetchMLVForinsert'] = this.state.fetchMLVForinsert;
+		insertDetails['fetchFromAnotherSourceForInsertFlag'] = this.state.fetchFromAnotherSourceForInsertFlag;
+		insertDetails['rsInsert'] = this.state.rsInsertFlag;
+		insertDetails['bulkInsert'] = this.state.bulkInsertFlag;
+
+		insertDetails['fetchFromAnotherSourceForUpdate'] = this.state.fetchFromAnotherSourceForUpdate;
+		insertDetails['updateMLVs'] = this.state.updateMLVs;
+		insertDetails['fetchMLVForUpdate'] = this.state.fetchMLVForUpdate;
+		insertDetails['fetchFromAnotherSourceForUpdateFlag'] = this.state.fetchFromAnotherSourceForUpdateFlag;
+		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (JSON.stringify(insertDetails)), {
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+
+
+		}).then(response=>{
+
+		}).catch(e=>{
+			alert(e)
+		})
+
+	}
+
 	// ****************** UPDATE_DETAILS METHODS *******************************
 	toggleFetchFromAnotherSourceForUpdate() {
 		this.setState({
@@ -573,7 +604,7 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
-	saveMLVForFetchFromAnotherSourceForUpdate(mlv) {
+	saveMLVForFetchFromAnotherSourceForUpdate(mlv, selectedPlugin) {
 		if (mlv != '') {
 			try {
 
@@ -583,7 +614,8 @@ export default class WriteBaseline extends Component {
 					fetchFromAnotherSourceForUpdate: {
 						...this.state.fetchFromAnotherSourceForUpdate,
 						mlv: mlv,
-						attributes: temp
+						attributes: temp,
+						selectedPlugin : selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -963,7 +995,7 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
-	saveMLVForFetchFromAnotherSourceForDelete(mlv) {
+	saveMLVForFetchFromAnotherSourceForDelete(mlv, selectedPlugin) {
 		if (mlv != '') {
 			try {
 
@@ -973,7 +1005,8 @@ export default class WriteBaseline extends Component {
 					fetchFromAnotherSourceForDelete: {
 						...this.state.fetchFromAnotherSourceForDelete,
 						mlv: mlv,
-						attributes: temp
+						attributes: temp,
+						selectedPlugin : selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -1540,6 +1573,7 @@ export default class WriteBaseline extends Component {
 									addFilterForFetchFromAnotherSourceForInsert={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
 									editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
 									copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}
+									executeInsert={this.executeInsert.bind(this)}
 								/>
 							</TabStripTab>
 							<TabStripTab title="Update">
