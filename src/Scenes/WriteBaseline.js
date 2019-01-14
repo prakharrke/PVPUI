@@ -13,17 +13,23 @@ import LoadingPanel from './Components/LoadingPanel'
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 import axios from 'axios';
 export default class WriteBaseline extends Component {
-
+	resultSetListIndex = 0;
+	listOfResultSetList = new Array()
 	constructor(props) {
 		super(props);
+
 		this.state = {
-			isLoading : false,
+			resultSetList: [],
+			resultsetOperation : '',
+			showResultSet: false,
+			isLoading: false,
 			baselineFilesList: [],
 			selected: 0,
 			testCaseSummary: '',
 			testCaseDescription: '',
 			mountMLVGenerator: false,
 			operation: '',
+			columnNames : [],
 			fetchFromAnotherSourceForInsertFlag: false,
 			fetchFromAnotherSourceForUpdateFlag: false,
 			fetchFromAnotherSourceForDeleteFlag: false,
@@ -31,19 +37,19 @@ export default class WriteBaseline extends Component {
 				mlv: '',
 				attributes: [],
 				filter: '',
-				selectedPlugin : ''
+				selectedPlugin: ''
 			},
 			fetchFromAnotherSourceForUpdate: {
 				mlv: '',
 				attributes: [],
 				filter: '',
-				selectedPlugin : ''
+				selectedPlugin: ''
 			},
 			fetchFromAnotherSourceForDelete: {
 				mlv: '',
 				attributes: [],
 				filter: '',
-				selectedPlugin : ''
+				selectedPlugin: ''
 			},
 			insertMLVs: {
 				currentIndex: 0,
@@ -65,19 +71,19 @@ export default class WriteBaseline extends Component {
 				mlv: '',
 				filter: '',
 				attributes: [],
-				selectedPlugin : ''
+				selectedPlugin: ''
 			},
 			fetchMLVForUpdate: {
 				mlv: '',
 				filter: '',
 				attributes: [],
-				selectedPlugin : ''
+				selectedPlugin: ''
 			},
 			fetchMLVForDelete: {
 				mlv: '',
 				filter: '',
 				attributes: [],
-				selectedPlugin : ''
+				selectedPlugin: ''
 			},
 			rsInsertFlag: false,
 			bulkInsertFlag: false,
@@ -146,7 +152,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchFromAnotherSourceForInsert,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin : selectedPlugin
+						selectedPlugin: selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -157,16 +163,16 @@ export default class WriteBaseline extends Component {
 			}
 
 		}
-		else{
+		else {
 			this.setState({
-					...this.state,
-					fetchFromAnotherSourceForInsert: {
-						...this.state.fetchFromAnotherSourceForInsert,
-						mlv: mlv,
-						attributes: []
-					},
-					mountMLVGenerator: false
-				})
+				...this.state,
+				fetchFromAnotherSourceForInsert: {
+					...this.state.fetchFromAnotherSourceForInsert,
+					mlv: mlv,
+					attributes: []
+				},
+				mountMLVGenerator: false
+			})
 		}
 	}
 
@@ -206,7 +212,7 @@ export default class WriteBaseline extends Component {
 			ID: '',
 			PID: '',
 			LEV: '',
-			PIN : '',
+			PIN: '',
 			values: [[]],
 			attributes: []
 		})
@@ -359,7 +365,7 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	setInsertPIN(index, value){
+	setInsertPIN(index, value) {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].PIN = value
 		this.setState({
@@ -482,13 +488,13 @@ export default class WriteBaseline extends Component {
 
 	}
 
-	copyInsertMLVToInsertFetch(){
+	copyInsertMLVToInsertFetch() {
 		this.setState({
 			...this.state,
-			fetchMLVForinsert : {
+			fetchMLVForinsert: {
 				...this.state.fetchMLVForinsert,
-				mlv : this.state.insertMLVs.insertMLVArray[0].mlv,
-				attributes :  this.state.insertMLVs.insertMLVArray[0].attributes
+				mlv: this.state.insertMLVs.insertMLVArray[0].mlv,
+				attributes: this.state.insertMLVs.insertMLVArray[0].attributes
 			}
 		})
 	}
@@ -507,21 +513,21 @@ export default class WriteBaseline extends Component {
 	}
 	saveFetchMLVForInsert(mlv, selectedPlugin) {
 
-		try{
-		var attributes = mlv.split('attributes=')[1].split(';')[0].split(',')
-		this.setState({
-			...this.state,
-			fetchMLVForinsert: {
-				...this.state.fetchMLVForinsert,
-				mlv: mlv,
-				attributes: attributes,
-				selectedPlugin : selectedPlugin
-			},
-			mountMLVGenerator: false
-		})
-	}catch{
-		alert('Error Parsing MLV')
-	}
+		try {
+			var attributes = mlv.split('attributes=')[1].split(';')[0].split(',')
+			this.setState({
+				...this.state,
+				fetchMLVForinsert: {
+					...this.state.fetchMLVForinsert,
+					mlv: mlv,
+					attributes: attributes,
+					selectedPlugin: selectedPlugin
+				},
+				mountMLVGenerator: false
+			})
+		} catch{
+			alert('Error Parsing MLV')
+		}
 	}
 	addFilterForFetchMLVForInsert(value) {
 
@@ -556,7 +562,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
-	executeInsert(){
+	executeInsert() {
 		var insertDetails = {}
 		insertDetails['fetchFromAnotherSourceForInsert'] = this.state.fetchFromAnotherSourceForInsert;
 		insertDetails['insertMLVs'] = this.state.insertMLVs;
@@ -569,15 +575,27 @@ export default class WriteBaseline extends Component {
 		insertDetails['updateMLVs'] = this.state.updateMLVs;
 		insertDetails['fetchMLVForUpdate'] = this.state.fetchMLVForUpdate;
 		insertDetails['fetchFromAnotherSourceForUpdateFlag'] = this.state.fetchFromAnotherSourceForUpdateFlag;
+
+		insertDetails['fetchFromAnotherSourceForDelete'] = this.state.fetchFromAnotherSourceForDelete;
+		insertDetails['deleteMLVs'] = this.state.deleteMLVs;
+		insertDetails['fetchMLVForDelete'] = this.state.fetchMLVForDelete;
+		insertDetails['fetchFromAnotherSourceForDeleteFlag'] = this.state.fetchFromAnotherSourceForDeleteFlag;
+
+		insertDetails['deleteAllMLVs'] = this.state.deleteAllMLVs;
+
 		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (JSON.stringify(insertDetails)), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 
 
-		}).then(response=>{
-
-		}).catch(e=>{
+		}).then(response => {
+			console.log('RESULT SET DATA')
+			console.log(response.data)
+			var resultSets = response.data
+			this.listOfResultSetList = response.data
+			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
+		}).catch(e => {
 			alert(e)
 		})
 
@@ -615,7 +633,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchFromAnotherSourceForUpdate,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin : selectedPlugin
+						selectedPlugin: selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -658,9 +676,9 @@ export default class WriteBaseline extends Component {
 			PID: ' ',
 			LEV: ' ',
 			PIN: ' ',
-			MLVLEFTOBJ : ' ',
-			MLVRIGHTOBJ : ' ',
-			MLVOBJECT : '',
+			MLVLEFTOBJ: ' ',
+			MLVRIGHTOBJ: ' ',
+			MLVOBJECT: '',
 			values: [],
 			filter: '',
 			attributes: ['MLVLEFTOBJ', 'MLVRIGHTOBJ', 'MLVOBJECT'],
@@ -675,15 +693,15 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	copyInsertMLVToUpdate(index){
+	copyInsertMLVToUpdate(index) {
 		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
 		updateMLVArray[index].mlv = this.state.insertMLVs.insertMLVArray[0].mlv;
 		updateMLVArray[index].attributes = this.state.insertMLVs.insertMLVArray[0].attributes;
 		this.setState({
 			...this.state,
-			updateMLVs : {
+			updateMLVs: {
 				...this.state.updateMLVs,
-				updateMLVArray : updateMLVArray
+				updateMLVArray: updateMLVArray
 			}
 		})
 	}
@@ -895,13 +913,13 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	copyInsertMLVToUpdateFetch(){
+	copyInsertMLVToUpdateFetch() {
 		this.setState({
 			...this.state,
-			fetchMLVForUpdate : {
+			fetchMLVForUpdate: {
 				...this.state.fetchMLVForinsert,
-				mlv : this.state.insertMLVs.insertMLVArray[0].mlv,
-				attributes :  this.state.insertMLVs.insertMLVArray[0].attributes
+				mlv: this.state.insertMLVs.insertMLVArray[0].mlv,
+				attributes: this.state.insertMLVs.insertMLVArray[0].attributes
 			}
 		})
 	}
@@ -930,7 +948,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchMLVForUpdate,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin : selectedPlugin
+						selectedPlugin: selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -1006,7 +1024,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchFromAnotherSourceForDelete,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin : selectedPlugin
+						selectedPlugin: selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -1068,15 +1086,15 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	copyInsertMLVToDelete(index){
+	copyInsertMLVToDelete(index) {
 		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
 		deleteMLVArray[index].mlv = this.state.insertMLVs.insertMLVArray[0].mlv;
 		deleteMLVArray[index].attributes = this.state.insertMLVs.insertMLVArray[0].attributes;
 		this.setState({
 			...this.state,
-			deleteMLVs : {
+			deleteMLVs: {
 				...this.state.deleteMLVs,
-				deleteMLVArray : deleteMLVArray
+				deleteMLVArray: deleteMLVArray
 			}
 		})
 	}
@@ -1191,13 +1209,13 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	copyInsertMLVToDeleteFetch(){
+	copyInsertMLVToDeleteFetch() {
 		this.setState({
 			...this.state,
-			fetchMLVForDelete : {
+			fetchMLVForDelete: {
 				...this.state.fetchMLVForDelete,
-				mlv : this.state.insertMLVs.insertMLVArray[0].mlv,
-				attributes : this.state.insertMLVs.insertMLVArray[0].attributes
+				mlv: this.state.insertMLVs.insertMLVArray[0].mlv,
+				attributes: this.state.insertMLVs.insertMLVArray[0].attributes
 			}
 		})
 	}
@@ -1215,7 +1233,7 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
-	saveFetchMLVForDelete(mlv,selectedPlugin) {
+	saveFetchMLVForDelete(mlv, selectedPlugin) {
 		if (mlv != '') {
 			try {
 
@@ -1226,7 +1244,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchMLVForDelete,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin : selectedPlugin
+						selectedPlugin: selectedPlugin
 					},
 					mountMLVGenerator: false
 				})
@@ -1287,15 +1305,15 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	copyInsertMLVToDeleteAll(index){
+	copyInsertMLVToDeleteAll(index) {
 		var deleteAllMLVArray = this.state.deleteAllMLVs.deleteAllMLVArray;
 		deleteAllMLVArray[index].mlv = this.state.insertMLVs.insertMLVArray[0].mlv;
 		deleteAllMLVArray[index].attributes = this.state.insertMLVs.insertMLVArray[0].attributes;
 		this.setState({
 			...this.state,
-			deleteAllMLVs : {
+			deleteAllMLVs: {
 				...this.state.deleteAllMLVs,
-				deleteAllMLVArray : deleteAllMLVArray
+				deleteAllMLVArray: deleteAllMLVArray
 			}
 		})
 	}
@@ -1425,13 +1443,13 @@ export default class WriteBaseline extends Component {
 	// ************************* METHOD TO GENERATE BASELINE ***********************************
 	generateBaseline() {
 
-		if(this.state.selectedBaseline == '' && this.state.newBaselineName == ''){
+		if (this.state.selectedBaseline == '' && this.state.newBaselineName == '') {
 			alert('Please select baseline excel file')
 			return
 		}
 		this.setState({
 			...this.state,
-			isLoading : true
+			isLoading: true
 		})
 		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (JSON.stringify(this.state)), {
 			headers: {
@@ -1442,16 +1460,130 @@ export default class WriteBaseline extends Component {
 		}).then(response => {
 			alert(response.data)
 			this.setState({
-			...this.state,
-			isLoading : false
-		})
+				...this.state,
+				isLoading: false
+			})
 		}).catch(error => {
 			alert(error)
 			this.setState({
-			...this.state,
-			isLoading : false
+				...this.state,
+				isLoading: false
+			})
 		})
+	}
+
+	decreaseIndex(event) {
+		var length = this.listOfResultSetList.length;
+		if (this.resultSetListIndex === 0) {
+			this.resultSetListIndex = 0
+		}
+		else {
+			this.resultSetListIndex = this.resultSetListIndex - 1;
+		}
+		if (length !== 0) {
+			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
+		}
+
+	}
+
+	increaseIndex(event) {
+		var length = this.listOfResultSetList.length;
+
+
+		if (this.resultSetListIndex === (length - 1)) {
+			this.resultSetListIndex = (length - 1)
+		}
+		else {
+			this.resultSetListIndex = this.resultSetListIndex + 1
+		}
+		if (length !== 0) {
+			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
+		}
+	}
+	closeResultSet(event) {
+		event.preventDefault();
+		this.setState({
+			showResultSet: false
 		})
+	}
+
+	computeResultSet(response) {
+
+
+		try {
+
+			console.log(response)
+			var resultsetList = new Array();
+
+			//alert(response)
+
+			//alert(response.length)
+
+			var parsed = JSON.parse(response);
+
+			// columnsNames array to hold decoded keys (columns in resultset)
+
+			var columnNames = new Array();
+
+
+
+			//var keys = Object.keys(parsed[0]);
+			columnNames = JSON.parse(parsed[0]).columnNames;
+			var resultsetOperation = JSON.parse(parsed[0]).operation;
+			// populating columnNames array by decoding every element of keys array
+
+			/*for (var i = 0; i < keys.length; i++) {
+
+				var key = keys[i];
+
+				columnNames[i] = atob(key);
+
+
+			}*/
+
+			this.setState({
+				...this.state,
+				columnNames: JSON.parse(parsed[0]).columnNames,
+				resultsetOperation : resultsetOperation
+			})
+
+			// * Populating resultsetList array with decoded values from the parsed resultset received.
+
+			for (var i = 0; i < parsed.length; i++) {
+
+
+				var temp = {};
+
+				for (var j = 0; j < columnNames.length; j++) {
+
+
+					var value = JSON.parse(parsed[i])[columnNames[j]];
+
+					// * fetching value from pared resultset and decoding it
+					console.log(value);
+
+					temp[columnNames[j]] = value;
+				}
+
+				resultsetList[i] = temp;
+			}
+
+			console.log(temp)
+
+			console.log(resultsetList);
+			//this.isNotLoading();
+			this.setState({
+				...this.state,
+				resultSetList: resultsetList,
+				showResultSet: true
+
+			})
+
+		} catch{
+			//this.isNotLoading();
+			alert("Error occurred while executing MLV.")
+		}
+
 	}
 
 
@@ -1479,182 +1611,251 @@ export default class WriteBaseline extends Component {
 		) : ''
 
 		console.log(mlvGenerator)
+		var columnsElement = this.state.columnNames.map((column) => {
+
+
+			return (
+
+				<Column
+					field={column}
+					title={column}
+				/>
+
+
+			)
+		})
 		return (
+			<div>
+				<div className="container-fluid" style={{ marginTop: "2em" }}>
+					{loadingComponent}
+					{mlvGenerator}
+					<div className="row">
+						<div className="col-lg-6">
+							<form className="k-form">
+								<Input
+									required={true}
+									label="Test Case Summary*"
+									style={{ width: "90%", textAlign: "center", margin: "1em" }}
+									value={this.state.testCaseSummary}
+									onChange={this.setTestCaseSummary.bind(this)}
 
-			<div className="container-fluid" style={{ marginTop: "2em" }}>
-				{loadingComponent}
-				{mlvGenerator}
-				<div className="row">
-					<div className="col-lg-6">
-						<form className="k-form">
+								/>
+							</form>
+						</div>
+						<div className="col-lg-6">
+							<form className="k-form">
+								<Input
+									required={true}
+									label="Test Case Description*"
+									style={{ width: "90%", textAlign: "center", margin: "1em" }}
+									onChange={this.setTestCaseDescription.bind(this)}
+									value={this.state.testCaseDescription}
+								/>
+							</form>
+						</div>
+					</div>
+					<div className="row justify-content-center">
+						<div className="col-lg-6 justify-content-center">
+							<DropDownList
+								style={{ margin: "1em", width: "100%" }}
+								data={this.state.baslineFilesList}
+								label="Select baseline file"
+								onChange={this.selectBaseline.bind(this)}
+								value={this.state.selectedBaseline}
+							/>
 							<Input
-								required={true}
-								label="Test Case Summary*"
-								style={{ width: "90%", textAlign: "center", margin: "1em" }}
-								value={this.state.testCaseSummary}
-								onChange={this.setTestCaseSummary.bind(this)}
+
+								label="Add a new baseline instead.."
+								value={this.state.newBaselineName}
+								style={{ width: "100%", textAlign: "center", margin: "1em" }}
+								onChange={this.addNewBaseline.bind(this)}
 
 							/>
-						</form>
-					</div>
-					<div className="col-lg-6">
-						<form className="k-form">
-							<Input
-								required={true}
-								label="Test Case Description*"
-								style={{ width: "90%", textAlign: "center", margin: "1em" }}
-								onChange={this.setTestCaseDescription.bind(this)}
-								value={this.state.testCaseDescription}
-							/>
-						</form>
-					</div>
-				</div>
-				<div className="row justify-content-center">
-					<div className="col-lg-6 justify-content-center">
-						<DropDownList
-							style={{ margin: "1em", width: "100%" }}
-							data={this.state.baslineFilesList}
-							label="Select baseline file"
-							onChange={this.selectBaseline.bind(this)}
-							value={this.state.selectedBaseline}
-						/>
-						<Input
 
-							label="Add a new baseline instead.."
-							value={this.state.newBaselineName}
-							style={{ width: "100%", textAlign: "center", margin: "1em" }}
-							onChange={this.addNewBaseline.bind(this)}
 
-						/>
+						</div>
+
 
 
 					</div>
+					<div className="row">
+						<div className="col-lg-12">
+							<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
 
+								<TabStripTab title="Insert">
+									<InsertDetails
+										generateMLV={this.generateMLV.bind(this)}
+										saveMLVForFetchFromAnotherSource={this.saveMLVForFetchFromAnotherSource.bind(this)}
+										fetchFromAnotherSourceForInsert={this.state.fetchFromAnotherSourceForInsert}
+										fetchFromAnotherSourceForInsertFlag={this.state.fetchFromAnotherSourceForInsertFlag}
+										toggleFetchFromAnotherSource={this.toggleFetchFromAnotherSource.bind(this)}
+										insertMLVArray={this.state.insertMLVs.insertMLVArray}
+										addInsertMLV={this.addInsertMLV.bind(this)}
+										generateInsertMLV={this.generateInsertMLV.bind(this)}
+										setInsertID={this.setInsertID.bind(this)}
+										setInsertPID={this.setInsertPID.bind(this)}
+										setInsertLEV={this.setInsertLEV.bind(this)}
+										setInsertPIN={this.setInsertPIN.bind(this)}
+										saveInsertMLV={this.saveInsertMLV.bind(this)}
+										setInsertValues={this.setInsertValues.bind(this)}
+										setAttributesForInsertMLV={this.setAttributesForInsertMLV.bind(this)}
+										addAttributeInsertValue={this.addAttributeInsertValue.bind(this)}
+										addAttributeInsertValueGroup={this.addAttributeInsertValueGroup.bind(this)}
+										deleteAttributeInsertValueGroup={this.deleteAttributeInsertValueGroup.bind(this)}
+										saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
+										addFilterForFetchMLVForInsert={this.addFilterForFetchMLVForInsert.bind(this)}
+										editFilterForFetchMLVForInsert={this.editFilterForFetchMLVForInsert.bind(this)}
+										generateFetchMLVForInsert={this.generateFetchMLVForInsert.bind(this)}
+										fetchMLVForinsert={this.state.fetchMLVForinsert}
+										toggleRSInsert={this.toggleRSInsert.bind(this)}
+										toggleBulkInsert={this.toggleBulkInsert.bind(this)}
+										rsInsertFlag={this.state.rsInsertFlag}
+										bulkInsertFlag={this.state.bulkInsertFlag}
+										deleteInsertMLV={this.deleteInsertMLV.bind(this)}
+										insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+										addAttributeValuePairForInsert={this.addAttributeValuePairForInsert.bind(this)}
+										setSelectedAttributeForInsert={this.setSelectedAttributeForInsert.bind(this)}
+										addFilterForFetchFromAnotherSourceForInsert={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
+										editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
+										copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}
+										executeInsert={this.executeInsert.bind(this)}
+									/>
+								</TabStripTab>
+								<TabStripTab title="Update">
+									<UpdateDetails
+										toggleFetchFromAnotherSourceForUpdate={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
+										fetchFromAnotherSourceForUpdateFlag={this.state.fetchFromAnotherSourceForUpdateFlag}
+										generateMLVFetchFromAnotherSourceForUpdate={this.generateMLVFetchFromAnotherSourceForUpdate.bind(this)}
+										fetchFromAnotherSourceForUpdate={this.state.fetchFromAnotherSourceForUpdate}
+										saveMLVForFetchFromAnotherSourceForUpdate={this.saveMLVForFetchFromAnotherSourceForUpdate.bind(this)}
+										addFilterForFetchFromAnotherSourceForUpdate={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+										editFilterForFetchFromAnotherSourceForUpdate={this.editFilterForFetchFromAnotherSourceForUpdate.bind(this)}
+										updateMLVArray={this.state.updateMLVs.updateMLVArray}
+										addUpdateMLV={this.addUpdateMLV.bind(this)}
+										generateUpdateMLV={this.generateUpdateMLV.bind(this)}
+										saveUpdateMLV={this.saveUpdateMLV.bind(this)}
+										deleteUpdateMLV={this.deleteUpdateMLV.bind(this)}
+										addUpdateValuePair={this.addUpdateValuePair.bind(this)}
+										setSelectedAttribute={this.setSelectedAttribute.bind(this)}
+										setValueForSelectedAttributeForUpdate={this.setValueForSelectedAttributeForUpdate.bind(this)}
+										deleteSelectedAttributeForUpdate={this.deleteSelectedAttributeForUpdate.bind(this)}
+										setIDForUpdate={this.setIDForUpdate.bind(this)}
+										setPIDForUpdate={this.setPIDForUpdate.bind(this)}
+										setLEVForUpdate={this.setLEVForUpdate.bind(this)}
+										setPINForUpdate={this.setPINForUpdate.bind(this)}
+										addFilterForUpdate={this.addFilterForUpdate.bind(this)}
+										editFilterForUpdate={this.editFilterForUpdate.bind(this)}
+										generateFetchMLVForUpdate={this.generateFetchMLVForUpdate.bind(this)}
+										saveFetchMLVForUpdate={this.saveFetchMLVForUpdate.bind(this)}
+										fetchMLVForUpdate={this.state.fetchMLVForUpdate}
+										addFilterForFetchMLVForUpdate={this.addFilterForFetchMLVForUpdate.bind(this)}
+										editFilterForFetchMLVForUpdate={this.editFilterForFetchMLVForUpdate.bind(this)}
+										insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+										copyInsertMLVToUpdateFetch={this.copyInsertMLVToUpdateFetch.bind(this)}
+										copyInsertMLVToUpdate={this.copyInsertMLVToUpdate.bind(this)}
 
+									/>
+								</TabStripTab>
+								<TabStripTab title="Delete">
+									<DeleteDetails
+										deleteMLVs={this.state.deleteMLVs}
+										addDeleteMLV={this.addDeleteMLV.bind(this)}
+										generateDeleteMLV={this.generateDeleteMLV.bind(this)}
+										saveDeleteMLV={this.saveDeleteMLV.bind(this)}
+										deleteDeleteMLV={this.deleteDeleteMLV.bind(this)}
+										addFilterForDelete={this.addFilterForDelete.bind(this)}
+										editFilterForDelete={this.editFilterForDelete.bind(this)}
+										fetchMLVForDelete={this.state.fetchMLVForDelete}
+										generateFetchMLVForDelete={this.generateFetchMLVForDelete.bind(this)}
+										saveFetchMLVForDelete={this.saveFetchMLVForDelete.bind(this)}
+										addFilterForFetchMLVForDelete={this.addFilterForFetchMLVForDelete.bind(this)}
+										editFilterForFetchMLVForDelete={this.editFilterForFetchMLVForDelete.bind(this)}
+										toggleFetchFromAnotherSourceForDelete={this.toggleFetchFromAnotherSourceForDelete.bind(this)}
+										fetchFromAnotherSourceForDeleteFlag={this.state.fetchFromAnotherSourceForDeleteFlag}
+										fetchFromAnotherSourceForDelete={this.state.fetchFromAnotherSourceForDelete}
+										saveMLVForFetchFromAnotherSourceForDelete={this.saveMLVForFetchFromAnotherSourceForDelete.bind(this)}
+										addFilterForFetchFromAnotherSourceForDelete={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
+										editFilterForFetchFromAnotherSourceForDelete={this.editFilterForFetchFromAnotherSourceForDelete.bind(this)}
+										generateMLVFetchFromAnotherSourceForDelete={this.generateMLVFetchFromAnotherSourceForDelete.bind(this)}
+										insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+										copyInsertMLVToDeleteFetch={this.copyInsertMLVToDeleteFetch.bind(this)}
+										copyInsertMLVToDelete={this.copyInsertMLVToDelete.bind(this)}
 
-				</div>
-				<div className="row">
-					<div className="col-lg-12">
-						<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
-
-							<TabStripTab title="Insert">
-								<InsertDetails
-									generateMLV={this.generateMLV.bind(this)}
-									saveMLVForFetchFromAnotherSource={this.saveMLVForFetchFromAnotherSource.bind(this)}
-									fetchFromAnotherSourceForInsert={this.state.fetchFromAnotherSourceForInsert}
-									fetchFromAnotherSourceForInsertFlag={this.state.fetchFromAnotherSourceForInsertFlag}
-									toggleFetchFromAnotherSource={this.toggleFetchFromAnotherSource.bind(this)}
-									insertMLVArray={this.state.insertMLVs.insertMLVArray}
-									addInsertMLV={this.addInsertMLV.bind(this)}
-									generateInsertMLV={this.generateInsertMLV.bind(this)}
-									setInsertID={this.setInsertID.bind(this)}
-									setInsertPID={this.setInsertPID.bind(this)}
-									setInsertLEV={this.setInsertLEV.bind(this)}
-									setInsertPIN={this.setInsertPIN.bind(this)}
-									saveInsertMLV={this.saveInsertMLV.bind(this)}
-									setInsertValues={this.setInsertValues.bind(this)}
-									setAttributesForInsertMLV={this.setAttributesForInsertMLV.bind(this)}
-									addAttributeInsertValue={this.addAttributeInsertValue.bind(this)}
-									addAttributeInsertValueGroup={this.addAttributeInsertValueGroup.bind(this)}
-									deleteAttributeInsertValueGroup={this.deleteAttributeInsertValueGroup.bind(this)}
-									saveFetchMLVForInsert={this.saveFetchMLVForInsert.bind(this)}
-									addFilterForFetchMLVForInsert={this.addFilterForFetchMLVForInsert.bind(this)}
-									editFilterForFetchMLVForInsert={this.editFilterForFetchMLVForInsert.bind(this)}
-									generateFetchMLVForInsert={this.generateFetchMLVForInsert.bind(this)}
-									fetchMLVForinsert={this.state.fetchMLVForinsert}
-									toggleRSInsert={this.toggleRSInsert.bind(this)}
-									toggleBulkInsert={this.toggleBulkInsert.bind(this)}
-									rsInsertFlag={this.state.rsInsertFlag}
-									bulkInsertFlag={this.state.bulkInsertFlag}
-									deleteInsertMLV={this.deleteInsertMLV.bind(this)}
-									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
-									addAttributeValuePairForInsert={this.addAttributeValuePairForInsert.bind(this)}
-									setSelectedAttributeForInsert={this.setSelectedAttributeForInsert.bind(this)}
-									addFilterForFetchFromAnotherSourceForInsert={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
-									editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
-									copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}
-									executeInsert={this.executeInsert.bind(this)}
-								/>
-							</TabStripTab>
-							<TabStripTab title="Update">
-								<UpdateDetails
-									toggleFetchFromAnotherSourceForUpdate={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
-									fetchFromAnotherSourceForUpdateFlag={this.state.fetchFromAnotherSourceForUpdateFlag}
-									generateMLVFetchFromAnotherSourceForUpdate={this.generateMLVFetchFromAnotherSourceForUpdate.bind(this)}
-									fetchFromAnotherSourceForUpdate={this.state.fetchFromAnotherSourceForUpdate}
-									saveMLVForFetchFromAnotherSourceForUpdate={this.saveMLVForFetchFromAnotherSourceForUpdate.bind(this)}
-									addFilterForFetchFromAnotherSourceForUpdate={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
-									editFilterForFetchFromAnotherSourceForUpdate={this.editFilterForFetchFromAnotherSourceForUpdate.bind(this)}
-									updateMLVArray={this.state.updateMLVs.updateMLVArray}
-									addUpdateMLV={this.addUpdateMLV.bind(this)}
-									generateUpdateMLV={this.generateUpdateMLV.bind(this)}
-									saveUpdateMLV={this.saveUpdateMLV.bind(this)}
-									deleteUpdateMLV={this.deleteUpdateMLV.bind(this)}
-									addUpdateValuePair={this.addUpdateValuePair.bind(this)}
-									setSelectedAttribute={this.setSelectedAttribute.bind(this)}
-									setValueForSelectedAttributeForUpdate={this.setValueForSelectedAttributeForUpdate.bind(this)}
-									deleteSelectedAttributeForUpdate={this.deleteSelectedAttributeForUpdate.bind(this)}
-									setIDForUpdate={this.setIDForUpdate.bind(this)}
-									setPIDForUpdate={this.setPIDForUpdate.bind(this)}
-									setLEVForUpdate={this.setLEVForUpdate.bind(this)}
-									setPINForUpdate={this.setPINForUpdate.bind(this)}
-									addFilterForUpdate={this.addFilterForUpdate.bind(this)}
-									editFilterForUpdate={this.editFilterForUpdate.bind(this)}
-									generateFetchMLVForUpdate={this.generateFetchMLVForUpdate.bind(this)}
-									saveFetchMLVForUpdate={this.saveFetchMLVForUpdate.bind(this)}
-									fetchMLVForUpdate={this.state.fetchMLVForUpdate}
-									addFilterForFetchMLVForUpdate={this.addFilterForFetchMLVForUpdate.bind(this)}
-									editFilterForFetchMLVForUpdate={this.editFilterForFetchMLVForUpdate.bind(this)}
-									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
-									copyInsertMLVToUpdateFetch={this.copyInsertMLVToUpdateFetch.bind(this)}
-									copyInsertMLVToUpdate={this.copyInsertMLVToUpdate.bind(this)}
-
-								/>
-							</TabStripTab>
-							<TabStripTab title="Delete">
-								<DeleteDetails
-									deleteMLVs={this.state.deleteMLVs}
-									addDeleteMLV={this.addDeleteMLV.bind(this)}
-									generateDeleteMLV={this.generateDeleteMLV.bind(this)}
-									saveDeleteMLV={this.saveDeleteMLV.bind(this)}
-									deleteDeleteMLV={this.deleteDeleteMLV.bind(this)}
-									addFilterForDelete={this.addFilterForDelete.bind(this)}
-									editFilterForDelete={this.editFilterForDelete.bind(this)}
-									fetchMLVForDelete={this.state.fetchMLVForDelete}
-									generateFetchMLVForDelete={this.generateFetchMLVForDelete.bind(this)}
-									saveFetchMLVForDelete={this.saveFetchMLVForDelete.bind(this)}
-									addFilterForFetchMLVForDelete={this.addFilterForFetchMLVForDelete.bind(this)}
-									editFilterForFetchMLVForDelete={this.editFilterForFetchMLVForDelete.bind(this)}
-									toggleFetchFromAnotherSourceForDelete={this.toggleFetchFromAnotherSourceForDelete.bind(this)}
-									fetchFromAnotherSourceForDeleteFlag={this.state.fetchFromAnotherSourceForDeleteFlag}
-									fetchFromAnotherSourceForDelete={this.state.fetchFromAnotherSourceForDelete}
-									saveMLVForFetchFromAnotherSourceForDelete={this.saveMLVForFetchFromAnotherSourceForDelete.bind(this)}
-									addFilterForFetchFromAnotherSourceForDelete={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
-									editFilterForFetchFromAnotherSourceForDelete={this.editFilterForFetchFromAnotherSourceForDelete.bind(this)}
-									generateMLVFetchFromAnotherSourceForDelete={this.generateMLVFetchFromAnotherSourceForDelete.bind(this)}
-									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
-									copyInsertMLVToDeleteFetch={this.copyInsertMLVToDeleteFetch.bind(this)}
-									copyInsertMLVToDelete={this.copyInsertMLVToDelete.bind(this)}
-
-								/>
-							</TabStripTab>
-							<TabStripTab title="Delete All">
-								<DeleteAllDetails
-									deleteAllMLVs={this.state.deleteAllMLVs}
-									addDeleteAllMLV={this.addDeleteAllMLV.bind(this)}
-									generateDeleteAllMLV={this.generateDeleteAllMLV.bind(this)}
-									saveDeleteAllMLV={this.saveDeleteAllMLV.bind(this)}
-									deleteDeleteAllMLV={this.deleteDeleteAllMLV.bind(this)}
-									addFilterForDeleteAll={this.addFilterForDeleteAll.bind(this)}
-									editFilterForDeleteAll={this.editFilterForDeleteAll.bind(this)}
-									generateBaseline={this.generateBaseline.bind(this)}
-									insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
-									copyInsertMLVToDeleteAll={this.copyInsertMLVToDeleteAll.bind(this)}
-								/>
-							</TabStripTab>
-						</TabStrip>
+									/>
+								</TabStripTab>
+								<TabStripTab title="Delete All">
+									<DeleteAllDetails
+										deleteAllMLVs={this.state.deleteAllMLVs}
+										addDeleteAllMLV={this.addDeleteAllMLV.bind(this)}
+										generateDeleteAllMLV={this.generateDeleteAllMLV.bind(this)}
+										saveDeleteAllMLV={this.saveDeleteAllMLV.bind(this)}
+										deleteDeleteAllMLV={this.deleteDeleteAllMLV.bind(this)}
+										addFilterForDeleteAll={this.addFilterForDeleteAll.bind(this)}
+										editFilterForDeleteAll={this.editFilterForDeleteAll.bind(this)}
+										generateBaseline={this.generateBaseline.bind(this)}
+										insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
+										copyInsertMLVToDeleteAll={this.copyInsertMLVToDeleteAll.bind(this)}
+									/>
+								</TabStripTab>
+							</TabStrip>
+						</div>
 					</div>
 				</div>
+				{
+					this.state.resultSetList.length > 0 &&
+					this.state.showResultSet == true &&
+
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%', marginBottom: '10em' }}>
+						<div className="row justify-content-right">
+							<div className='col-lg-2'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.decreaseIndex.bind(this)}
+								>
+									Left
+						</Button>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.increaseIndex.bind(this)}
+								>
+									Right
+						</Button>
+							</div>
+
+							<div className='col-lg-2'></div>
+							<div className='col-lg-4'>
+								{this.state.resultsetOperation}
+							</div>
+							
+							<div className='col-lg-2'></div>
+							<div className='col-lg-1'></div>
+							<div className='col-lg-1'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.closeResultSet.bind(this)}
+								>
+									Close
+						</Button>
+							</div>
+						</div>
+
+						<div style={{ overflowX: "scroll" }}>
+							<Grid
+								style={{ height: "40em", overflowX: "scroll" }}
+								data={this.state.resultSetList}
+								resizable={true}
+								scrollable="scrollable"
+							>
+								{
+									columnsElement
+								}
+							</Grid>
+						</div>
+					</div>
+				}
 			</div>
 		)
 	}
