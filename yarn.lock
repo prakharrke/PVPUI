@@ -896,6 +896,14 @@
     "@progress/kendo-react-popup" "2.4.0"
     prop-types "^15.6.0"
 
+"@progress/kendo-react-dialogs@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-react-dialogs/-/kendo-react-dialogs-2.5.0.tgz#0671e23005748b4e77edf255f3f173ccf2a6fb7e"
+  integrity sha512-Ed2UDDgoFoQm7F0dAdkA4ue2WKsb3xzSeGnxNIY6n627JL78kPVxrCLcVXrlLBrY+j+1YjM38vBAGh/Hpy/T/g==
+  dependencies:
+    "@progress/kendo-react-common" "2.5.0"
+    prop-types "^15.6.0"
+
 "@progress/kendo-react-dropdowns@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@progress/kendo-react-dropdowns/-/kendo-react-dropdowns-2.4.0.tgz#8a8e1aa49de0877bd4d0bc223222ce18350fa588"

@@ -21,7 +21,8 @@ export default class PVPUI extends Component {
 			mlv: '',
 			createBaseline: false,
 			mlvGeneratorState: {},
-			connInfoList: []
+			connInfoList: [],
+			pluginList : []
 
 		}
 
@@ -113,6 +114,13 @@ export default class PVPUI extends Component {
 
     }
 
+    setPluginList(pluginList){
+    	this.setState({
+    		...this.state,
+    		pluginList : pluginList
+    	})
+    }
+
 
 
 	render() {
@@ -158,6 +166,7 @@ export default class PVPUI extends Component {
 						modelNotCreated={this.modelNotCreated.bind(this)}
 						modelCreated={this.modelCreated.bind(this)}
 						setConnInfoList={this.setConnInfoList.bind(this)}
+						setPluginList={this.setPluginList.bind(this)}
 					/>
 
 				</nav>
@@ -194,7 +203,7 @@ export default class PVPUI extends Component {
 					}} />
 
 					<Route path='/writeBaseline' render={props => {
-						return (<WriteBaseline connInfoList={this.state.connInfoList}/>
+						return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList}/>
 							)
 					}} />
 				</Switch>

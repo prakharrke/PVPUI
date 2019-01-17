@@ -29,6 +29,15 @@ export default class MLVGenerator extends Component {
 		}
 		else
 			this.state = {
+				ID: {
+					
+				},
+				PID: {
+					
+				},
+				LEV: {
+					
+				},
 				total: this.props.connInfoList[0].objectList.length,
 				skip: 0,
 				filterOperator: 'contains',
@@ -733,6 +742,7 @@ export default class MLVGenerator extends Component {
 		attributes.push({
 			columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 			attributeName: event.target.value,
+			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
 			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
 		})
 		this.setState({
@@ -817,6 +827,7 @@ export default class MLVGenerator extends Component {
 			attributes.push({
 				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 				attributeName: event.target.value,
+				attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
 				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
 			})
 			this.setState({
@@ -831,7 +842,7 @@ export default class MLVGenerator extends Component {
 	}
 
 	addCustomAttributeToAttributeList(event) {
-		
+
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
@@ -840,6 +851,7 @@ export default class MLVGenerator extends Component {
 			attributes.push({
 				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 				attributeName: event.target.value,
+				attributeValue: event.target.value,
 				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
 			})
 			this.setState({
@@ -855,10 +867,14 @@ export default class MLVGenerator extends Component {
 
 	// * ADD CUSTOM ATTRIBUTE 
 	addCustomAttribute(event) {
-
+		var value = '';
+		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+			value = `${this.state.selectedObject.objectName}.${event.target.value}`
+		else
+			value = event.target.value
 		this.setState({
 
-			customAttribute: (this.state.customAttribute + " " + event.target.value)
+			customAttribute: (this.state.customAttribute + " " + value)
 		})
 	}
 
@@ -1642,6 +1658,9 @@ export default class MLVGenerator extends Component {
 		requestData['selectedObjectList'] = this.state.selectedObjectList;
 		requestData['parallelExecution'] = this.state.parallelExecution;
 		requestData['cache'] = this.state.cache;
+		requestData['ID'] = this.state.ID;
+		requestData['PID'] = this.state.PID;
+		requestData['LEV'] = this.state.LEV;
 		axios.post('http://localhost:9090/PVPUI/GenerateMLV', 'selectedObjectList=' + btoa(JSON.stringify(requestData)), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -1755,6 +1774,78 @@ export default class MLVGenerator extends Component {
 		if (this.props.parent == undefined)
 
 			this.props.loadMLVGeneratorState(this.state);
+	}
+
+	// * METHOD TO SET ID
+
+	setID(event) {
+		if(event.target.value === ''){
+			delete this.state.ID[this.state.selectedObject.objectID]
+			this.setState({
+				ID : {
+					...this.state.ID
+				}
+			})
+			return 
+		}
+		var value = '';
+		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+			value = `${this.state.selectedObject.objectName}.${event.target.value}`
+		else
+			value = event.target.value
+		this.setState({
+			...this.state,
+			ID: {
+				...this.state.ID,
+				[this.state.selectedObject.objectID] : value
+			}
+		})
+	}
+	setPID(event) {
+		if(event.target.value === ''){
+			delete this.state.PID[this.state.selectedObject.objectID]
+			this.setState({
+				PID : {
+					...this.state.PID
+				}
+			})
+			return 
+		}
+		var value = '';
+		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+			value = `${this.state.selectedObject.objectName}.${event.target.value}`
+		else
+			value = event.target.value
+		this.setState({
+			...this.state,
+			PID: {
+				...this.state.PID,
+				[this.state.selectedObject.objectID] : value
+			}
+		})
+	}
+	setLEV(event) {
+		if(event.target.value === ''){
+			delete this.state.LEV[this.state.selectedObject.objectID]
+			this.setState({
+				LEV : {
+					...this.state.LEV
+				}
+			})
+			return 
+		}
+		var value = '';
+		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+			value = `${this.state.selectedObject.objectName}.${event.target.value}`
+		else
+			value = event.target.value
+		this.setState({
+			...this.state,
+			LEV: {
+				...this.state.LEV,
+				[this.state.selectedObject.objectID] : value
+			}
+		})
 	}
 
 
@@ -1973,6 +2064,32 @@ export default class MLVGenerator extends Component {
 										</select>
 									</div>
 
+								</div>
+								< div className="row justify-content-center">
+									<div className="col-lg-4">
+										<AutoComplete
+											data={this.state.attributeListForSelectedObject}
+											onChange={this.setID.bind(this)}
+											style={{ width: "100%" }}
+											value={this.state.ID[this.state.selectedObject.objectID]}
+											label="ID" />
+									</div>
+									<div className="col-lg-4">
+										<AutoComplete
+											data={this.state.attributeListForSelectedObject}
+											onChange={this.setPID.bind(this)}
+											style={{ width: "100%" }}
+											value={this.state.PID[this.state.selectedObject.objectID]}
+											label="PID" />
+									</div>
+									<div className="col-lg-4">
+										<AutoComplete
+											data={this.state.attributeListForSelectedObject}
+											onChange={this.setLEV.bind(this)}
+											style={{ width: "100%" }}
+											value={this.state.LEV[this.state.selectedObject.objectID]}
+											label="LEV" />
+									</div>
 								</div>
 								<PanelBarItem title={<i style={{ fintSize: "14px" }}>Add custom Attrbutes</i>}>
 									<div className="row">

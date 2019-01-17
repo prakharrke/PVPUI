@@ -10,6 +10,7 @@ import DeleteDetails from './Components/deleteDetails'
 import DeleteAllDetails from './Components/DeleteAllDetails'
 import MLVGenerator from './MLVGenerator';
 import LoadingPanel from './Components/LoadingPanel'
+import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 import axios from 'axios';
 export default class WriteBaseline extends Component {
@@ -19,8 +20,12 @@ export default class WriteBaseline extends Component {
 		super(props);
 
 		this.state = {
+
+			writeConnection : '',
+			fetchFromAnotherSourceConnection : '',
+			showConnectionSelectionDialog: false,
 			resultSetList: [],
-			resultsetOperation : '',
+			resultsetOperation: '',
 			showResultSet: false,
 			isLoading: false,
 			baselineFilesList: [],
@@ -29,7 +34,7 @@ export default class WriteBaseline extends Component {
 			testCaseDescription: '',
 			mountMLVGenerator: false,
 			operation: '',
-			columnNames : [],
+			columnNames: [],
 			fetchFromAnotherSourceForInsertFlag: false,
 			fetchFromAnotherSourceForUpdateFlag: false,
 			fetchFromAnotherSourceForDeleteFlag: false,
@@ -106,7 +111,8 @@ export default class WriteBaseline extends Component {
 			console.log(response.data)
 			//this.isNotLoading();
 			this.setState({
-				baslineFilesList: response.data
+				baslineFilesList: response.data,
+				showConnectionSelectionDialog: true
 			})
 		})
 	}
@@ -152,7 +158,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchFromAnotherSourceForInsert,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin: selectedPlugin
+						selectedPlugin: this.state.fetchFromAnotherSourceConnection
 					},
 					mountMLVGenerator: false
 				})
@@ -393,7 +399,7 @@ export default class WriteBaseline extends Component {
 	// * METHOD TO ADD ATTRIBUTE VALUE PAIR FOR INSERT
 
 	addAttributeValuePairForInsert(index) {
-		alert(index)
+		
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var values = insertMLVArray[index].values;
 
@@ -583,6 +589,9 @@ export default class WriteBaseline extends Component {
 
 		insertDetails['deleteAllMLVs'] = this.state.deleteAllMLVs;
 
+		insertDetails['writePluginName'] = this.state.writeConnection;
+		insertDetails['fetchFromAnotherSourcePluginName'] = this.state.fetchFromAnotherSourceConnection
+
 		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (JSON.stringify(insertDetails)), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -633,7 +642,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchFromAnotherSourceForUpdate,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin: selectedPlugin
+						selectedPlugin: this.state.fetchFromAnotherSourceConnection
 					},
 					mountMLVGenerator: false
 				})
@@ -948,7 +957,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchMLVForUpdate,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin: selectedPlugin
+						selectedPlugin: this.state.fetchFromAnotherSourceConnection
 					},
 					mountMLVGenerator: false
 				})
@@ -1024,7 +1033,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchFromAnotherSourceForDelete,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin: selectedPlugin
+						selectedPlugin: this.state.fetchFromAnotherSourceConnection
 					},
 					mountMLVGenerator: false
 				})
@@ -1244,7 +1253,7 @@ export default class WriteBaseline extends Component {
 						...this.state.fetchMLVForDelete,
 						mlv: mlv,
 						attributes: temp,
-						selectedPlugin: selectedPlugin
+						selectedPlugin: this.state.fetchFromAnotherSourceConnection
 					},
 					mountMLVGenerator: false
 				})
@@ -1544,7 +1553,7 @@ export default class WriteBaseline extends Component {
 			this.setState({
 				...this.state,
 				columnNames: JSON.parse(parsed[0]).columnNames,
-				resultsetOperation : resultsetOperation
+				resultsetOperation: resultsetOperation
 			})
 
 			// * Populating resultsetList array with decoded values from the parsed resultset received.
@@ -1586,11 +1595,103 @@ export default class WriteBaseline extends Component {
 
 	}
 
+	toggleDialog(event) {
+		this.setState({
+			showConnectionSelectionDialog: !this.state.showConnectionSelectionDialog
+		})
+	}
+
+	setWriteConnection(event){
+		this.setState({
+			...this.state,
+			writeConnection : event.target.value
+		})
+	}
+
+	setFetchFromAnotherSourceConnection(event){
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceConnection : event.target.value
+		})
+	}
+
 
 
 
 	render() {
+
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
+		var fetchFromAnotherSourceConnectionSelectionElement = (
+			<div>
+				{this.state.showConnectionSelectionDialog && <Dialog title={"Status"} onClose={this.toggleDialog.bind(this)} width={1000} height={250}>
+					<div className="row justify-content-center" style={{ width: '100%' }}>
+						<div className="col-lg-6">
+							<select
+								multiple
+								className="form-control"
+								size={4}
+								//onDoubleClick={this.addPredicate.bind(this)}
+
+								style={{ overflowX: "scroll" }}
+							>
+								{
+									this.props.pluginList.map((plugin) => {
+
+										return (
+
+											<option key={plugin}
+												onDoubleClick={this.setWriteConnection.bind(this)}
+												value={plugin}>{plugin}</option>
+										)
+									})
+								}
+							</select>
+							<Input
+									
+									label="Write Connection"
+									style={{ width: "90%", textAlign: "center", margin: "1em" }}
+									value={this.state.writeConnection}
+								/>
+						</div>
+						<div className="col-lg-6">
+							<select
+								multiple
+								className="form-control"
+								size={4}
+								//onDoubleClick={this.addPredicate.bind(this)}
+
+								style={{ overflowX: "scroll" }}
+							>
+								{
+									this.props.pluginList.map((plugin) => {
+
+										return (
+
+											<option key={plugin}
+												onDoubleClick={this.setFetchFromAnotherSourceConnection.bind(this)}
+												value={plugin}>{plugin}</option>
+										)
+									})
+								}
+							</select>
+							<Input
+									
+									label="Fetch From Another Source Connection"
+									style={{ width: "90%", textAlign: "center", margin: "1em" }}
+									
+									value={this.state.fetchFromAnotherSourceConnection}
+								/>
+						</div>
+					</div>
+					<DialogActionsBar>
+
+
+					</DialogActionsBar>
+				</Dialog>}
+			</div>
+
+
+		)
 		console.log(this.state)
 		var mlvGenerator = this.state.mountMLVGenerator && this.props.connInfoList.length > 0 ? (
 			<MLVGenerator connInfoList={this.props.connInfoList}
@@ -1626,9 +1727,34 @@ export default class WriteBaseline extends Component {
 		})
 		return (
 			<div>
+				{fetchFromAnotherSourceConnectionSelectionElement}
 				<div className="container-fluid" style={{ marginTop: "2em" }}>
 					{loadingComponent}
 					{mlvGenerator}
+					<div className="row justify-content-center">
+						<div className="col-lg-6 justify-content-center">
+							<DropDownList
+								style={{ margin: "1em", width: "100%" }}
+								data={this.state.baslineFilesList}
+								label="Select baseline file"
+								onChange={this.selectBaseline.bind(this)}
+								value={this.state.selectedBaseline}
+							/>
+							<Input
+
+								label="Add a new baseline instead.."
+								value={this.state.newBaselineName}
+								style={{ width: "100%", textAlign: "center", margin: "1em" }}
+								onChange={this.addNewBaseline.bind(this)}
+
+							/>
+
+
+						</div>
+
+
+
+					</div>
 					<div className="row">
 						<div className="col-lg-6">
 							<form className="k-form">
@@ -1654,30 +1780,7 @@ export default class WriteBaseline extends Component {
 							</form>
 						</div>
 					</div>
-					<div className="row justify-content-center">
-						<div className="col-lg-6 justify-content-center">
-							<DropDownList
-								style={{ margin: "1em", width: "100%" }}
-								data={this.state.baslineFilesList}
-								label="Select baseline file"
-								onChange={this.selectBaseline.bind(this)}
-								value={this.state.selectedBaseline}
-							/>
-							<Input
 
-								label="Add a new baseline instead.."
-								value={this.state.newBaselineName}
-								style={{ width: "100%", textAlign: "center", margin: "1em" }}
-								onChange={this.addNewBaseline.bind(this)}
-
-							/>
-
-
-						</div>
-
-
-
-					</div>
 					<div className="row">
 						<div className="col-lg-12">
 							<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
@@ -1828,7 +1931,7 @@ export default class WriteBaseline extends Component {
 							<div className='col-lg-4'>
 								{this.state.resultsetOperation}
 							</div>
-							
+
 							<div className='col-lg-2'></div>
 							<div className='col-lg-1'></div>
 							<div className='col-lg-1'>

@@ -286,7 +286,7 @@ export default class InsertDetails extends Component {
 								<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
 
 									<PanelBar >
-										<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Update Values'}</i>}>
+										<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Insert Values'}</i>}>
 											<div className="row justify-content-center">
 												<div className="col-lg-1">
 													<Button

@@ -48,6 +48,8 @@ export default class ConnectionCreation extends Component {
 				pluginList: pluginList
 			})
 
+			this.props.setPluginList(pluginList)
+
 		}).catch(e => {
 			console.log(e)
 			this.props.isNotLoading();
