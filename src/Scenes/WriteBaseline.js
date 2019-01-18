@@ -20,7 +20,7 @@ export default class WriteBaseline extends Component {
 		super(props);
 
 		this.state = {
-
+			insertState : {},
 			writeConnection : '',
 			fetchFromAnotherSourceConnection : '',
 			showConnectionSelectionDialog: false,
@@ -459,6 +459,21 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+	deleteSelectedAttributeForInsert(index, attributeIndex){
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		insertMLVArray[index].values.map(valueArray=>{
+
+			valueArray.splice(attributeIndex, 1)
+		})
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+
+	}
 	addAttributeInsertValueGroup(index) {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		//var attributeLength = insertMLVArray[index].attributes.length;
@@ -608,6 +623,13 @@ export default class WriteBaseline extends Component {
 			alert(e)
 		})
 
+	}
+
+	saveInsertDetailsState(insertState){
+		this.setState({
+			...this.state,
+			insertState : insertState
+		})
 	}
 
 	// ****************** UPDATE_DETAILS METHODS *******************************
@@ -1623,13 +1645,13 @@ export default class WriteBaseline extends Component {
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 		var fetchFromAnotherSourceConnectionSelectionElement = (
 			<div>
-				{this.state.showConnectionSelectionDialog && <Dialog title={"Status"} onClose={this.toggleDialog.bind(this)} width={1000} height={250}>
+				{this.state.showConnectionSelectionDialog && <Dialog title={"Please select connections"} onClose={this.toggleDialog.bind(this)} width={800} height={500}>
 					<div className="row justify-content-center" style={{ width: '100%' }}>
 						<div className="col-lg-6">
 							<select
 								multiple
 								className="form-control"
-								size={4}
+								size={12}
 								//onDoubleClick={this.addPredicate.bind(this)}
 
 								style={{ overflowX: "scroll" }}
@@ -1648,7 +1670,7 @@ export default class WriteBaseline extends Component {
 							</select>
 							<Input
 									
-									label="Write Connection"
+									label="Destination Connection"
 									style={{ width: "90%", textAlign: "center", margin: "1em" }}
 									value={this.state.writeConnection}
 								/>
@@ -1657,7 +1679,7 @@ export default class WriteBaseline extends Component {
 							<select
 								multiple
 								className="form-control"
-								size={4}
+								size={12}
 								//onDoubleClick={this.addPredicate.bind(this)}
 
 								style={{ overflowX: "scroll" }}
@@ -1676,7 +1698,7 @@ export default class WriteBaseline extends Component {
 							</select>
 							<Input
 									
-									label="Fetch From Another Source Connection"
+									label="Source Connection"
 									style={{ width: "90%", textAlign: "center", margin: "1em" }}
 									
 									value={this.state.fetchFromAnotherSourceConnection}
@@ -1684,7 +1706,16 @@ export default class WriteBaseline extends Component {
 						</div>
 					</div>
 					<DialogActionsBar>
-
+					<Button
+						onClick={this.toggleDialog.bind(this)}
+					>
+					Cancel
+					</Button>
+					<Button
+						onClick={this.toggleDialog.bind(this)}
+					>
+					Save
+					</Button>
 
 					</DialogActionsBar>
 				</Dialog>}
@@ -1787,6 +1818,8 @@ export default class WriteBaseline extends Component {
 
 								<TabStripTab title="Insert">
 									<InsertDetails
+										insertState={this.state.insertState}
+										saveInsertDetailsState={this.saveInsertDetailsState.bind(this)}
 										generateMLV={this.generateMLV.bind(this)}
 										saveMLVForFetchFromAnotherSource={this.saveMLVForFetchFromAnotherSource.bind(this)}
 										fetchFromAnotherSourceForInsert={this.state.fetchFromAnotherSourceForInsert}
@@ -1822,6 +1855,7 @@ export default class WriteBaseline extends Component {
 										editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
 										copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}
 										executeInsert={this.executeInsert.bind(this)}
+										deleteSelectedAttributeForInsert={this.deleteSelectedAttributeForInsert.bind(this)}
 									/>
 								</TabStripTab>
 								<TabStripTab title="Update">

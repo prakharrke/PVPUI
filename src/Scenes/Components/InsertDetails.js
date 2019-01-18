@@ -8,6 +8,7 @@ export default class InsertDetails extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			...this.props.insertState,
 			fetchFromAnotherSource: false,
 			rawData: true,
 
@@ -181,6 +182,15 @@ export default class InsertDetails extends Component {
 		this.props.executeInsert();
 	}
 
+	deleteSelectedAttributeForInsert(event) {
+		event.preventDefault();
+		this.props.deleteSelectedAttributeForInsert(event.target.id, event.target.attributeIndex)
+
+	}
+	componentWillUnmount(){
+		this.props.saveInsertDetailsState(this.state)
+	}
+
 
 	render() {
 
@@ -244,11 +254,12 @@ export default class InsertDetails extends Component {
 							/>
 						</div>
 						<div className="col-lg-3">
-							<Input
+							
+							<DropDownList
 								data={object.attributes}
 								label="LEV"
 								id={object.index}
-								style={{ width: '100%', margin: '2em' }}
+								style={{ width: '100%', margin: '1em' }}
 								onChange={this.setInsertLEV.bind(this)}
 								value={object.LEV}
 							/>
@@ -345,7 +356,7 @@ export default class InsertDetails extends Component {
 													return (
 
 														<div className="row justify-content-center">
-															<div className="col-lg-6">
+															<div className="col-lg-5">
 																<DropDownList
 																	data={object.attributes}
 																	label="Column Name"
@@ -357,7 +368,7 @@ export default class InsertDetails extends Component {
 																	value={valueObject.attributeName}
 																/>
 															</div>
-															<div className="col-lg-6">
+															<div className="col-lg-5">
 
 																{this.props.fetchFromAnotherSourceForInsertFlag ?
 																	(
@@ -384,6 +395,15 @@ export default class InsertDetails extends Component {
 																		value={valueObject.value}
 																	/>)}
 															</div>
+															<div className='col-lg-1'>
+															<Button
+																primary={true}
+																id={object.index}
+																attributeIndex={index}
+																onClick={this.deleteSelectedAttributeForInsert.bind(this)}
+															>Delete
+															</Button>
+														</div>
 														</div>
 
 													)
