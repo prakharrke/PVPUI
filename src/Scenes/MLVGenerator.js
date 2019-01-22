@@ -59,6 +59,7 @@ export default class MLVGenerator extends Component {
 					level: '',
 					objectName: '',
 					nativeRelations: [],
+					nativeRelationsData : [],
 					objectID: ''
 				},
 				explicitRelation: {
@@ -1309,7 +1310,8 @@ export default class MLVGenerator extends Component {
 
 			this.setState({
 				...this.state,
-				nativeRelations: parsedJson.nativeRelationsBetweenObjects
+				nativeRelations: parsedJson.nativeRelationsBetweenObjects,
+				nativeRelationsData : parsedJson.nativeRelationsBetweenObjects
 			})
 
 		}).catch(e => {
@@ -1379,6 +1381,15 @@ export default class MLVGenerator extends Component {
 				[parentObject.objectID]: {
 					...this.state[parentObject.objectID],
 					parentTo: parentTo
+				},
+				parentObject : {
+					levelName: "Select Parent",
+					id: 0,
+					level: '',
+					objectName: '',
+					nativeRelations: [],
+					nativeRelationsData : [],
+					objectID: ''
 				}
 			})
 
@@ -1847,6 +1858,13 @@ export default class MLVGenerator extends Component {
 			}
 		})
 	}
+
+
+	nativeRelationsFilter = (event) => {
+        this.setState({
+            nativeRelationsData: filterBy(this.state.nativeRelations.slice(), event.filter)
+        });
+    }
 
 
 	render() {
@@ -2543,9 +2561,11 @@ export default class MLVGenerator extends Component {
 											<div className="col-lg-4 justify-content-center">
 												<MultiSelect
 													placeholder={"Native Relations"}
-													data={this.state.nativeRelations}
+													data={this.state.nativeRelationsData}
+													filterable={true}
 													style={{ margin: "1em", width: '100%' }}
 													onChange={this.addNativeRelation.bind(this)}
+													onFilterChange={this.nativeRelationsFilter.bind(this)}
 													value={this.state[this.state.selectedObject.objectID].relation.native}
 												/>
 											</div>

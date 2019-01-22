@@ -7,7 +7,6 @@ import CreateBaseline from "./Scenes/CreateBaseline"
 import './css/bootstrap.min.css'
 import './css/bootstrap.css'
 import './css/all.css';
-
 import './css/transition.css'
 
 

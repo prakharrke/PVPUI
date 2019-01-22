@@ -165,19 +165,25 @@ export default class InsertDetails extends Component {
 	}
 	setSelectedAttributeForInsert(event) {
 
-		this.props.setSelectedAttributeForInsert(event.target.props.id, event.target.props.attributeIndex, event.target.value)
+		//this.props.setSelectedAttributeForInsert(event.target.props.id, event.target.props.attributeIndex, event.target.value)
+
+	}
+
+	setSelectedAttributeForInsertNew(event){
+		console.log(event.target)
+		this.props.addAttributeValuePairForInsertNew(event.target.id, event.target.value)
 	}
 
 	setInsertPIN(event) {
 		this.props.setInsertPIN(event.target.props.id, event.target.value)
 	}
 
-	copyInsertMLVToInsertFetch(event){
+	copyInsertMLVToInsertFetch(event) {
 		event.preventDefault();
 		this.props.copyInsertMLVToInsertFetch();
 	}
 
-	executeInsert(event){
+	executeInsert(event) {
 		event.preventDefault();
 		this.props.executeInsert();
 	}
@@ -187,7 +193,7 @@ export default class InsertDetails extends Component {
 		this.props.deleteSelectedAttributeForInsert(event.target.id, event.target.attributeIndex)
 
 	}
-	componentWillUnmount(){
+	componentWillUnmount() {
 		this.props.saveInsertDetailsState(this.state)
 	}
 
@@ -254,7 +260,7 @@ export default class InsertDetails extends Component {
 							/>
 						</div>
 						<div className="col-lg-3">
-							
+
 							<DropDownList
 								data={object.attributes}
 								label="LEV"
@@ -351,82 +357,133 @@ export default class InsertDetails extends Component {
 											</div>
 
 
-											{this.state[`attributeGroupIndex_${object.index}`] != undefined ?
-												object.values[this.state[`attributeGroupIndex_${object.index}`]].map((valueObject, index) => {
-													return (
+											{/*{
+												this.state[`attributeGroupIndex_${object.index}`] != undefined ?
+													object.values[this.state[`attributeGroupIndex_${object.index}`]].map((valueObject, index) => {
+														return (
 
-														<div className="row justify-content-center">
-															<div className="col-lg-5">
-																<DropDownList
-																	data={object.attributes}
-																	label="Column Name"
-																	groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
-																	id={object.index}
-																	attributeIndex={index}
-																	style={{ width: '100%', margin: '1em' }}
-																	onChange={this.setSelectedAttributeForInsert.bind(this)}
-																	value={valueObject.attributeName}
-																/>
-															</div>
-															<div className="col-lg-5">
-
-																{this.props.fetchFromAnotherSourceForInsertFlag ?
-																	(
-																		<DropDownList
-																			data={this.props.fetchFromAnotherSourceForInsert.attributes}
-																			label="Column Name"
-																			groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
-																			id={object.index}
-																			attributeIndex={index}
-																			style={{ width: '100%', margin: '1em' }}
-																			onChange={this.addAttributeInsertValue.bind(this)}
-																			value={valueObject.value}
-																		/>
-																	)
-																	:
-																	(<Input
-
-																		label="Value"
+															<div className="row justify-content-center">
+																<div className="col-lg-5">
+																	<DropDownList
+																		data={object.attributes}
+																		label="Column Name"
 																		groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
 																		id={object.index}
 																		attributeIndex={index}
-																		style={{ width: '100%', margin: '2em' }}
-																		onChange={this.addAttributeInsertValue.bind(this)}
-																		value={valueObject.value}
-																	/>)}
-															</div>
-															<div className='col-lg-1'>
-															<Button
-																primary={true}
-																id={object.index}
-																attributeIndex={index}
-																onClick={this.deleteSelectedAttributeForInsert.bind(this)}
-															>Delete
-															</Button>
-														</div>
-														</div>
+																		style={{ width: '100%', margin: '1em' }}
+																		onChange={this.setSelectedAttributeForInsert.bind(this)}
+																		value={valueObject.attributeName}
+																	/>
+																</div>
+																<div className="col-lg-5">
 
-													)
-												}) : ''
+																	{this.props.fetchFromAnotherSourceForInsertFlag ?
+																		(
+																			<DropDownList
+																				data={this.props.fetchFromAnotherSourceForInsert.attributes}
+																				label="Column Name"
+																				groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																				id={object.index}
+																				attributeIndex={index}
+																				style={{ width: '100%', margin: '1em' }}
+																				onChange={this.addAttributeInsertValue.bind(this)}
+																				value={valueObject.value}
+																			/>
+																		)
+																		:
+																		(<Input
+
+																			label="Value"
+																			groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																			id={object.index}
+																			attributeIndex={index}
+																			style={{ width: '100%', margin: '2em' }}
+																			onChange={this.addAttributeInsertValue.bind(this)}
+																			value={valueObject.value}
+																		/>)}
+																</div>
+																<div className='col-lg-1'>
+																	<Button
+																		primary={true}
+																		id={object.index}
+																		attributeIndex={index}
+																		onClick={this.deleteSelectedAttributeForInsert.bind(this)}
+																	>Delete
+																									</Button>
+																</div>
+															</div>
+
+														)
+													}) : ''
+											}*/}
+
+											{
+												this.state[`attributeGroupIndex_${object.index}`] != undefined ?
+													(
+														<div className="row">
+															<div className="col-lg-6">
+																<select
+																	multiple
+																	className="form-control"
+																	size={10}
+																	id={object.index}
+																	style={{ overflowX: "scroll", margin: '1em' }}
+																	
+																>
+																	{object.attributes.map((attributeName) => {
+																		return (
+																			<option 
+																			value={attributeName}
+																			id={object.index}
+																			onDoubleClick={this.setSelectedAttributeForInsertNew.bind(this)}
+																			>{attributeName}</option>
+
+																		)
+																	})}
+																</select>
+															</div>
+															<div className="col-lg-5">
+
+																{
+																	object.values[this.state[`attributeGroupIndex_${object.index}`]].map((valueObject, index) => {
+																		return (
+																			<div className="row">
+																			<div className="col-lg-11">
+																			<Input
+
+																				label={valueObject.attributeName}
+																				groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																				id={object.index}
+																				attributeIndex={index}
+																				style={{ width: '100%',  }}
+																				onChange={this.addAttributeInsertValue.bind(this)}
+																				value={valueObject.value}
+																			/>
+																			</div>
+																			<div className='col-lg-1'>
+																	<Button
+																		primary={true}
+																		id={object.index}
+																		attributeIndex={index}
+																		onClick={this.deleteSelectedAttributeForInsert.bind(this)}
+																	>Delete
+																									</Button>
+																</div>
+																			</div>
+																		)
+
+																	})
+																}
+
+
+															</div>
+
+														</div>
+													) : ""
+
 											}
 
-											{/*<div className="col-lg-6">
-																									{this.state[`attributeGroupIndex_${object.index}`] != undefined &&
-																										object.values[this.state[`attributeGroupIndex_${object.index}`]].map((value, index) => {
-																											return (
-																												<Input
-																													groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
-																													id={object.index}
-																													attributeIndex={index}
-																													label={object.attributes[index]}
-																													style={{ width: '100%', margin: '1em' }}
-																													value={value}
-																													onChange={this.addAttributeInsertValue.bind(this)}
-																												/>
-																											)
-																										})
-																									}
-																								</div>*/}
+
 
 										</PanelBarItem>
 									</PanelBar>
@@ -609,10 +666,10 @@ export default class InsertDetails extends Component {
 										<div className="row justify-content-center">
 											<div className="col-lg-2">
 												<Button
-											primary={true}
-											style={{ margin: '1em' }}
-											onClick={this.copyInsertMLVToInsertFetch.bind(this)}
-										>Copy from insert</Button>
+													primary={true}
+													style={{ margin: '1em' }}
+													onClick={this.copyInsertMLVToInsertFetch.bind(this)}
+												>Copy from insert</Button>
 											</div>
 										</div>
 
@@ -745,10 +802,10 @@ export default class InsertDetails extends Component {
 						<div className="row">
 							<div className="col-lg-1">
 								<Button
-										style={{ margin: "1em" }}
-										onClick={this.executeInsert.bind(this)}
-									>
-										Execute
+									style={{ margin: "1em" }}
+									onClick={this.executeInsert.bind(this)}
+								>
+									Execute
 									</Button>
 							</div>
 						</div>

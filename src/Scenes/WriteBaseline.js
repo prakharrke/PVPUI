@@ -420,6 +420,27 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
+	addAttributeValuePairForInsertNew(index, attributeName){
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		var values = insertMLVArray[index].values;
+
+		insertMLVArray[index].values.map((value) => {
+
+			value.push({
+				attributeName: attributeName,
+				value: ''
+			})
+		})
+
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+	}
+
 	// * METHOD TO SET ATTRIBUTES FOR INSERT_MLV
 	setAttributesForInsertMLV(index, attributes) {
 
@@ -607,7 +628,7 @@ export default class WriteBaseline extends Component {
 		insertDetails['writePluginName'] = this.state.writeConnection;
 		insertDetails['fetchFromAnotherSourcePluginName'] = this.state.fetchFromAnotherSourceConnection
 
-		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (JSON.stringify(insertDetails)), {
+		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (encodeURIComponent(JSON.stringify(insertDetails))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -1467,6 +1488,7 @@ export default class WriteBaseline extends Component {
 
 	addNewBaseline(event) {
 		this.setState({
+			selectedBaseline : '',
 			newBaselineName: event.target.value
 		})
 	}
@@ -1482,7 +1504,7 @@ export default class WriteBaseline extends Component {
 			...this.state,
 			isLoading: true
 		})
-		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (JSON.stringify(this.state)), {
+		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (encodeURIComponent(JSON.stringify(this.state))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -1851,6 +1873,7 @@ export default class WriteBaseline extends Component {
 										insertMLVLength={this.state.insertMLVs.insertMLVArray.length}
 										addAttributeValuePairForInsert={this.addAttributeValuePairForInsert.bind(this)}
 										setSelectedAttributeForInsert={this.setSelectedAttributeForInsert.bind(this)}
+										addAttributeValuePairForInsertNew={this.addAttributeValuePairForInsertNew.bind(this)}
 										addFilterForFetchFromAnotherSourceForInsert={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
 										editFilterForFetchFromAnotherSourceForInsert={this.editFilterForFetchFromAnotherSourceForInsert.bind(this)}
 										copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}

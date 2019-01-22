@@ -9,6 +9,8 @@ import { BrowserRouter, Route, Router, HashRouter, Redirect, Switch } from 'reac
 import { Link, NavLink } from 'react-router-dom';
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import WriteBaseline from './WriteBaseline'
+import ActivitiesBaseline from './ActivitiesBaseline'
+import '../css/transition.css';
 export default class PVPUI extends Component {
 
 	constructor(props) {
@@ -22,7 +24,8 @@ export default class PVPUI extends Component {
 			createBaseline: false,
 			mlvGeneratorState: {},
 			connInfoList: [],
-			pluginList : []
+			pluginList: [],
+			showPanel: false
 
 		}
 
@@ -97,29 +100,46 @@ export default class PVPUI extends Component {
 		})
 	}
 
-	
-	 onSelect = (event) => {
-	 	switch(event.target.props.route){
-	 		case '/mlvGenerator' : 
-	 		if(this.state.connInfoList.length > 0)
-	 			this.props.history.push(event.target.props.route);
-	 		else
-	 			alert('Please choose base connection first')
-	 			return
-	 		break;
-	 		default :
-	 		this.props.history.push(event.target.props.route);
 
-	 	}
+	onSelect = (event) => {
+		switch (event.target.props.route) {
+			case '/mlvGenerator':
+				if (this.state.connInfoList.length > 0)
+					this.props.history.push(event.target.props.route);
+				else
+					alert('Please choose base connection first')
+				return
+				break;
+			default:
+				this.props.history.push(event.target.props.route);
 
-    }
+		}
 
-    setPluginList(pluginList){
-    	this.setState({
-    		...this.state,
-    		pluginList : pluginList
-    	})
-    }
+	}
+
+	setPluginList(pluginList) {
+		this.setState({
+			...this.state,
+			pluginList: pluginList
+		})
+	}
+
+	togglePanel(event) {
+		event.preventDefault();
+		this.setState({
+			...this.state,
+			showPanel: true
+		})
+	}
+
+	hidePanel(event) {
+
+		this.setState({
+			...this.state,
+			showPanel: false
+		})
+
+	}
 
 
 
@@ -171,45 +191,71 @@ export default class PVPUI extends Component {
 
 				</nav>
 				{loading}
+				<div className="row">
+					<div className="col-lg-2">
+						<Button
+							onMouseOver={this.togglePanel.bind(this)}
 
-				 <div className="row"
-                >
-                <div className="col-lg-2"
-                    >
-                    <PanelBar expandMode={'single'} onSelect={this.onSelect.bind(this)}>
-                        <PanelBarItem title={'MLV Generator'} route="/mlvGenerator" />
-                        <PanelBarItem title={'Read Baseline'} route="/readBaseline" />
-                        <PanelBarItem title={'Write Baseline'} route="/writeBaseline" />
-                    </PanelBar>
-                </div>
-                <div className="col-lg-10">
-				<Switch>
-					<Route path='/mlvGenerator' render={props => {
-						return (<MLVGenerator
-							objectList={this.state.objectList}
-							connInfoList={this.state.connInfoList}
-							addMLV={this.addMLV.bind(this)}
-							oldState={this.state.mlvGeneratorState}
-							loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
-						/>)
-					}} />
-					<Route path='/readBaseline' render={props => {
-						return (<CreateBaseline
-							isLoading={this.isLoading.bind(this)}
-							isNotLoading={this.isNotLoading.bind(this)}
-							mlv={this.state.mlv}
-							mlvGeneratorState={this.state.mlvGeneratorState}
-						/>)
-					}} />
-
-					<Route path='/writeBaseline' render={props => {
-						return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList}/>
-							)
-					}} />
-				</Switch>
+						>Navigate</Button>
+					</div>
 				</div>
-                
-            </div>
+				<div className="row"
+				>
+
+
+					{this.state.showPanel &&
+
+
+						<div className="col-lg-2" onMouseLeave={this.hidePanel.bind(this)}>
+							<ReactCSSTransitionGroup
+								transitionName="example"
+								transitionEnterTimeout={500}
+								transitionLeaveTimeout={300}>
+								<PanelBar
+									expandMode={'single'}
+									onSelect={this.onSelect.bind(this)}
+
+								>
+									<PanelBarItem title={'MLV Generator'} route="/mlvGenerator" />
+									<PanelBarItem title={'Read Baseline'} route="/readBaseline" />
+									<PanelBarItem title={'Write Baseline'} route="/writeBaseline" />
+									<PanelBarItem title={'Activities Baseline'} route="/activitiesBaseline" />
+								</PanelBar>
+							</ReactCSSTransitionGroup>
+						</div>}
+
+					<div className={`col-lg-${this.state.showPanel ? "10" : "12"}`}>
+						<Switch>
+							<Route path='/mlvGenerator' render={props => {
+								return (<MLVGenerator
+									objectList={this.state.objectList}
+									connInfoList={this.state.connInfoList}
+									addMLV={this.addMLV.bind(this)}
+									oldState={this.state.mlvGeneratorState}
+									loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
+								/>)
+							}} />
+							<Route path='/readBaseline' render={props => {
+								return (<CreateBaseline
+									isLoading={this.isLoading.bind(this)}
+									isNotLoading={this.isNotLoading.bind(this)}
+									mlv={this.state.mlv}
+									mlvGeneratorState={this.state.mlvGeneratorState}
+								/>)
+							}} />
+
+							<Route path='/writeBaseline' render={props => {
+								return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} />
+								)
+							}} />
+							<Route path='/activitiesBaseline' render={props => {
+								return (<ActivitiesBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} />
+								)
+							}} />
+						</Switch>
+					</div>
+
+				</div>
 			</div>
 
 		)

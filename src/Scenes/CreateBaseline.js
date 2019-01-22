@@ -154,7 +154,7 @@ export default class CreateBaseline extends Component {
 			return
 		}
 		this.isLoading();
-		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter })}`, {
+		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${encodeURIComponent(JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter }))}`, {
 			headers: {
 			}
 
@@ -306,7 +306,7 @@ export default class CreateBaseline extends Component {
 
 		console.log(baselineDetails)
 
-		axios.post('http://localhost:9090/PVPUI/AddToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
+		axios.post('http://localhost:9090/PVPUI/AddToBaseline', `baselineDetails=${encodeURIComponent(JSON.stringify(baselineDetails))}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -428,7 +428,7 @@ export default class CreateBaseline extends Component {
 		console.log(JSON.stringify(temp));
 
 
-		axios.post('http://localhost:9090/PVPUI/ExecuteFilterMLV', `MLV=${JSON.stringify(temp)}`, {
+		axios.post('http://localhost:9090/PVPUI/ExecuteFilterMLV', `MLV=${encodeURIComponent(JSON.stringify(temp))}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -492,7 +492,7 @@ export default class CreateBaseline extends Component {
 
 		}
 
-		axios.post('http://localhost:9090/PVPUI/AddGeneratedFiltersToBaseline', `baselineDetails=${JSON.stringify(baselineDetails)}`, {
+		axios.post('http://localhost:9090/PVPUI/AddGeneratedFiltersToBaseline', `baselineDetails=${encodeURIComponent(JSON.stringify(baselineDetails))}`, {
 			headers: {
 			}
 

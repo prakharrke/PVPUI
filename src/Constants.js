@@ -11,3 +11,4 @@ exports.PLM = ['Agile','Aras','Enovia','IFS','Metaphase','Simatic','TC','windchi
 exports.ALM = ['clearcase','clearquest','doors','primavera'];
 exports.DB = ['Cassandra','jdbc','oracle','orientdb','hana','sql','db2'];
 exports.ERP = ['t4s','sap'];
+exports.activityTypes = ['Insert', 'Update', 'Delete', 'Select', 'Stored Procedure', 'Bulk Insert', 'Bulk Update'];
