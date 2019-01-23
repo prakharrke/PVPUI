@@ -30,17 +30,18 @@ export default class MLVGenerator extends Component {
 		else
 			this.state = {
 				ID: {
-					
+
 				},
 				PID: {
-					
+
 				},
 				LEV: {
-					
+
 				},
 				total: this.props.connInfoList[0].objectList.length,
 				skip: 0,
 				filterOperator: 'contains',
+				relationAttributes: [],
 				exactSearch: false,
 				selectedConnectionID: -1,
 				tempObject: '',
@@ -59,7 +60,7 @@ export default class MLVGenerator extends Component {
 					level: '',
 					objectName: '',
 					nativeRelations: [],
-					nativeRelationsData : [],
+					nativeRelationsData: [],
 					objectID: ''
 				},
 				explicitRelation: {
@@ -665,7 +666,10 @@ export default class MLVGenerator extends Component {
 		} else {
 			// * FIRST SETTING NATIVE RELATIONS FOR LEVEL SAVED AS PARENT IN THE SELECTED OBJECT
 			this.getNativeObjectsBetweenObjects(this.state[event.target.value.objectID].relation.parentObject)
-
+			if(this.state[event.target.value.objectID].relation.type === 'native'){
+				var selectedRelation = this.state[event.target.value.objectID].relation.native;
+				this.getNativeRelationAttributes(selectedRelation)
+			}
 			this.setState({
 
 				...this.state,
@@ -735,6 +739,34 @@ export default class MLVGenerator extends Component {
 		if (event.target.value === "") {
 
 			return
+		}
+
+		
+		if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION') {
+			
+			var selectedObject = this.state.selectedObject;
+			var attributes = new Array();
+			attributes = this.state[selectedObject.objectID].attributes;
+			var attributesLength = attributes.length
+			attributes.push({
+				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				attributeName: event.target.value,
+				attributeValue: event.target.value,
+				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+			})
+			this.setState({
+				customAttribute: "",
+				[this.state.selectedObject.objectID]: {
+
+					...this.state[selectedObject.objectID],
+					attributes: attributes
+				}
+
+			})
+
+			return
+
+
 		}
 		var selectedObject = this.state.selectedObject;
 		var attributes = new Array();
@@ -821,6 +853,32 @@ export default class MLVGenerator extends Component {
 			return
 		}
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
+			if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION') {
+			
+			var selectedObject = this.state.selectedObject;
+			var attributes = new Array();
+			attributes = this.state[selectedObject.objectID].attributes;
+			var attributesLength = attributes.length
+			attributes.push({
+				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				attributeName: event.target.value,
+				attributeValue: event.target.value,
+				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+			})
+			this.setState({
+				customAttribute: "",
+				[this.state.selectedObject.objectID]: {
+
+					...this.state[selectedObject.objectID],
+					attributes: attributes
+				}
+
+			})
+
+			return
+
+
+		}
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
 			attributes = this.state[selectedObject.objectID].attributes;
@@ -845,6 +903,33 @@ export default class MLVGenerator extends Component {
 	addCustomAttributeToAttributeList(event) {
 
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
+			if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION') {
+			
+			var selectedObject = this.state.selectedObject;
+			var attributes = new Array();
+			attributes = this.state[selectedObject.objectID].attributes;
+			var attributesLength = attributes.length
+			attributes.push({
+				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				attributeName: event.target.value,
+				attributeValue: event.target.value,
+				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+			})
+			this.setState({
+				customAttribute: "",
+				[this.state.selectedObject.objectID]: {
+
+					...this.state[selectedObject.objectID],
+					attributes: attributes
+				}
+
+			})
+
+			return
+
+
+		}
+
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
 			attributes = this.state[selectedObject.objectID].attributes;
@@ -1311,7 +1396,7 @@ export default class MLVGenerator extends Component {
 			this.setState({
 				...this.state,
 				nativeRelations: parsedJson.nativeRelationsBetweenObjects,
-				nativeRelationsData : parsedJson.nativeRelationsBetweenObjects
+				nativeRelationsData: parsedJson.nativeRelationsBetweenObjects
 			})
 
 		}).catch(e => {
@@ -1362,8 +1447,20 @@ export default class MLVGenerator extends Component {
 			})
 
 			parentTo.splice(indexToSplice, 1);
-			this.setState({
+			// * REMOVING MLVRELATION_ATTRIBUTES FROM CURRENT_TOTAL_ATTRIBUTELIST
+			var attributes = this.state.attributeListForSelectedObject;
+			var newAttributes = new Array();
+			attributes.map(attribute=>{
+				if(attribute.split('.')[0] === 'MLVRELATION' ||  attribute.split('.')[0] === 'MLVOBJECTRELATION'){
 
+				}
+				else{
+					newAttributes.push(attribute);
+				}
+			})
+			this.setState({
+				...this.state,
+				attributeListForSelectedObject : newAttributes,
 				[this.state.selectedObject.objectID]: {
 					...this.state[this.state.selectedObject.objectID],
 					relation: {
@@ -1382,13 +1479,13 @@ export default class MLVGenerator extends Component {
 					...this.state[parentObject.objectID],
 					parentTo: parentTo
 				},
-				parentObject : {
+				parentObject: {
 					levelName: "Select Parent",
 					id: 0,
 					level: '',
 					objectName: '',
 					nativeRelations: [],
-					nativeRelationsData : [],
+					nativeRelationsData: [],
 					objectID: ''
 				}
 			})
@@ -1420,6 +1517,8 @@ export default class MLVGenerator extends Component {
 		// * NATIVE RELATION CAN HAVE ONLY ONE VALUE. BUT WE HAVE USED AN ARRAY BECAUSE WE HAVE USED MULTISELECT, WHICH REQUIRES AN ARRAY AS DATA. THIS ARRAY WOULD HOLD ONLY ONE VALUE
 		var selectedNativeRelation = new Array();
 		selectedNativeRelation.push(event.target.value[event.target.value.length - 1])
+		// * METHOD TO FETCH NATIVE RELATION ATTRIBUTES
+		this.getNativeRelationAttributes(event.target.value[event.target.value.length - 1])
 		this.setState({
 			[this.state.selectedObject.objectID]: {
 				...this.state[this.state.selectedObject.objectID],
@@ -1439,6 +1538,47 @@ export default class MLVGenerator extends Component {
 			}
 		})
 
+	}
+
+	getNativeRelationAttributes(relation) {
+		axios.post('http://localhost:9090/PVPUI/GetNativeRelationAttributes', `relationName=${relation}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+			if(response.data.relationAttributes === undefined)
+				return
+			
+			var attributes = new Array();
+			attributes = this.state.attributeListForSelectedObject;
+
+			var mlvRelationAtts = new Array();
+			response.data.relationAttributes.map(attribute => {
+
+				mlvRelationAtts.push("MLVRELATION." + attribute)
+			})
+
+
+
+			var mlvObjectRelationAtts = new Array();
+			response.data.relationAttributes.map(attribute => {
+
+				mlvObjectRelationAtts.push("MLVOBJECTRELATION." + attribute)
+			})
+
+
+
+
+			attributes = attributes.concat(mlvRelationAtts)
+			attributes = attributes.concat(mlvObjectRelationAtts);
+			console.log("NEW ATTRIBTUES")
+			console.log(attributes);
+			this.setState({
+				...this.state,
+				attributeListForSelectedObject: attributes
+			})
+		})
 	}
 
 	// * METHOD TO ADD CHILD ATTRIBUTE FOR EXPLICIT RELATION 
@@ -1790,14 +1930,14 @@ export default class MLVGenerator extends Component {
 	// * METHOD TO SET ID
 
 	setID(event) {
-		if(event.target.value === ''){
+		if (event.target.value === '') {
 			delete this.state.ID[this.state.selectedObject.objectID]
 			this.setState({
-				ID : {
+				ID: {
 					...this.state.ID
 				}
 			})
-			return 
+			return
 		}
 		var value = '';
 		if (this.state.attributeListForSelectedObject.includes(event.target.value))
@@ -1808,19 +1948,19 @@ export default class MLVGenerator extends Component {
 			...this.state,
 			ID: {
 				...this.state.ID,
-				[this.state.selectedObject.objectID] : value
+				[this.state.selectedObject.objectID]: value
 			}
 		})
 	}
 	setPID(event) {
-		if(event.target.value === ''){
+		if (event.target.value === '') {
 			delete this.state.PID[this.state.selectedObject.objectID]
 			this.setState({
-				PID : {
+				PID: {
 					...this.state.PID
 				}
 			})
-			return 
+			return
 		}
 		var value = '';
 		if (this.state.attributeListForSelectedObject.includes(event.target.value))
@@ -1831,19 +1971,19 @@ export default class MLVGenerator extends Component {
 			...this.state,
 			PID: {
 				...this.state.PID,
-				[this.state.selectedObject.objectID] : value
+				[this.state.selectedObject.objectID]: value
 			}
 		})
 	}
 	setLEV(event) {
-		if(event.target.value === ''){
+		if (event.target.value === '') {
 			delete this.state.LEV[this.state.selectedObject.objectID]
 			this.setState({
-				LEV : {
+				LEV: {
 					...this.state.LEV
 				}
 			})
-			return 
+			return
 		}
 		var value = '';
 		if (this.state.attributeListForSelectedObject.includes(event.target.value))
@@ -1854,17 +1994,17 @@ export default class MLVGenerator extends Component {
 			...this.state,
 			LEV: {
 				...this.state.LEV,
-				[this.state.selectedObject.objectID] : value
+				[this.state.selectedObject.objectID]: value
 			}
 		})
 	}
 
 
 	nativeRelationsFilter = (event) => {
-        this.setState({
-            nativeRelationsData: filterBy(this.state.nativeRelations.slice(), event.filter)
-        });
-    }
+		this.setState({
+			nativeRelationsData: filterBy(this.state.nativeRelations.slice(), event.filter)
+		});
+	}
 
 
 	render() {

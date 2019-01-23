@@ -13,6 +13,7 @@ import LoadingPanel from './Components/LoadingPanel'
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 import axios from 'axios';
+import * as constants from '../Constants'
 export default class WriteBaseline extends Component {
 	resultSetListIndex = 0;
 	listOfResultSetList = new Array()
@@ -284,6 +285,8 @@ export default class WriteBaseline extends Component {
 			if (mlv != '') {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+				
+					temp = temp.concat(constants.mlvObjects);
 					var attributeValues = new Array(temp.length)
 					//var attributeCollectiveValues = new Array();
 					//attributeCollectiveValues.push(attributeValues.fill(''))
@@ -312,6 +315,8 @@ export default class WriteBaseline extends Component {
 			if (mlv != '') {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
+					
+					temp = temp.concat(constants.mlvObjects);
 					insertMLVArray[index].attributes = temp;
 					//var attributeValues = new Array(temp.length)
 					//var attributeCollectiveValues = new Array();
@@ -387,6 +392,81 @@ export default class WriteBaseline extends Component {
 
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		insertMLVArray[index].values = values;
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+
+	}
+	// * METHOD TO ADD COLUMN VALUES BY RAW DATA
+
+	setRawDataInsertColumns(index, value){
+		var columnString = value.substring(1, value.length-1);
+		var columnsArray = new Array();
+		columnsArray = columnString.split(',');
+		
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		var values = insertMLVArray[index].values;
+
+		insertMLVArray[index].values.map((value) => {
+
+			columnsArray.map(columnName=>{
+
+				value.push({
+					attributeName : columnName.trim(),
+					value : ''
+				})
+			})
+		})
+
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: insertMLVArray
+			}
+		})
+
+	}
+
+	//* METHOD TO SET RAW DATA INSERT VALUES
+
+	setRawDataInsertValues(index, value){
+		var valueString = value.substring(1, value.length-1);
+		var insertValues = new Array();
+		insertValues = valueString.split(',');
+		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
+		var values = insertMLVArray[index].values;
+		if(insertValues.length % values[0].length != 0){
+			alert('Values should be a multiple of insert columns')
+			return
+		}
+		var columnCount = values[0].length
+		var insertRowCount = insertValues.length / values[0].length;
+		
+		var rowsTobeAdded = insertRowCount - values.length
+		for(var i=1; i <= rowsTobeAdded; i++){
+			var valuePairObject = new Array();
+			
+			values[0].map(value=>{
+				valuePairObject.push({...value})
+			})
+			values.push(valuePairObject)
+		}
+
+		values.map((valueArray, valueArrayIndex)=>{
+
+			valueArray.map((value, valueIndex)=>{
+				
+				var attributeValue = insertValues[valueArrayIndex * columnCount + valueIndex]
+				value.value = attributeValue;
+			})
+		})
+
+		insertMLVArray[index].values = values
 		this.setState({
 			...this.state,
 			insertMLVs: {
@@ -557,6 +637,7 @@ export default class WriteBaseline extends Component {
 
 		try {
 			var attributes = mlv.split('attributes=')[1].split(';')[0].split(',')
+
 			this.setState({
 				...this.state,
 				fetchMLVForinsert: {
@@ -627,7 +708,7 @@ export default class WriteBaseline extends Component {
 
 		insertDetails['writePluginName'] = this.state.writeConnection;
 		insertDetails['fetchFromAnotherSourcePluginName'] = this.state.fetchFromAnotherSourceConnection
-
+		this.props.isLoading();
 		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (encodeURIComponent(JSON.stringify(insertDetails))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -635,12 +716,14 @@ export default class WriteBaseline extends Component {
 
 
 		}).then(response => {
+			this.props.isNotLoading();
 			console.log('RESULT SET DATA')
 			console.log(response.data)
 			var resultSets = response.data
 			this.listOfResultSetList = response.data
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
 		}).catch(e => {
+			this.props.isNotLoading();
 			alert(e)
 		})
 
@@ -1504,6 +1587,7 @@ export default class WriteBaseline extends Component {
 			...this.state,
 			isLoading: true
 		})
+		this.props.isLoading();
 		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (encodeURIComponent(JSON.stringify(this.state))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -1511,12 +1595,14 @@ export default class WriteBaseline extends Component {
 
 
 		}).then(response => {
+			this.props.isNotLoading();
 			alert(response.data)
 			this.setState({
 				...this.state,
 				isLoading: false
 			})
 		}).catch(error => {
+			this.props.isNotLoading();
 			alert(error)
 			this.setState({
 				...this.state,
@@ -1879,6 +1965,8 @@ export default class WriteBaseline extends Component {
 										copyInsertMLVToInsertFetch={this.copyInsertMLVToInsertFetch.bind(this)}
 										executeInsert={this.executeInsert.bind(this)}
 										deleteSelectedAttributeForInsert={this.deleteSelectedAttributeForInsert.bind(this)}
+										setRawDataInsertColumns={this.setRawDataInsertColumns.bind(this)}
+										setRawDataInsertValues={this.setRawDataInsertValues.bind(this)}
 									/>
 								</TabStripTab>
 								<TabStripTab title="Update">

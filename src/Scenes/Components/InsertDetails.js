@@ -169,7 +169,7 @@ export default class InsertDetails extends Component {
 
 	}
 
-	setSelectedAttributeForInsertNew(event){
+	setSelectedAttributeForInsertNew(event) {
 		console.log(event.target)
 		this.props.addAttributeValuePairForInsertNew(event.target.id, event.target.value)
 	}
@@ -197,10 +197,49 @@ export default class InsertDetails extends Component {
 		this.props.saveInsertDetailsState(this.state)
 	}
 
+	setRawDataInsertColumns(event) {
+		this.props.setRawDataInsertColumns(event.target.id, event.target.value)
+	}
+
+	setRawDataInsertValues(event) {
+		this.props.setRawDataInsertValues(event.target.id, event.target.value)
+	}
+
 
 	render() {
 
 		var insertMLVArrayElement = this.props.insertMLVArray.map((object, index) => {
+
+			var rawDataColumns = '';
+			if (object.values[0].length > 0) {
+				rawDataColumns = '(';
+				object.values[0].map((value, valueIndex) => {
+					rawDataColumns = rawDataColumns + value.attributeName
+					if (valueIndex < object.values[0].length - 1)
+						rawDataColumns = rawDataColumns + ' , ';
+				})
+				rawDataColumns = rawDataColumns + ')';
+			}
+			var rawDataValues = ''
+
+			if (object.values.length > 0) {
+				if (object.values[0].length > 0) {
+					rawDataValues = '(';
+					object.values.map((valuesArray, valuesArrayIndex) => {
+
+						valuesArray.map((value, valueIndex) => {
+							rawDataValues = rawDataValues + value.value
+							if (valueIndex < valuesArray.length - 1)
+								rawDataValues = rawDataValues + " , ";
+						})
+
+						if (valuesArrayIndex < object.values.length - 1)
+							rawDataValues = rawDataValues + " , ";
+					})
+
+					rawDataValues = rawDataValues + ')';
+				}
+			}
 
 
 			return (
@@ -428,14 +467,14 @@ export default class InsertDetails extends Component {
 																	size={10}
 																	id={object.index}
 																	style={{ overflowX: "scroll", margin: '1em' }}
-																	
+
 																>
 																	{object.attributes.map((attributeName) => {
 																		return (
-																			<option 
-																			value={attributeName}
-																			id={object.index}
-																			onDoubleClick={this.setSelectedAttributeForInsertNew.bind(this)}
+																			<option
+																				value={attributeName}
+																				id={object.index}
+																				onDoubleClick={this.setSelectedAttributeForInsertNew.bind(this)}
 																			>{attributeName}</option>
 
 																		)
@@ -448,27 +487,27 @@ export default class InsertDetails extends Component {
 																	object.values[this.state[`attributeGroupIndex_${object.index}`]].map((valueObject, index) => {
 																		return (
 																			<div className="row">
-																			<div className="col-lg-11">
-																			<Input
+																				<div className="col-lg-11">
+																					<Input
 
-																				label={valueObject.attributeName}
-																				groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
-																				id={object.index}
-																				attributeIndex={index}
-																				style={{ width: '100%',  }}
-																				onChange={this.addAttributeInsertValue.bind(this)}
-																				value={valueObject.value}
-																			/>
-																			</div>
-																			<div className='col-lg-1'>
-																	<Button
-																		primary={true}
-																		id={object.index}
-																		attributeIndex={index}
-																		onClick={this.deleteSelectedAttributeForInsert.bind(this)}
-																	>Delete
+																						label={valueObject.attributeName}
+																						groupIndex={this.state[`attributeGroupIndex_${object.index}`]}
+																						id={object.index}
+																						attributeIndex={index}
+																						style={{ width: '100%', }}
+																						onChange={this.addAttributeInsertValue.bind(this)}
+																						value={valueObject.value}
+																					/>
+																				</div>
+																				<div className='col-lg-1'>
+																					<Button
+																						primary={true}
+																						id={object.index}
+																						attributeIndex={index}
+																						onClick={this.deleteSelectedAttributeForInsert.bind(this)}
+																					>Delete
 																									</Button>
-																</div>
+																				</div>
 																			</div>
 																		)
 
@@ -505,8 +544,8 @@ export default class InsertDetails extends Component {
 											class="form-control rounded-0"
 											rows="2"
 											id={object.index}
-											value={'(' + object.attributes + ')'}
-
+											value={rawDataColumns}
+											onChange={this.setRawDataInsertColumns.bind(this)}
 										>
 
 										</textarea>
@@ -519,7 +558,8 @@ export default class InsertDetails extends Component {
 											class="form-control rounded-0"
 											rows="2"
 											id={object.index}
-											value={object.values}
+											onChange={this.setRawDataInsertValues.bind(this)}
+											value={rawDataValues}
 
 										>
 

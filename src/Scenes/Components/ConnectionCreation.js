@@ -298,20 +298,20 @@ export default class ConnectionCreation extends Component {
 				<div className="row justify-content-center" style={{ marginTop: "2em" }}>
 					<div className="col-lg-8 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
-						<PanelBar >
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Add Connections</i>}>
-								<div className="row justify-content-center" style={{ width: "100%" }}>
-									<div className="row justify-content-center">
-										<div className="col-lg-2">
-											<Button primary={true} style={{ margin: '1em' }} onClick={this.createNewConnection.bind(this)}>Add Connection</Button>
-										</div>
-
-									</div>
-
-									{secondayConnectionsElement}
-								</div>
-							</PanelBarItem>
-						</PanelBar>
+						{/*<PanelBar >
+													<PanelBarItem title={<i style={{ fontSize: "16px" }}>Add Connections</i>}>
+														<div className="row justify-content-center" style={{ width: "100%" }}>
+															<div className="row justify-content-center">
+																<div className="col-lg-2">
+																	<Button primary={true} style={{ margin: '1em' }} onClick={this.createNewConnection.bind(this)}>Add Connection</Button>
+																</div>
+						
+															</div>
+						
+															{secondayConnectionsElement}
+														</div>
+													</PanelBarItem>
+												</PanelBar>*/}
 					</div>
 				</div>
 

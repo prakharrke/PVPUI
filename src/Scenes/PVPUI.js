@@ -11,6 +11,7 @@ import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import WriteBaseline from './WriteBaseline'
 import ActivitiesBaseline from './ActivitiesBaseline'
 import '../css/transition.css';
+import axios from 'axios';
 export default class PVPUI extends Component {
 
 	constructor(props) {
@@ -31,6 +32,19 @@ export default class PVPUI extends Component {
 
 
 	}
+	/*componentWillMount(){
+
+		axios.post('http://localhost:9090/PVPUI/InitializeLogger', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+			headers: {
+			}
+
+
+		}).then(response=>{
+
+		}).catch(e=>{
+			alert(e)
+		})
+	}*/
 
 	isLoading() {
 
@@ -177,7 +191,7 @@ export default class PVPUI extends Component {
 
 			<div className="container-fluid">
 
-
+				{loading}
 				<nav className="navbar navbar-expand-lg">
 					<ConnectionCreation
 						isLoading={this.isLoading.bind(this)}
@@ -190,7 +204,7 @@ export default class PVPUI extends Component {
 					/>
 
 				</nav>
-				{loading}
+				
 				<div className="row">
 					<div className="col-lg-2">
 						<Button
@@ -245,7 +259,7 @@ export default class PVPUI extends Component {
 							}} />
 
 							<Route path='/writeBaseline' render={props => {
-								return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} />
+								return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList}  isLoading={this.isLoading.bind(this)} isNotLoading={this.isNotLoading.bind(this)}/>
 								)
 							}} />
 							<Route path='/activitiesBaseline' render={props => {

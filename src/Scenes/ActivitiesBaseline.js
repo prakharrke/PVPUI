@@ -12,7 +12,7 @@ export default class ActivitiesBaseline extends Component {
 
 		return(
 
-			<h3></h3>
+			<h2></h2>
 			)
 
 	}
