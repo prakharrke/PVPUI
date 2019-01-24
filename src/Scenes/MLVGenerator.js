@@ -29,6 +29,7 @@ export default class MLVGenerator extends Component {
 		}
 		else
 			this.state = {
+				blurState:false,
 				ID: {
 
 				},
@@ -706,7 +707,7 @@ export default class MLVGenerator extends Component {
 
 		this.isLoading();
 
-		axios.post('http://localhost:9090/PVPUI/GetAttributesForSelectedObject', `objectName=${event.target.value.objectName}`, {
+		axios.post(Constants.url + 'GetAttributesForSelectedObject', `objectName=${event.target.value.objectName}`, {
 			headers: {
 			}
 
@@ -715,7 +716,7 @@ export default class MLVGenerator extends Component {
 
 
 			var attributeList = new Array();
-			attributeList = response.data.attributeList
+			attributeList = Constants.eQAttributes.concat(response.data.attributeList)
 			this.isNotLoading();
 			this.setState({
 
@@ -742,7 +743,7 @@ export default class MLVGenerator extends Component {
 		}
 
 		
-		if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION') {
+		if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION' || Constants.eQAttributes.includes(event.target.value)) {
 			
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
@@ -848,12 +849,17 @@ export default class MLVGenerator extends Component {
 	}
 
 	addSelectedAttributeFromAutoComplete(event) {
+		
 		if (!this.state.attributeListForSelectedObject.includes(event.target.value)) {
 
 			return
 		}
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
-			if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION') {
+			
+
+
+			
+			if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION' || Constants.eQAttributes.includes(event.target.value)) {
 			
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
@@ -865,6 +871,7 @@ export default class MLVGenerator extends Component {
 				attributeValue: event.target.value,
 				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
 			})
+
 			this.setState({
 				customAttribute: "",
 				[this.state.selectedObject.objectID]: {
@@ -874,11 +881,12 @@ export default class MLVGenerator extends Component {
 				}
 
 			})
-
+			event.target.value=""
+			event.preventDefault();
 			return
 
 
-		}
+		}	
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
 			attributes = this.state[selectedObject.objectID].attributes;
@@ -897,6 +905,9 @@ export default class MLVGenerator extends Component {
 				},
 				customAttribute: ""
 			})
+
+			
+			
 		}
 	}
 
@@ -954,7 +965,7 @@ export default class MLVGenerator extends Component {
 	// * ADD CUSTOM ATTRIBUTE 
 	addCustomAttribute(event) {
 		var value = '';
-		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+		if (this.state.attributeListForSelectedObject.includes(event.target.value) && !Constants.eQAttributes.includes(event.target.value))
 			value = `${this.state.selectedObject.objectName}.${event.target.value}`
 		else
 			value = event.target.value
@@ -1382,7 +1393,7 @@ export default class MLVGenerator extends Component {
 	// * METHOD TO SEND POST REQUIEST TO GET NATIVE RELATIONS FOR OBJECTS
 	getNativeObjectsBetweenObjects(parentObject) {
 		var childObject = this.state.selectedObject.objectName;
-		axios.post('http://localhost:9090/PVPUI/NativeRelationsBetweenObjects', `objects=${JSON.stringify({ childObject: childObject, parentObject: parentObject })}`, {
+		axios.post(Constants.url + 'NativeRelationsBetweenObjects', `objects=${JSON.stringify({ childObject: childObject, parentObject: parentObject })}`, {
 			headers: {
 			}
 
@@ -1541,7 +1552,7 @@ export default class MLVGenerator extends Component {
 	}
 
 	getNativeRelationAttributes(relation) {
-		axios.post('http://localhost:9090/PVPUI/GetNativeRelationAttributes', `relationName=${relation}`, {
+		axios.post(Constants.url + 'GetNativeRelationAttributes', `relationName=${relation}`, {
 			headers: {
 			}
 
@@ -1812,7 +1823,7 @@ export default class MLVGenerator extends Component {
 		requestData['ID'] = this.state.ID;
 		requestData['PID'] = this.state.PID;
 		requestData['LEV'] = this.state.LEV;
-		axios.post('http://localhost:9090/PVPUI/GenerateMLV', 'selectedObjectList=' + btoa(JSON.stringify(requestData)), {
+		axios.post(Constants.url + 'GenerateMLV', 'selectedObjectList=' + btoa(JSON.stringify(requestData)), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -1903,7 +1914,7 @@ export default class MLVGenerator extends Component {
 			}
 		}
 		// * LOAD MODEL WITH CONNECTION_ID AS PROVIDED
-		axios.post('http://localhost:9090/PVPUI/LoadModel', 'details=' + JSON.stringify({ connectionID: event.target.value.connectionID, pluginName: event.target.value.pluginName }), {
+		axios.post(Constants.url + 'LoadModel', 'details=' + JSON.stringify({ connectionID: event.target.value.connectionID, pluginName: event.target.value.pluginName }), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -2116,6 +2127,7 @@ export default class MLVGenerator extends Component {
 		return (
 			<div className="container-fluid" style={{ marginTop: "2em", marginBottom: '5em' }}>
 				{loadingComponent}
+				<div style={{filter : this.state.blurState ? "blur(40px)" : "none"}}>
 				<div className=" row justify-content-center">
 					<form className="form-inline" style={{ width: "50%" }}>
 						{
@@ -2201,7 +2213,7 @@ export default class MLVGenerator extends Component {
 										</select>
 										<br />
 										<div tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
-											<AutoComplete data={this.state.attributeListForSelectedObject} onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)} style={{ width: "100%" }} placeholder="Search Attribute" />
+											<AutoComplete data={this.state.attributeListForSelectedObject} onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}  style={{ width: "100%" }} placeholder="Search Attribute" />
 										</div>
 									</div>
 									<div className="col-lg-2" style={{ padding: '0px' }}>
@@ -2326,6 +2338,7 @@ export default class MLVGenerator extends Component {
 									<div className="col-lg-2 justify-content-center">
 										<Button
 											style={{ margin: "1em" }}
+											primary={true}
 											onClick={this.hideLevel.bind(this)}>
 											Hide Level
 											</Button>
@@ -2684,6 +2697,7 @@ export default class MLVGenerator extends Component {
 										<div className="row justify-content-center">
 											<div className="col-lg-2">
 												<Button
+												primary={true}
 													style={{ margin: "1em" }}
 													onClick={this.toggleIsRecursionTrue.bind(this)}>
 													Recursion
@@ -2727,12 +2741,14 @@ export default class MLVGenerator extends Component {
 											</div>
 											<div classNam="col-lg-2">
 												<Button
+												primary={true}
 													style={{ margin: "1em" }}
 													onClick={this.saveExplicitRelation.bind(this)}
 												>
 													Add
 												</Button>
 												<Button
+												primary={true}
 													style={{ margin: "1em" }}
 													onClick={this.removeExplictRelation.bind(this)}
 												>
@@ -2854,6 +2870,7 @@ export default class MLVGenerator extends Component {
 								<div className="row">
 									<div className="col-lg-6">
 										<Button
+										primary={true}
 											style={{ margin: "1em" }}
 											onClick={this.enableParallelExecution.bind(this)}>
 											Parallel Execution
@@ -2866,6 +2883,7 @@ export default class MLVGenerator extends Component {
 											}
 										/>
 										<Button
+										primary={true}
 											style={{ margin: "1em" }}
 											onClick={this.enableCache.bind(this)}>
 											Cache Enabled
@@ -2894,12 +2912,13 @@ export default class MLVGenerator extends Component {
 						<div className="row" style={{ marginTop: '1em' }}>
 							<div className="col-lg-6">
 
-								<Button onClick={this.createMLV.bind(this)}>
+								<Button primary={true} onClick={this.createMLV.bind(this)}>
+								
 									Generate MLV
 								</Button>
 							</div>
 							<div className="col-lg-6">
-								<Button onClick={this.showGridView.bind(this)}>
+								<Button primary={true} onClick={this.showGridView.bind(this)}>
 									Grid View
 								</Button>
 							</div>
@@ -2920,7 +2939,7 @@ export default class MLVGenerator extends Component {
 						{this.props.parent != undefined &&
 							<div className="row" style={{ marginTop: '1em' }}>
 								<div className="col-lg-6">
-									<Button onClick={this.saveMLVToParent.bind(this)}>
+									<Button primary={true} onClick={this.saveMLVToParent.bind(this)}>
 										Save
 								</Button>
 								</div>
@@ -2928,7 +2947,10 @@ export default class MLVGenerator extends Component {
 						}
 
 					</div>
-					{
+					
+				</div>
+				</div>
+				{
 						this.state.showGridView &&
 						<div className="fixed-bottom" style={{ width: "100%", height: '50%', marginBottom: '15em' }}>
 							<div className="row justify-content-right">
@@ -2984,8 +3006,8 @@ export default class MLVGenerator extends Component {
 								</Grid>
 							</div>
 						</div>
+						
 					}
-				</div>
 			</div>
 		)
 	}
@@ -3258,7 +3280,8 @@ export default class MLVGenerator extends Component {
 				columns: columnsArray,
 				gridViewData: gridViewData
 			},
-			showGridView: true
+			showGridView: true,
+			blurState : true
 		})
 
 		/* COMPONENTS FOR GRID_VIEW_DATA
@@ -3275,7 +3298,8 @@ export default class MLVGenerator extends Component {
 		event.preventDefault();
 		this.setState({
 			...this.state,
-			showGridView: false
+			showGridView: false,
+			blurState:false
 		})
 	}
 

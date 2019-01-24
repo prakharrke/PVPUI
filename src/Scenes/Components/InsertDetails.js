@@ -190,7 +190,8 @@ export default class InsertDetails extends Component {
 
 	deleteSelectedAttributeForInsert(event) {
 		event.preventDefault();
-		this.props.deleteSelectedAttributeForInsert(event.target.id, event.target.attributeIndex)
+		
+		this.props.deleteSelectedAttributeForInsert(event.target.id, event.target.getAttribute('attributeIndex'))
 
 	}
 	componentWillUnmount() {
@@ -228,7 +229,7 @@ export default class InsertDetails extends Component {
 					object.values.map((valuesArray, valuesArrayIndex) => {
 
 						valuesArray.map((value, valueIndex) => {
-							rawDataValues = rawDataValues + value.value
+							rawDataValues = rawDataValues + value.value.trim()
 							if (valueIndex < valuesArray.length - 1)
 								rawDataValues = rawDataValues + " , ";
 						})
@@ -839,16 +840,7 @@ export default class InsertDetails extends Component {
 							</div>
 						}
 
-						<div className="row">
-							<div className="col-lg-1">
-								<Button
-									style={{ margin: "1em" }}
-									onClick={this.executeInsert.bind(this)}
-								>
-									Execute
-									</Button>
-							</div>
-						</div>
+						
 					</div>
 				</div>
 			</div>

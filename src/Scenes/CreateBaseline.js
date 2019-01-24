@@ -16,6 +16,7 @@ export default class CreateBaseline extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			blurState:false,
 			testCaseSummary: '',
 			testCaseDescription: '',
 			runFlag: '',
@@ -55,7 +56,7 @@ export default class CreateBaseline extends Component {
 
 	componentWillMount() {
 		this.isLoading();
-		axios.post('http://localhost:9090/PVPUI/GetBaselineFilesList', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+		axios.post(Constants.url + 'GetBaselineFilesList', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
 			headers: {
 			}
 
@@ -154,7 +155,7 @@ export default class CreateBaseline extends Component {
 			return
 		}
 		this.isLoading();
-		axios.post('http://localhost:9090/PVPUI/ExecuteMLV', `MLV=${encodeURIComponent(JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter }))}`, {
+		axios.post(Constants.url + 'ExecuteMLV', `MLV=${encodeURIComponent(JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter }))}`, {
 			headers: {
 			}
 
@@ -233,7 +234,8 @@ export default class CreateBaseline extends Component {
 			this.setState({
 				...this.state,
 				resultSetList: resultsetList,
-				showResultSet: true
+				showResultSet: true,
+				blurState : true
 
 			})
 
@@ -248,7 +250,8 @@ export default class CreateBaseline extends Component {
 	closeResultSet(event) {
 		event.preventDefault();
 		this.setState({
-			showResultSet: false
+			showResultSet: false,
+			blurState : false
 		})
 	}
 
@@ -306,7 +309,7 @@ export default class CreateBaseline extends Component {
 
 		console.log(baselineDetails)
 
-		axios.post('http://localhost:9090/PVPUI/AddToBaseline', `baselineDetails=${encodeURIComponent(JSON.stringify(baselineDetails))}`, {
+		axios.post(Constants.url + 'AddToBaseline', `baselineDetails=${encodeURIComponent(JSON.stringify(baselineDetails))}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -355,7 +358,7 @@ export default class CreateBaseline extends Component {
 			}
 		}
 
-		axios.post('http://localhost:9090/PVPUI/GenerateFilterTestCases', `state=${btoa(JSON.stringify(state))}`, {
+		axios.post(Constants.url + 'GenerateFilterTestCases', `state=${btoa(JSON.stringify(state))}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -428,7 +431,7 @@ export default class CreateBaseline extends Component {
 		console.log(JSON.stringify(temp));
 
 
-		axios.post('http://localhost:9090/PVPUI/ExecuteFilterMLV', `MLV=${encodeURIComponent(JSON.stringify(temp))}`, {
+		axios.post(Constants.url + 'ExecuteFilterMLV', `MLV=${encodeURIComponent(JSON.stringify(temp))}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -492,7 +495,7 @@ export default class CreateBaseline extends Component {
 
 		}
 
-		axios.post('http://localhost:9090/PVPUI/AddGeneratedFiltersToBaseline', `baselineDetails=${encodeURIComponent(JSON.stringify(baselineDetails))}`, {
+		axios.post(Constants.url + 'AddGeneratedFiltersToBaseline', `baselineDetails=${encodeURIComponent(JSON.stringify(baselineDetails))}`, {
 			headers: {
 			}
 
@@ -508,6 +511,7 @@ export default class CreateBaseline extends Component {
 
 	render() {
 		console.log(this.state.filters)
+
 		var columnsElement = this.state.columnNames.map((column) => {
 
 
@@ -536,7 +540,7 @@ export default class CreateBaseline extends Component {
 
 			<div className="container-fluid" style={{ marginTop: "2em" }}>
 				{loadingComponent}
-				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
+				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto", filter : this.state.blurState ? "blur(40px)" : "none"}}>
 					<PanelBar >
 						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Baseline Details</i>}>
 							<div className="k-form">
@@ -682,6 +686,7 @@ export default class CreateBaseline extends Component {
 								</div>
 							</div>
 							<Button
+							primary={true}
 								style={{ textAlign: "center", margin: "1em" }}
 								onClick={this.executeMLV.bind(this)}
 							>
@@ -712,6 +717,7 @@ export default class CreateBaseline extends Component {
 
 							</div>
 							<Button
+								primary={true}
 								style={{ margin: "1em" }}
 								onClick={this.addToBaseline.bind(this)}
 							>
@@ -788,6 +794,7 @@ export default class CreateBaseline extends Component {
 										}
 									</div>
 									<Button
+										primary={true}
 										style={{ margin: "1em" }}
 										onClick={this.executeFilterMLVs.bind(this)}
 									>
@@ -798,6 +805,7 @@ export default class CreateBaseline extends Component {
 								<div className="row justify-content-center">
 									<div className="col-lg-2">
 										<Button
+											primary={true}
 											style={{ margin: "1em" }}
 											onClick={this.addFiltersGeneratedToBaseline.bind(this)}
 										>

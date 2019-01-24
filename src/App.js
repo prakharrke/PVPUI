@@ -6,15 +6,20 @@ import BaselineGrid from "./Scenes/BaselineGrid"
 import CreateBaseline from "./Scenes/CreateBaseline"
 import './css/bootstrap.min.css'
 import './css/bootstrap.css'
-import './css/all.css';
+import './css/matall.css';
 import './css/transition.css'
-
+import * as Constants from './Constants'
 
 class App extends Component {
+	componentWillMount(){
+
+		Constants.url = 'http://localhost:' + window.location.port + '/PVPUI/'
+		console.log("LOCATION PORT " + window.location)
+	}
   render() {
     return (
       <div className="App stylesContainer">
-
+      	
         <Routes />
 
       </div>

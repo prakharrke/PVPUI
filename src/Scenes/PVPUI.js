@@ -208,6 +208,7 @@ export default class PVPUI extends Component {
 				<div className="row">
 					<div className="col-lg-2">
 						<Button
+						primary={true}
 							onMouseOver={this.togglePanel.bind(this)}
 
 						>Navigate</Button>

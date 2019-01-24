@@ -4,6 +4,7 @@ import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
 import * as Constants from '../../Constants.js'
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
+
 export default class ConnectionCreation extends Component {
 
 	constructor(props) {
@@ -23,7 +24,7 @@ export default class ConnectionCreation extends Component {
 
 		this.props.isLoading();
 
-		axios.post('http://localhost:9090/PVPUI/GetPlugins', { p: '1' }, {
+		axios.post(Constants.url + 'GetPlugins', { p: '1' }, {
 			headers: {
 
 				'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ export default class ConnectionCreation extends Component {
 
 	setPlugin = (event) => {
 		this.props.isLoading();
-		axios.post('http://localhost:9090/PVPUI/LoadModel', `details=${JSON.stringify({ connectionID: -1, pluginName: event.target.value })}`, {
+		axios.post(Constants.url + 'LoadModel', `details=${JSON.stringify({ connectionID: -1, pluginName: event.target.value })}`, {
 			headers: {
 			}
 
@@ -115,7 +116,7 @@ export default class ConnectionCreation extends Component {
 			return
 		}
 		this.props.isLoading();
-		axios.post('http://localhost:9090/PVPUI/TestConnection', `selectedPlugin=${this.state.selectedPlugin}`, {
+		axios.post(Constants.url + 'TestConnection', `selectedPlugin=${this.state.selectedPlugin}`, {
 			headers: {
 			}
 
@@ -145,7 +146,7 @@ export default class ConnectionCreation extends Component {
 			return
 		}
 		this.props.isLoading();
-		axios.post('http://localhost:9090/PVPUI/CreateModel', `selectedPlugin=${this.state.selectedPlugin}`, {
+		axios.post(Constants.url + 'CreateModel', `selectedPlugin=${this.state.selectedPlugin}`, {
 			headers: {
 			}
 
@@ -209,7 +210,7 @@ export default class ConnectionCreation extends Component {
 		this.props.isLoading();
 		console.log(event.target.getAttribute('index'))
 		event.preventDefault();
-		axios.post('http://localhost:9090/PVPUI/TestConnection', `selectedPlugin=${this.state.secondaryConnections[event.target.getAttribute('index')].pluginName}`, {
+		axios.post(Constants.url + 'TestConnection', `selectedPlugin=${this.state.secondaryConnections[event.target.getAttribute('index')].pluginName}`, {
 			headers: {
 			}
 
@@ -235,7 +236,7 @@ export default class ConnectionCreation extends Component {
 		console.log(event.target.getAttribute('index'))
 		var index = event.target.getAttribute('index');
 		event.preventDefault();
-		axios.post('http://localhost:9090/PVPUI/CreateModelForSecondaryConnections', `pluginDetails=${JSON.stringify({ pluginName: this.state.secondaryConnections[event.target.getAttribute('index')].pluginName, index: event.target.getAttribute('index') })}`, {
+		axios.post(Constants.url + 'CreateModelForSecondaryConnections', `pluginDetails=${JSON.stringify({ pluginName: this.state.secondaryConnections[event.target.getAttribute('index')].pluginName, index: event.target.getAttribute('index') })}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}

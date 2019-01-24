@@ -204,18 +204,7 @@ export default class DeleteAllDetails extends Component {
 						</PanelBar>
 					</div>
 				</div>
-				<div className="row justify-content-end">
-					<div className="col-lg-2 d-flex justify-content-end">
-						<Button
-							className="float-right"
-							primary={true}
-							//id={object.index}
-							onClick={this.generateBaseline.bind(this)}
-							style={{ margin: '1em' }}
-						>Generate Baseline
-					</Button>
-					</div>
-				</div>
+				
 			</div>
 		)
 	}

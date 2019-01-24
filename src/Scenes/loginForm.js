@@ -3,6 +3,7 @@ import { Input } from '@progress/kendo-react-inputs';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import { Link, NavLink } from 'react-router-dom';
+import * as Constants from '../Constants'
 export default class LoginForm extends Component {
 	constructor(props) {
 
@@ -15,7 +16,7 @@ export default class LoginForm extends Component {
 
 	login(event) {
 
-		axios.post('http://localhost:9090/PVPUI/AuthenticateUser', `userDetails=${JSON.stringify({ username: this.state.username, password: this.state.password })}`, {
+		axios.post(Constants.url + 'AuthenticateUser', `userDetails=${JSON.stringify({ username: this.state.username, password: this.state.password })}`, {
 			headers: {
 			}
 

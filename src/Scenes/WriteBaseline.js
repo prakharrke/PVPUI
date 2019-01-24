@@ -21,9 +21,10 @@ export default class WriteBaseline extends Component {
 		super(props);
 
 		this.state = {
-			insertState : {},
-			writeConnection : '',
-			fetchFromAnotherSourceConnection : '',
+			insertState: {},
+			blurState: false,
+			writeConnection: '',
+			fetchFromAnotherSourceConnection: '',
 			showConnectionSelectionDialog: false,
 			resultSetList: [],
 			resultsetOperation: '',
@@ -102,7 +103,7 @@ export default class WriteBaseline extends Component {
 
 	componentWillMount() {
 
-		axios.post('http://localhost:9090/PVPUI/GetWriteBaselineFilesList', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+		axios.post(constants.url + 'GetWriteBaselineFilesList', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
 			headers: {
 			}
 
@@ -285,7 +286,7 @@ export default class WriteBaseline extends Component {
 			if (mlv != '') {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
-				
+
 					temp = temp.concat(constants.mlvObjects);
 					var attributeValues = new Array(temp.length)
 					//var attributeCollectiveValues = new Array();
@@ -315,7 +316,7 @@ export default class WriteBaseline extends Component {
 			if (mlv != '') {
 				try {
 					var temp = mlv.split('attributes=')[1].split(';')[0].split(',')
-					
+
 					temp = temp.concat(constants.mlvObjects);
 					insertMLVArray[index].attributes = temp;
 					//var attributeValues = new Array(temp.length)
@@ -403,21 +404,22 @@ export default class WriteBaseline extends Component {
 	}
 	// * METHOD TO ADD COLUMN VALUES BY RAW DATA
 
-	setRawDataInsertColumns(index, value){
-		var columnString = value.substring(1, value.length-1);
+	setRawDataInsertColumns(index, value) {
+		var columnString = value.substring(1, value.length - 1);
 		var columnsArray = new Array();
 		columnsArray = columnString.split(',');
-		
+
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var values = insertMLVArray[index].values;
-
+		insertMLVArray[index].values = new Array()
+		insertMLVArray[index].values.push(new Array())
 		insertMLVArray[index].values.map((value) => {
 
-			columnsArray.map(columnName=>{
+			columnsArray.map(columnName => {
 
 				value.push({
-					attributeName : columnName.trim(),
-					value : ''
+					attributeName: columnName.trim(),
+					value: ''
 				})
 			})
 		})
@@ -434,33 +436,34 @@ export default class WriteBaseline extends Component {
 
 	//* METHOD TO SET RAW DATA INSERT VALUES
 
-	setRawDataInsertValues(index, value){
-		var valueString = value.substring(1, value.length-1);
+	setRawDataInsertValues(index, value) {
+		var valueString = value.substring(1, value.length - 1);
 		var insertValues = new Array();
 		insertValues = valueString.split(',');
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var values = insertMLVArray[index].values;
-		if(insertValues.length % values[0].length != 0){
+
+		if (insertValues.length % values[0].length != 0) {
 			alert('Values should be a multiple of insert columns')
 			return
 		}
 		var columnCount = values[0].length
 		var insertRowCount = insertValues.length / values[0].length;
-		
+
 		var rowsTobeAdded = insertRowCount - values.length
-		for(var i=1; i <= rowsTobeAdded; i++){
+		for (var i = 1; i <= rowsTobeAdded; i++) {
 			var valuePairObject = new Array();
-			
-			values[0].map(value=>{
-				valuePairObject.push({...value})
+
+			values[0].map(value => {
+				valuePairObject.push({ ...value })
 			})
 			values.push(valuePairObject)
 		}
 
-		values.map((valueArray, valueArrayIndex)=>{
+		values.map((valueArray, valueArrayIndex) => {
 
-			valueArray.map((value, valueIndex)=>{
-				
+			valueArray.map((value, valueIndex) => {
+
 				var attributeValue = insertValues[valueArrayIndex * columnCount + valueIndex]
 				value.value = attributeValue;
 			})
@@ -479,7 +482,7 @@ export default class WriteBaseline extends Component {
 	// * METHOD TO ADD ATTRIBUTE VALUE PAIR FOR INSERT
 
 	addAttributeValuePairForInsert(index) {
-		
+
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var values = insertMLVArray[index].values;
 
@@ -500,7 +503,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 
-	addAttributeValuePairForInsertNew(index, attributeName){
+	addAttributeValuePairForInsertNew(index, attributeName) {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var values = insertMLVArray[index].values;
 
@@ -560,9 +563,9 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
-	deleteSelectedAttributeForInsert(index, attributeIndex){
+	deleteSelectedAttributeForInsert(index, attributeIndex) {
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
-		insertMLVArray[index].values.map(valueArray=>{
+		insertMLVArray[index].values.map(valueArray => {
 
 			valueArray.splice(attributeIndex, 1)
 		})
@@ -686,6 +689,65 @@ export default class WriteBaseline extends Component {
 	}
 
 	executeInsert() {
+		if (this.state.insertMLVs.insertMLVArray.length == 0) {
+			alert('Please provide at least one insert MLV')
+			return
+		} else {
+
+			var exit = false;
+			this.state.insertMLVs.insertMLVArray.map((object, index) => {
+
+				if (object.mlv === '') {
+					alert('Insert MLV at index ' + index + ' is empty. Either delete it or provide an MLV')
+					exit = true
+					return
+				}
+
+			})
+			if (exit) {
+				return
+			}
+
+		}
+
+		if (this.state.deleteAllMLVs.deleteAllMLVArray.length == 0) {
+			alert('Please provide at least one delete all MLV to delete the data inserted from insert operation')
+			return
+		} else {
+
+			var exit = false;
+			this.state.deleteAllMLVs.deleteAllMLVArray.map((object, index) => {
+
+				if (object.mlv === '') {
+					alert('Delete all MLV at index ' + index + ' is empty. Either delete it or provide an MLV')
+					exit = true
+					return
+				}
+				if (object.filter === '') {
+					alert('Filter for delete all MLV at index ' + index + ' is empty. This might delete all the data in application. Please provide filter.')
+					exit = true;
+					return
+				}
+			})
+			if (exit) {
+				return
+			}
+
+		}
+
+		if(this.state.writeConnection === ''){
+			alert('Please select at least write destination connection');
+			return
+		}
+		if(this.state.fetchFromAnotherSourceForInsertFlag || this.state.fetchFromAnotherSourceForUpdateFlag || this.state.fetchFromAnotherSourceForDeleteFlag ){
+			if(this.state.fetchFromAnotherSourceConnection === ''){
+			alert('You have set fetch from another source as true in one of the cases. Please select fetch from another source connection')
+			return
+		}
+		}
+
+
+
 		var insertDetails = {}
 		insertDetails['fetchFromAnotherSourceForInsert'] = this.state.fetchFromAnotherSourceForInsert;
 		insertDetails['insertMLVs'] = this.state.insertMLVs;
@@ -709,7 +771,7 @@ export default class WriteBaseline extends Component {
 		insertDetails['writePluginName'] = this.state.writeConnection;
 		insertDetails['fetchFromAnotherSourcePluginName'] = this.state.fetchFromAnotherSourceConnection
 		this.props.isLoading();
-		axios.post('http://localhost:9090/PVPUI/ExecuteInsert', 'insertDetails=' + (encodeURIComponent(JSON.stringify(insertDetails))), {
+		axios.post(constants.url + 'ExecuteInsert', 'insertDetails=' + (encodeURIComponent(JSON.stringify(insertDetails))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -729,10 +791,10 @@ export default class WriteBaseline extends Component {
 
 	}
 
-	saveInsertDetailsState(insertState){
+	saveInsertDetailsState(insertState) {
 		this.setState({
 			...this.state,
-			insertState : insertState
+			insertState: insertState
 		})
 	}
 
@@ -1571,7 +1633,7 @@ export default class WriteBaseline extends Component {
 
 	addNewBaseline(event) {
 		this.setState({
-			selectedBaseline : '',
+			selectedBaseline: '',
 			newBaselineName: event.target.value
 		})
 	}
@@ -1588,7 +1650,7 @@ export default class WriteBaseline extends Component {
 			isLoading: true
 		})
 		this.props.isLoading();
-		axios.post('http://localhost:9090/PVPUI/GenerateWriteBaseline', 'writeBaselineDetails=' + (encodeURIComponent(JSON.stringify(this.state))), {
+		axios.post(constants.url + 'GenerateWriteBaseline', 'writeBaselineDetails=' + (encodeURIComponent(JSON.stringify(this.state))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -1642,7 +1704,8 @@ export default class WriteBaseline extends Component {
 	closeResultSet(event) {
 		event.preventDefault();
 		this.setState({
-			showResultSet: false
+			showResultSet: false,
+			blurState: false
 		})
 	}
 
@@ -1714,7 +1777,8 @@ export default class WriteBaseline extends Component {
 			this.setState({
 				...this.state,
 				resultSetList: resultsetList,
-				showResultSet: true
+				showResultSet: true,
+				blurState: true
 
 			})
 
@@ -1726,22 +1790,28 @@ export default class WriteBaseline extends Component {
 	}
 
 	toggleDialog(event) {
+		if (this.state.showConnectionSelectionDialog) {
+			if (this.state.writeConnection === '') {
+				alert('Please provide write connection')
+				return
+			}
+		}
 		this.setState({
 			showConnectionSelectionDialog: !this.state.showConnectionSelectionDialog
 		})
 	}
 
-	setWriteConnection(event){
+	setWriteConnection(event) {
 		this.setState({
 			...this.state,
-			writeConnection : event.target.value
+			writeConnection: event.target.value
 		})
 	}
 
-	setFetchFromAnotherSourceConnection(event){
+	setFetchFromAnotherSourceConnection(event) {
 		this.setState({
 			...this.state,
-			fetchFromAnotherSourceConnection : event.target.value
+			fetchFromAnotherSourceConnection: event.target.value
 		})
 	}
 
@@ -1777,11 +1847,11 @@ export default class WriteBaseline extends Component {
 								}
 							</select>
 							<Input
-									
-									label="Destination Connection"
-									style={{ width: "90%", textAlign: "center", margin: "1em" }}
-									value={this.state.writeConnection}
-								/>
+
+								label="Destination Connection"
+								style={{ width: "90%", textAlign: "center", margin: "1em" }}
+								value={this.state.writeConnection}
+							/>
 						</div>
 						<div className="col-lg-6">
 							<select
@@ -1805,24 +1875,24 @@ export default class WriteBaseline extends Component {
 								}
 							</select>
 							<Input
-									
-									label="Source Connection"
-									style={{ width: "90%", textAlign: "center", margin: "1em" }}
-									
-									value={this.state.fetchFromAnotherSourceConnection}
-								/>
+
+								label="Source Connection"
+								style={{ width: "90%", textAlign: "center", margin: "1em" }}
+
+								value={this.state.fetchFromAnotherSourceConnection}
+							/>
 						</div>
 					</div>
 					<DialogActionsBar>
-					<Button
-						onClick={this.toggleDialog.bind(this)}
-					>
-					Cancel
+						<Button
+							onClick={this.toggleDialog.bind(this)}
+						>
+							Cancel
 					</Button>
-					<Button
-						onClick={this.toggleDialog.bind(this)}
-					>
-					Save
+						<Button
+							onClick={this.toggleDialog.bind(this)}
+						>
+							Save
 					</Button>
 
 					</DialogActionsBar>
@@ -1867,9 +1937,20 @@ export default class WriteBaseline extends Component {
 		return (
 			<div>
 				{fetchFromAnotherSourceConnectionSelectionElement}
-				<div className="container-fluid" style={{ marginTop: "2em" }}>
+				<div className="container-fluid" style={{ marginTop: "2em", filter: this.state.blurState ? "blur(40px)" : "none" }}>
 					{loadingComponent}
 					{mlvGenerator}
+					<div className="row justify-content-center">
+						<div className="col-lg-2">
+							<Button
+								style={{ margin: "1em" }}
+								onClick={this.toggleDialog.bind(this)}
+								primary={true}
+							>
+								Set Write Connections
+									</Button>
+						</div>
+					</div>
 					<div className="row justify-content-center">
 						<div className="col-lg-6 justify-content-center">
 							<DropDownList
@@ -2046,6 +2127,28 @@ export default class WriteBaseline extends Component {
 									/>
 								</TabStripTab>
 							</TabStrip>
+						</div>
+					</div>
+					<div className="row d-flex" style={{ width: '100%' }}>
+						<div className="col-lg-1">
+							<Button
+								style={{ margin: "1em" }}
+								onClick={this.executeInsert.bind(this)}
+								primary={true}
+							>
+								Execute
+									</Button>
+						</div>
+						<div className="col-lg-9"></div>
+						<div className="col-lg-2 ">
+							<Button
+								className="float-right"
+								primary={true}
+								//id={object.index}
+								onClick={this.generateBaseline.bind(this)}
+								style={{ margin: '1em' }}
+							>Generate Baseline
+					</Button>
 						</div>
 					</div>
 				</div>

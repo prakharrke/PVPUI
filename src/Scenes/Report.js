@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { groupBy, process } from '@progress/kendo-data-query';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import * as Constants from '../Constants'
 export default class Report extends Component {
 
 	constructor(props) {
@@ -35,7 +36,7 @@ export default class Report extends Component {
 		toDate.setMilliseconds(0)
 		console.log(fromDate)
 		console.log(toDate)
-		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
+		axios.post(Constants.url + 'FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
 			headers: {
 			}
 

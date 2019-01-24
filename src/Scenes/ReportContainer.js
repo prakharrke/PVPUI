@@ -66,7 +66,7 @@ export default class ReportContainer extends Component {
 
 		this.categories = categoriesLocal;
 
-		axios.post('http://localhost:9090/PVPUI/FetchGraphReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
+		axios.post(Constants.url + 'FetchGraphReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime() })}`, {
 			headers: {
 			}
 

@@ -7,6 +7,7 @@ import LoadingPanel from './Components/LoadingPanel'
 import { DatePicker } from '@progress/kendo-react-dateinputs';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
+import * as Constants from '../Constants'
 export default class Report extends Component {
 
 	constructor(props) {
@@ -55,7 +56,7 @@ export default class Report extends Component {
 		fromDate.setMilliseconds(0)
 		console.log(fromDate)
 		console.log(toDate)
-		axios.post('http://localhost:9090/PVPUI/FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : connectionName })}`, {
+		axios.post(Constants.url + 'FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : connectionName })}`, {
 			headers: {
 			}
 
