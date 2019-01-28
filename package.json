@@ -4,6 +4,8 @@
   "private": true,
   "homepage": "/PVPUI",
   "dependencies": {
+    "@material-ui/core": "^3.9.1",
+    "@material-ui/icons": "^3.0.2",
     "@progress/kendo-data-query": "^1.5.0",
     "@progress/kendo-drawing": "^1.5.7",
     "@progress/kendo-react-buttons": "^2.4.0",

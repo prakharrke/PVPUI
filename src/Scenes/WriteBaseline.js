@@ -405,6 +405,7 @@ export default class WriteBaseline extends Component {
 	// * METHOD TO ADD COLUMN VALUES BY RAW DATA
 
 	setRawDataInsertColumns(index, value) {
+		value = value.trim();
 		var columnString = value.substring(1, value.length - 1);
 		var columnsArray = new Array();
 		columnsArray = columnString.split(',');
@@ -437,6 +438,7 @@ export default class WriteBaseline extends Component {
 	//* METHOD TO SET RAW DATA INSERT VALUES
 
 	setRawDataInsertValues(index, value) {
+		value = value.trim();
 		var valueString = value.substring(1, value.length - 1);
 		var insertValues = new Array();
 		insertValues = valueString.split(',');
@@ -786,6 +788,7 @@ export default class WriteBaseline extends Component {
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
 		}).catch(e => {
 			this.props.isNotLoading();
+			console.log(e)
 			alert(e)
 		})
 
@@ -1885,11 +1888,13 @@ export default class WriteBaseline extends Component {
 					</div>
 					<DialogActionsBar>
 						<Button
+							primary={true}
 							onClick={this.toggleDialog.bind(this)}
 						>
 							Cancel
 					</Button>
 						<Button
+						primary={true}
 							onClick={this.toggleDialog.bind(this)}
 						>
 							Save
@@ -1929,6 +1934,8 @@ export default class WriteBaseline extends Component {
 				<Column
 					field={column}
 					title={column}
+					minResizableWidth={'250px'}
+					width={'250px'}
 				/>
 
 
@@ -2156,7 +2163,7 @@ export default class WriteBaseline extends Component {
 					this.state.resultSetList.length > 0 &&
 					this.state.showResultSet == true &&
 
-					<div className="fixed-bottom" style={{ width: "100%", height: '50%', marginBottom: '10em' }}>
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%', position : 'absolute' }}>
 						<div className="row justify-content-right">
 							<div className='col-lg-2'>
 								<Button
@@ -2193,9 +2200,9 @@ export default class WriteBaseline extends Component {
 							</div>
 						</div>
 
-						<div style={{ overflowX: "scroll" }}>
+						<div style={{ overflowY: "scroll" }}>
 							<Grid
-								style={{ height: "40em", overflowX: "scroll" }}
+								style={{ height: "40em" }}
 								data={this.state.resultSetList}
 								resizable={true}
 								scrollable="scrollable"

@@ -94,7 +94,10 @@ export default class MLVGenerator extends Component {
 					columns: [],
 					gridViewData: []
 				},
-				showGridView: false
+				showGridView: false,
+				selectedConnection : {
+
+				}
 
 			}
 
@@ -218,6 +221,17 @@ export default class MLVGenerator extends Component {
 				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
 			})
 		}
+	}
+
+	setConnectionForLevel(event){
+		var selectedConnection = {
+			...event.target.value
+		}
+		this.setState({
+			...this.state,
+			selectedConnection : selectedConnection,
+			objectList : event.target.value.objectList
+		})
 	}
 	addSelectedObjectTry(event) {
 
@@ -2130,21 +2144,19 @@ export default class MLVGenerator extends Component {
 				<div style={{filter : this.state.blurState ? "blur(40px)" : "none"}}>
 				<div className=" row justify-content-center">
 					<form className="form-inline" style={{ width: "50%" }}>
-						{
-							this.state.connInfoList.length > 1 &&
-							(
+						
 								<DropDownList
 
-									data={this.state.connInfoList}
-									onChange={this.selectSourceConnection.bind(this)}
+									data={this.props.connections}
+									onChange={this.setConnectionForLevel.bind(this)}
 									style={{ width: '100%', marginTop: "1em" }}
 									label='Select Source Connection'
-									textField='pluginName'
+									textField='connectionName'
 									dataItemKey='connectionID'
 
 								/>
-							)
-						}
+							
+						
 						<Switch
 							style={{ margin: "1em" }}
 							checked={this.state.exactSearch}
@@ -2952,7 +2964,7 @@ export default class MLVGenerator extends Component {
 				</div>
 				{
 						this.state.showGridView &&
-						<div className="fixed-bottom" style={{ width: "100%", height: '50%', marginBottom: '15em' }}>
+						<div className="fixed-bottom" style={{ width: "100%", height: '50%',position : 'absolute' }}>
 							<div className="row justify-content-right">
 								<div className='col-lg-2'></div>
 								<div className='col-lg-2'></div>
@@ -2970,9 +2982,9 @@ export default class MLVGenerator extends Component {
 								</div>
 							</div>
 
-							<div style={{ overflowX: "scroll" }}>
+							<div style={{ overflowY: "scroll" }}>
 								<Grid
-									style={{ height: "40em", overflowX: "scroll" }}
+									style={{ height: "40em"}}
 									data={this.state.gridView.gridViewData}
 									resizable={true}
 
@@ -2980,17 +2992,17 @@ export default class MLVGenerator extends Component {
 									<Column
 										field="Source"
 										title="Source"
-										width="250px"
+										width="500px"
 									/>
 									<Column
 										field="Level"
 										title="Level"
-										width="250px"
+										width="500px"
 									/>
 									<Column
 										field="relation"
 										title="Relation"
-										width="250px"
+										width="500px"
 									/>
 									{
 										this.state.gridView.columns.map(column => {
@@ -2998,7 +3010,7 @@ export default class MLVGenerator extends Component {
 												<Column
 													field={column}
 													title={column}
-													width="250px"
+													width="500px"
 												/>
 											)
 										})

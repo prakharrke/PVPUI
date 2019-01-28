@@ -373,6 +373,7 @@ export default class UpdateDetails extends Component {
 					<div className="row justify-content-center">
 						<div className="col-lg-4">
 							<Button
+							primary={true}
 								style={{ margin: "1em" }}
 								onClick={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
 							>

@@ -215,6 +215,7 @@ export default class InsertDetails extends Component {
 			if (object.values[0].length > 0) {
 				rawDataColumns = '(';
 				object.values[0].map((value, valueIndex) => {
+
 					rawDataColumns = rawDataColumns + value.attributeName
 					if (valueIndex < object.values[0].length - 1)
 						rawDataColumns = rawDataColumns + ' , ';
@@ -324,6 +325,7 @@ export default class InsertDetails extends Component {
 					<div className="row justify-content-center">
 						<div className="col-lg-2">
 							<Button
+							primary={true}
 								style={{ margin: "1em" }}
 								onClick={this.toggleRawData.bind(this)}
 							>
@@ -344,16 +346,7 @@ export default class InsertDetails extends Component {
 
 									<PanelBar >
 										<PanelBarItem title={<i style={{ fontSize: "12px" }}>{'Insert Values'}</i>}>
-											<div className="row justify-content-center">
-												<div className="col-lg-1">
-													<Button
-														primary={true}
-														id={object.index}
-														style={{ margin: '1em' }}
-														onClick={this.addAttributeValuePairForInsert.bind(this)}
-													>Add</Button>
-												</div>
-											</div>
+											
 											<div className="row justify-content-center">
 												<div className="col-lg-1">
 													<Button
@@ -581,6 +574,7 @@ export default class InsertDetails extends Component {
 				<div className="row justify-content-center">
 					<div className="col-lg-4">
 						<Button
+						primary={true}
 							style={{ margin: "1em" }}
 							onClick={this.toggleFetchFromAnotherSource.bind(this)}
 						>
@@ -815,6 +809,7 @@ export default class InsertDetails extends Component {
 							<div className="row justify-content-center">
 								<div className="col-lg-2">
 									<Button
+									primary={true}
 										style={{ margin: "1em" }}
 										onClick={this.toggleRSInsert.bind(this)}
 									>
@@ -827,6 +822,7 @@ export default class InsertDetails extends Component {
 								</div>
 								<div className="col-lg-2">
 									<Button
+									primary={true}
 										style={{ margin: "1em" }}
 										onClick={this.toggleBulkInsert.bind(this)}
 									>

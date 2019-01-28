@@ -13,7 +13,7 @@ import * as Constants from './Constants'
 class App extends Component {
 	componentWillMount(){
 
-		Constants.url = 'http://localhost:' + window.location.port + '/PVPUI/'
+		Constants.url = 'http://localhost:' + '9090' + '/PVPUI/'
 		console.log("LOCATION PORT " + window.location)
 	}
   render() {

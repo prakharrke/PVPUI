@@ -12,6 +12,8 @@ import WriteBaseline from './WriteBaseline'
 import ActivitiesBaseline from './ActivitiesBaseline'
 import '../css/transition.css';
 import axios from 'axios';
+import Connections from './Connections'
+import * as Constants from '../Constants'	
 export default class PVPUI extends Component {
 
 	constructor(props) {
@@ -26,7 +28,8 @@ export default class PVPUI extends Component {
 			mlvGeneratorState: {},
 			connInfoList: [],
 			pluginList: [],
-			showPanel: false
+			showPanel: false,
+			connections: []
 
 		}
 
@@ -155,7 +158,94 @@ export default class PVPUI extends Component {
 
 	}
 
+	addConnection() {
+		
+		var connections = new Array();
+		connections = this.state.connections
+		connections.push({
+			connectionName: '',
+			connectionID: '',
+			connectionCreated: false,
+			objectList: []
+		})
+		this.setState({
+			connections: connections
+		})
 
+	}
+	testConnection(index) {
+		this.isLoading()
+		//var index = event.target.getAttribute('index');
+		axios.post(Constants.url + 'TestConnectionNew', `connectionDetails=${JSON.stringify(this.state.connections[index])}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+			this.isNotLoading()
+			alert(response.data)
+		}).catch(e => {
+			this.isNotLoading()
+			alert(e)
+		})
+	}
+
+	createModel(index) {
+
+		this.isLoading()
+		//var index = event.target.getAttribute('index');
+		axios.post(Constants.url + 'CreateModelNew', `connectionDetails=${JSON.stringify(this.state.connections[index])}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+			this.isNotLoading()
+			var connections = this.state.connections;
+			connections[index].objectList = response.data.objectList
+			connections[index].connectionCreated = response.data.connectionCreated
+			this.setState({
+				connections: connections
+
+			})
+		}).catch(e => {
+			this.isNotLoading()
+			alert(e)
+		})
+
+
+	}
+
+	setConnectionName(index, value) {
+
+		var connections = new Array();
+		connections = this.state.connections;
+		connections[index].connectionName = value;
+		this.setState({
+			connections: connections
+		})
+
+	}
+
+	setConnectionID(index, value) {
+		var connections = new Array();
+		connections = this.state.connections;
+		connections[index].connectionID = value;
+		this.setState({
+			connections: connections
+		})
+	}
+
+	deleteConnection(index) {
+
+		//alert(event.target.getAttribute('index'))
+		var connections = new Array();
+		connections = this.state.connections;
+		connections.splice(index, 1)
+		this.setState({
+			connections: connections
+		})
+	}
 
 	render() {
 
@@ -204,11 +294,11 @@ export default class PVPUI extends Component {
 					/>
 
 				</nav>
-				
+
 				<div className="row">
 					<div className="col-lg-2">
 						<Button
-						primary={true}
+							primary={true}
 							onMouseOver={this.togglePanel.bind(this)}
 
 						>Navigate</Button>
@@ -235,6 +325,7 @@ export default class PVPUI extends Component {
 									<PanelBarItem title={'Read Baseline'} route="/readBaseline" />
 									<PanelBarItem title={'Write Baseline'} route="/writeBaseline" />
 									<PanelBarItem title={'Activities Baseline'} route="/activitiesBaseline" />
+									<PanelBarItem title={'Connections'} route="/connections" />
 								</PanelBar>
 							</ReactCSSTransitionGroup>
 						</div>}
@@ -248,6 +339,7 @@ export default class PVPUI extends Component {
 									addMLV={this.addMLV.bind(this)}
 									oldState={this.state.mlvGeneratorState}
 									loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
+									connections={this.state.connections}
 								/>)
 							}} />
 							<Route path='/readBaseline' render={props => {
@@ -260,11 +352,25 @@ export default class PVPUI extends Component {
 							}} />
 
 							<Route path='/writeBaseline' render={props => {
-								return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList}  isLoading={this.isLoading.bind(this)} isNotLoading={this.isNotLoading.bind(this)}/>
+								return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} isLoading={this.isLoading.bind(this)} isNotLoading={this.isNotLoading.bind(this)} />
 								)
 							}} />
 							<Route path='/activitiesBaseline' render={props => {
 								return (<ActivitiesBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} />
+								)
+							}} />
+							<Route path='/connections' render={props => {
+								return (<Connections 
+									connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} 
+									isLoading={this.isLoading.bind(this)} 
+									isNotLoading={this.isNotLoading.bind(this)}
+									testConnection={this.testConnection.bind(this)}
+									createModel={this.createModel.bind(this)}
+									setConnectionID={this.setConnectionID.bind(this)}
+									setConnectionName={this.setConnectionName.bind(this)} 
+									connections={this.state.connections}
+									addConnection={this.addConnection.bind(this)}
+									/>
 								)
 							}} />
 						</Switch>

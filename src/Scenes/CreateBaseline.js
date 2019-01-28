@@ -290,7 +290,7 @@ export default class CreateBaseline extends Component {
 			return
 		}
 		this.isLoading();
-		alert(this.state.testFilter)
+		
 		var baselineDetails = {
 			testCaseSummary: this.state.testCaseSummary,
 			testCaseDescription: this.state.testCaseDescription,
@@ -430,7 +430,7 @@ export default class CreateBaseline extends Component {
 		}
 		console.log(JSON.stringify(temp));
 
-
+		this.isLoading()
 		axios.post(Constants.url + 'ExecuteFilterMLV', `MLV=${encodeURIComponent(JSON.stringify(temp))}`, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -443,6 +443,8 @@ export default class CreateBaseline extends Component {
 			this.listOfResultSetList = response.data;
 
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
+		}).catch(e=>{
+			this.isNotLoading()
 		})
 	}
 
@@ -520,12 +522,15 @@ export default class CreateBaseline extends Component {
 				<Column
 					field={column}
 					title={column}
+					minResizableWidth={'250'}
+					width={'250px'}
 				/>
 
 
 			)
 		})
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
+		
 		var attributeColumns = new Array();
 		if (this.state.mlv != '') {
 			try {
@@ -537,9 +542,10 @@ export default class CreateBaseline extends Component {
 		}
 
 		return (
-
+			<div>
+			
 			<div className="container-fluid" style={{ marginTop: "2em" }}>
-				{loadingComponent}
+				
 				<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto", filter : this.state.blurState ? "blur(40px)" : "none"}}>
 					<PanelBar >
 						<PanelBarItem title={<i style={{ fontSize: "16px" }}>Baseline Details</i>}>
@@ -816,12 +822,12 @@ export default class CreateBaseline extends Component {
 							</PanelBarItem>}
 					</PanelBar>
 				</div>
-
+				{loadingComponent}
 				{
 					this.state.resultSetList.length > 0 &&
 					this.state.showResultSet == true &&
 
-					<div className="fixed-bottom" style={{ width: "100%", height: '50%', marginBottom: '10em' }}>
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%',position : 'absolute' }}>
 						<div className="row justify-content-right">
 							<div className='col-lg-2'>
 								<Button
@@ -856,9 +862,9 @@ export default class CreateBaseline extends Component {
 							</div>
 						</div>
 
-						<div style={{ overflowX: "scroll" }}>
+						<div style={{ overflowY: "scroll" }}>
 							<Grid
-								style={{ height: "40em", overflowX: "scroll" }}
+								style={{ height: "40em" }}
 								data={this.state.resultSetList}
 								resizable={true}
 								scrollable="scrollable"
@@ -870,6 +876,7 @@ export default class CreateBaseline extends Component {
 						</div>
 					</div>
 				}
+			</div>
 			</div>
 
 		)
