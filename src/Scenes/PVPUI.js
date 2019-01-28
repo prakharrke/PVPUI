@@ -14,6 +14,7 @@ import '../css/transition.css';
 import axios from 'axios';
 import Connections from './Connections'
 import * as Constants from '../Constants'	
+import Menu from '@material-ui/icons/Menu';
 export default class PVPUI extends Component {
 
 	constructor(props) {
@@ -29,25 +30,49 @@ export default class PVPUI extends Component {
 			connInfoList: [],
 			pluginList: [],
 			showPanel: false,
-			connections: []
+			connections: [{connectionName : '', connectionID : '', objectList : '', connectionCreated : false}]
 
 		}
 
 
 	}
-	/*componentWillMount(){
+	componentWillMount(){
 
-		axios.post('http://localhost:9090/PVPUI/InitializeLogger', `MLV=${JSON.stringify({ mlv: this.state.mlv, filter: '' })}`, {
+		this.isLoading();
+
+		axios.post(Constants.url + 'GetPlugins', { p: '1' }, {
 			headers: {
+
+				'Content-Type': 'application/json',
+
+
+
 			}
 
 
-		}).then(response=>{
+		}).then((response) => {
 
-		}).catch(e=>{
-			alert(e)
+			this.isNotLoading();
+			var parsedJson = response.data;
+			Constants.Constants.MLVFunctions = parsedJson.MLVFunctions;
+			Constants.Constants.MLVWhereClauseFunctions = parsedJson.MLVWhereClauseFunctions;
+			Constants.Constants.MLVOperators = parsedJson.MLVOperators;
+			var pluginList = new Array();
+			pluginList = parsedJson.pluginList.split(",")
+
+			this.setState({
+
+				pluginList: pluginList
+			})
+
+			this.setPluginList(pluginList)
+
+		}).catch(e => {
+			console.log(e)
+			this.isNotLoading();
+			alert("Something went wrong")
 		})
-	}*/
+	}
 
 	isLoading() {
 
@@ -121,10 +146,10 @@ export default class PVPUI extends Component {
 	onSelect = (event) => {
 		switch (event.target.props.route) {
 			case '/mlvGenerator':
-				if (this.state.connInfoList.length > 0)
+				//if (this.state.connInfoList.length > 0)
 					this.props.history.push(event.target.props.route);
-				else
-					alert('Please choose base connection first')
+				//else
+				//	alert('Please choose base connection first')
 				return
 				break;
 			default:
@@ -160,8 +185,8 @@ export default class PVPUI extends Component {
 
 	addConnection() {
 		
-		var connections = new Array();
-		connections = this.state.connections
+		
+		var connections = this.state.connections
 		connections.push({
 			connectionName: '',
 			connectionID: '',
@@ -176,7 +201,7 @@ export default class PVPUI extends Component {
 	testConnection(index) {
 		this.isLoading()
 		//var index = event.target.getAttribute('index');
-		axios.post(Constants.url + 'TestConnectionNew', `connectionDetails=${JSON.stringify(this.state.connections[index])}`, {
+		axios.post(Constants.url + 'TestConnectionNew', `connectionDetails=${JSON.stringify({...this.state.connections[index]})}`, {
 			headers: {
 			}
 
@@ -194,8 +219,10 @@ export default class PVPUI extends Component {
 
 		this.isLoading()
 		//var index = event.target.getAttribute('index');
-		axios.post(Constants.url + 'CreateModelNew', `connectionDetails=${JSON.stringify(this.state.connections[index])}`, {
+		
+		axios.post(Constants.url + 'CreateModelNew',  `connectionDetails=${JSON.stringify({...this.state.connections[index]})}`, {
 			headers: {
+				
 			}
 
 
@@ -218,8 +245,8 @@ export default class PVPUI extends Component {
 
 	setConnectionName(index, value) {
 
-		var connections = new Array();
-		connections = this.state.connections;
+		
+		var connections = this.state.connections;
 		connections[index].connectionName = value;
 		this.setState({
 			connections: connections
@@ -228,8 +255,8 @@ export default class PVPUI extends Component {
 	}
 
 	setConnectionID(index, value) {
-		var connections = new Array();
-		connections = this.state.connections;
+		
+		var connections = this.state.connections;
 		connections[index].connectionID = value;
 		this.setState({
 			connections: connections
@@ -239,8 +266,8 @@ export default class PVPUI extends Component {
 	deleteConnection(index) {
 
 		//alert(event.target.getAttribute('index'))
-		var connections = new Array();
-		connections = this.state.connections;
+		
+		var connections = this.state.connections;
 		connections.splice(index, 1)
 		this.setState({
 			connections: connections
@@ -249,7 +276,7 @@ export default class PVPUI extends Component {
 
 	render() {
 
-
+		console.log(this.state.connections)
 		var loading = this.state.isLoading ? (<LoadingPanel />) : "";
 		var mountGenerator = "";
 
@@ -264,7 +291,8 @@ export default class PVPUI extends Component {
 				loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
 			/>
 
-		} if (this.state.isModelCreated === false && this.state.createBaseline == false) {
+		}
+		 if (this.state.isModelCreated === false && this.state.createBaseline == false) {
 
 			mountGenerator = ""
 		}
@@ -279,29 +307,29 @@ export default class PVPUI extends Component {
 		}
 		return (
 
-			<div className="container-fluid">
+			<div className="container-fluid" style={{margin : '1em'}}>
 
 				{loading}
-				<nav className="navbar navbar-expand-lg">
-					<ConnectionCreation
-						isLoading={this.isLoading.bind(this)}
-						isNotLoading={this.isNotLoading.bind(this)}
-						setObjectList={this.setObjectList.bind(this)}
-						modelNotCreated={this.modelNotCreated.bind(this)}
-						modelCreated={this.modelCreated.bind(this)}
-						setConnInfoList={this.setConnInfoList.bind(this)}
-						setPluginList={this.setPluginList.bind(this)}
-					/>
-
-				</nav>
+				{/*<nav className="navbar navbar-expand-lg">
+									<ConnectionCreation
+										isLoading={this.isLoading.bind(this)}
+										isNotLoading={this.isNotLoading.bind(this)}
+										setObjectList={this.setObjectList.bind(this)}
+										modelNotCreated={this.modelNotCreated.bind(this)}
+										modelCreated={this.modelCreated.bind(this)}
+										setConnInfoList={this.setConnInfoList.bind(this)}
+										setPluginList={this.setPluginList.bind(this)}
+									/>
+				
+								</nav>*/}
 
 				<div className="row">
 					<div className="col-lg-2">
 						<Button
-							primary={true}
+							
 							onMouseOver={this.togglePanel.bind(this)}
 
-						>Navigate</Button>
+						><Menu /></Button>
 					</div>
 				</div>
 				<div className="row"
@@ -370,6 +398,7 @@ export default class PVPUI extends Component {
 									setConnectionName={this.setConnectionName.bind(this)} 
 									connections={this.state.connections}
 									addConnection={this.addConnection.bind(this)}
+									deleteConnection={this.deleteConnection.bind(this)}
 									/>
 								)
 							}} />

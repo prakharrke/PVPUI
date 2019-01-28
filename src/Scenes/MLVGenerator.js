@@ -20,7 +20,7 @@ export default class MLVGenerator extends Component {
 	constructor(props) {
 
 		super(props);
-		this.filteredData = this.props.connInfoList[0].objectList.slice();
+		this.filteredData = [];
 		if (Object.keys(this.props.oldState).length != 0) {
 
 			this.state = {
@@ -29,7 +29,7 @@ export default class MLVGenerator extends Component {
 		}
 		else
 			this.state = {
-				blurState:false,
+				blurState: false,
 				ID: {
 
 				},
@@ -39,7 +39,7 @@ export default class MLVGenerator extends Component {
 				LEV: {
 
 				},
-				total: this.props.connInfoList[0].objectList.length,
+				total: 0,
 				skip: 0,
 				filterOperator: 'contains',
 				relationAttributes: [],
@@ -48,7 +48,8 @@ export default class MLVGenerator extends Component {
 				tempObject: '',
 				selectedObjectList: [],
 				loading: false,
-				objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
+				//objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
+				objectList: [],
 				connInfoList: this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
@@ -95,9 +96,13 @@ export default class MLVGenerator extends Component {
 					gridViewData: []
 				},
 				showGridView: false,
-				selectedConnection : {
-
-				}
+				selectedConnection: {
+					connectionName: '',
+					connectionID: '',
+					objectList: []
+				},
+				mlvName : '',
+				baseConnection : {connectionName : '', connectionID : ''}
 
 			}
 
@@ -215,22 +220,44 @@ export default class MLVGenerator extends Component {
 
 		// * UPDATING OBJECTLIST FROM CONNINFO AFTER CHANGE IN BASE CONNECTION
 
-		if (!this.state.objectList.every(object => { return this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.includes(object) })) {
+		/*if (!this.state.objectList.every(object => { return this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.includes(object) })) {
 			this.filteredData = this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice();
 			this.setState({
 				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
 			})
-		}
+		}*/
 	}
 
-	setConnectionForLevel(event){
+	setMLVName(event){
+
+		this.setState({
+			...this.state,
+			mlvName : event.target.value
+		})
+	}
+
+	setBaseConnection(event){
+		this.setState({
+			...this.state,
+			baseConnection : {
+				connectionName : event.target.value.connectionName,
+				connectionID : event.target.value.connectionID
+			}
+		})
+	}
+
+	setConnectionForLevel(event) {
 		var selectedConnection = {
 			...event.target.value
 		}
+		this.filteredData = event.target.value.objectList.slice();
 		this.setState({
 			...this.state,
-			selectedConnection : selectedConnection,
-			objectList : event.target.value.objectList
+			selectedConnection: selectedConnection,
+			objectList: event.target.value.objectList.slice(0, pageSize),
+			total: event.target.value.objectList.length,
+			skip: 0
+
 		})
 	}
 	addSelectedObjectTry(event) {
@@ -240,7 +267,10 @@ export default class MLVGenerator extends Component {
 		var newObjectID = indexOfNewObject + '_' + new Date().getTime();
 		selectedObjectList.push({
 			objectName: event.target.value,
-			objectID: newObjectID
+			objectID: newObjectID,
+			connectionName: this.state.selectedConnection.connectionName,
+			connectionID: this.state.selectedConnection.connectionID,
+			objectList: this.state.selectedConnection.objectList
 		})
 
 		this.setState({
@@ -590,6 +620,10 @@ export default class MLVGenerator extends Component {
 		console.log(event.page)
 		const skip = event.page.skip;
 		const take = event.page.take;
+		console.log('!!!!!!!!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@')
+		console.log(skip)
+		console.log(take)
+		console.log(this.filteredData)
 		const newSubsetData = this.filteredData.slice(skip, skip + take);
 		console.log(newSubsetData);
 		this.setState({
@@ -604,7 +638,8 @@ export default class MLVGenerator extends Component {
 				...this.state,
 				exactSearch: false,
 				filterOperator: 'contains',
-				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
+				//objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
+				objectList: this.state.selectedConnection.objectList.slice(0, pageSize)
 			})
 
 			//this.totalObjectListFilter(event)
@@ -614,13 +649,31 @@ export default class MLVGenerator extends Component {
 				...this.state,
 				exactSearch: true,
 				filterOperator: 'eq',
-				objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
+				//objectList: this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(0, pageSize)
+				objectList: this.state.selectedConnection.objectList.slice(0, pageSize)
 			})
 		}
 	}
 
 	totalObjectListFilter(event) {
-		this.filteredData = filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(), { logic: "and", filters: [{ operator: this.state.filterOperator, value: event.filter.value }] });
+		if (event.filter.value == '') {
+			this.filteredData = this.state.selectedConnection.objectList.slice()
+			const data = this.filteredData.slice(0, pageSize);
+			this.setState({
+				objectList: data,
+				total: this.filteredData.length,
+				skip: 0,
+				loading: false
+			});
+
+
+			this.setState({
+				loading: true
+			});
+			return
+		}
+		//this.filteredData = filterBy(this.state.connInfoList[this.state.connInfoList.map(connInfo => { return connInfo.connectionID }).indexOf(this.state.selectedConnectionID)].objectList.slice(), { logic: "and", filters: [{ operator: this.state.filterOperator, value: event.filter.value }] });
+		this.filteredData = filterBy(this.state.selectedConnection.objectList.slice(), { logic: "and", filters: [{ operator: this.state.filterOperator, value: event.filter.value }] });
 		const data = this.filteredData.slice(0, pageSize);
 		this.setState({
 			objectList: data,
@@ -657,7 +710,7 @@ export default class MLVGenerator extends Component {
 
 
 				},
-				selectedObject: { objectName: event.target.value.objectName, objectID: event.target.value.objectID },
+				selectedObject: { objectName: event.target.value.objectName, objectID: event.target.value.objectID, connectionName: event.target.value.connectionName, connectionID: event.target.value.connectionID, objectList: event.target.value.objectList },
 				nativeRelations: [],
 				explicitRelation: {
 					attribute: {
@@ -681,14 +734,14 @@ export default class MLVGenerator extends Component {
 		} else {
 			// * FIRST SETTING NATIVE RELATIONS FOR LEVEL SAVED AS PARENT IN THE SELECTED OBJECT
 			this.getNativeObjectsBetweenObjects(this.state[event.target.value.objectID].relation.parentObject)
-			if(this.state[event.target.value.objectID].relation.type === 'native'){
+			if (this.state[event.target.value.objectID].relation.type === 'native') {
 				var selectedRelation = this.state[event.target.value.objectID].relation.native;
 				this.getNativeRelationAttributes(selectedRelation)
 			}
 			this.setState({
 
 				...this.state,
-				selectedObject: { objectName: event.target.value.objectName, objectID: event.target.value.objectID },
+				selectedObject: { objectName: event.target.value.objectName, objectID: event.target.value.objectID, connectionName: event.target.value.connectionName, connectionID: event.target.value.connectionID, objectList: event.target.value.objectList },
 				parentObject: {
 					levelName: this.state[event.target.value.objectID].relation.parentLevelName,
 					level: this.state[event.target.value.objectID].relation.level,
@@ -720,8 +773,11 @@ export default class MLVGenerator extends Component {
 
 
 		this.isLoading();
-
-		axios.post(Constants.url + 'GetAttributesForSelectedObject', `objectName=${event.target.value.objectName}`, {
+		console.log('!!!!!!!!!!!!!')
+		console.log(event.target.value)
+		var data = `objectDetails=${JSON.stringify({ objectName: event.target.value.objectName, objectID: event.target.value.objectID, connectionID: event.target.value.connectionID })}`
+		alert(data)
+		axios.post(Constants.url + 'GetAttributesForSelectedObject', data, {
 			headers: {
 			}
 
@@ -735,7 +791,12 @@ export default class MLVGenerator extends Component {
 			this.setState({
 
 
-				attributeListForSelectedObject: attributeList
+				attributeListForSelectedObject: attributeList,
+				selectedConnection: {
+					connectionName: event.target.value.connectionName,
+					connectionID: event.target.value.connectionID,
+					objectList: event.target.value.objectList
+				}
 			})
 
 
@@ -756,9 +817,9 @@ export default class MLVGenerator extends Component {
 			return
 		}
 
-		
+
 		if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION' || Constants.eQAttributes.includes(event.target.value)) {
-			
+
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
 			attributes = this.state[selectedObject.objectID].attributes;
@@ -863,44 +924,44 @@ export default class MLVGenerator extends Component {
 	}
 
 	addSelectedAttributeFromAutoComplete(event) {
-		
+
 		if (!this.state.attributeListForSelectedObject.includes(event.target.value)) {
 
 			return
 		}
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
-			
 
 
-			
+
+
 			if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION' || Constants.eQAttributes.includes(event.target.value)) {
-			
-			var selectedObject = this.state.selectedObject;
-			var attributes = new Array();
-			attributes = this.state[selectedObject.objectID].attributes;
-			var attributesLength = attributes.length
-			attributes.push({
-				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-				attributeName: event.target.value,
-				attributeValue: event.target.value,
-				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
-			})
 
-			this.setState({
-				customAttribute: "",
-				[this.state.selectedObject.objectID]: {
+				var selectedObject = this.state.selectedObject;
+				var attributes = new Array();
+				attributes = this.state[selectedObject.objectID].attributes;
+				var attributesLength = attributes.length
+				attributes.push({
+					columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+					attributeName: event.target.value,
+					attributeValue: event.target.value,
+					ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+				})
 
-					...this.state[selectedObject.objectID],
-					attributes: attributes
-				}
+				this.setState({
+					customAttribute: "",
+					[this.state.selectedObject.objectID]: {
 
-			})
-			event.target.value=""
-			event.preventDefault();
-			return
+						...this.state[selectedObject.objectID],
+						attributes: attributes
+					}
+
+				})
+				event.target.value = ""
+				event.preventDefault();
+				return
 
 
-		}	
+			}
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
 			attributes = this.state[selectedObject.objectID].attributes;
@@ -920,8 +981,8 @@ export default class MLVGenerator extends Component {
 				customAttribute: ""
 			})
 
-			
-			
+
+
 		}
 	}
 
@@ -929,31 +990,31 @@ export default class MLVGenerator extends Component {
 
 		if (event.key == 'Enter' && (this.state[this.state.selectedObject.objectID] != null || this.state[this.state.selectedObject.objectID] != undefined) && event.target.value != "") {
 			if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION') {
-			
-			var selectedObject = this.state.selectedObject;
-			var attributes = new Array();
-			attributes = this.state[selectedObject.objectID].attributes;
-			var attributesLength = attributes.length
-			attributes.push({
-				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-				attributeName: event.target.value,
-				attributeValue: event.target.value,
-				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
-			})
-			this.setState({
-				customAttribute: "",
-				[this.state.selectedObject.objectID]: {
 
-					...this.state[selectedObject.objectID],
-					attributes: attributes
-				}
+				var selectedObject = this.state.selectedObject;
+				var attributes = new Array();
+				attributes = this.state[selectedObject.objectID].attributes;
+				var attributesLength = attributes.length
+				attributes.push({
+					columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+					attributeName: event.target.value,
+					attributeValue: event.target.value,
+					ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+				})
+				this.setState({
+					customAttribute: "",
+					[this.state.selectedObject.objectID]: {
 
-			})
+						...this.state[selectedObject.objectID],
+						attributes: attributes
+					}
 
-			return
+				})
+
+				return
 
 
-		}
+			}
 
 			var selectedObject = this.state.selectedObject;
 			var attributes = new Array();
@@ -1407,7 +1468,7 @@ export default class MLVGenerator extends Component {
 	// * METHOD TO SEND POST REQUIEST TO GET NATIVE RELATIONS FOR OBJECTS
 	getNativeObjectsBetweenObjects(parentObject) {
 		var childObject = this.state.selectedObject.objectName;
-		axios.post(Constants.url + 'NativeRelationsBetweenObjects', `objects=${JSON.stringify({ childObject: childObject, parentObject: parentObject })}`, {
+		axios.post(Constants.url + 'NativeRelationsBetweenObjects', `objects=${JSON.stringify({ childObject: childObject, parentObject: parentObject, connectionID: this.state.selectedObject.connectionID })}`, {
 			headers: {
 			}
 
@@ -1475,17 +1536,17 @@ export default class MLVGenerator extends Component {
 			// * REMOVING MLVRELATION_ATTRIBUTES FROM CURRENT_TOTAL_ATTRIBUTELIST
 			var attributes = this.state.attributeListForSelectedObject;
 			var newAttributes = new Array();
-			attributes.map(attribute=>{
-				if(attribute.split('.')[0] === 'MLVRELATION' ||  attribute.split('.')[0] === 'MLVOBJECTRELATION'){
+			attributes.map(attribute => {
+				if (attribute.split('.')[0] === 'MLVRELATION' || attribute.split('.')[0] === 'MLVOBJECTRELATION') {
 
 				}
-				else{
+				else {
 					newAttributes.push(attribute);
 				}
 			})
 			this.setState({
 				...this.state,
-				attributeListForSelectedObject : newAttributes,
+				attributeListForSelectedObject: newAttributes,
 				[this.state.selectedObject.objectID]: {
 					...this.state[this.state.selectedObject.objectID],
 					relation: {
@@ -1572,9 +1633,9 @@ export default class MLVGenerator extends Component {
 
 
 		}).then(response => {
-			if(response.data.relationAttributes === undefined)
+			if (response.data.relationAttributes === undefined)
 				return
-			
+
 			var attributes = new Array();
 			attributes = this.state.attributeListForSelectedObject;
 
@@ -1837,7 +1898,10 @@ export default class MLVGenerator extends Component {
 		requestData['ID'] = this.state.ID;
 		requestData['PID'] = this.state.PID;
 		requestData['LEV'] = this.state.LEV;
-		axios.post(Constants.url + 'GenerateMLV', 'selectedObjectList=' + btoa(JSON.stringify(requestData)), {
+		requestData['mlvName'] = this.state.mlvName;
+		requestData['baseConnectionName'] = this.state.baseConnection.connectionName;
+		requestData['baseConnectionID'] = this.state.baseConnection.connectionID
+		axios.post(Constants.url + 'GenerateMLV', 'selectedObjectList=' + encodeURIComponent(JSON.stringify(requestData)), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
@@ -2141,885 +2205,911 @@ export default class MLVGenerator extends Component {
 		return (
 			<div className="container-fluid" style={{ marginTop: "2em", marginBottom: '5em' }}>
 				{loadingComponent}
-				<div style={{filter : this.state.blurState ? "blur(40px)" : "none"}}>
-				<div className=" row justify-content-center">
-					<form className="form-inline" style={{ width: "50%" }}>
-						
-								<DropDownList
+				<div style={{ filter: this.state.blurState ? "blur(40px)" : "none" }}>
+					<div className="row justify-content-center">
+						<div className="col-lg-4">
+							<Input
+								
+								value={this.state.mlvName}
+								placeholder="MLV Name*"
+								style={{ width: "100%", textAlign: "center", margin : '1em' }}
+								onChange={this.setMLVName.bind(this)}
 
-									data={this.props.connections}
-									onChange={this.setConnectionForLevel.bind(this)}
-									style={{ width: '100%', marginTop: "1em" }}
-									label='Select Source Connection'
-									textField='connectionName'
-									dataItemKey='connectionID'
+							/>
+						</div>
+						<div className="col-lg-4">
+							<DropDownList
+								
+								data={this.props.connections}
+								onChange={this.setBaseConnection.bind(this)}
+								style={{ width: '100%' }}
+								label='Select Base Connection'
+								textField='connectionName'
+								dataItemKey='connectionID'
+								value={this.state.baseConnection}
 
-								/>
-							
-						
-						<Switch
-							style={{ margin: "1em" }}
-							checked={this.state.exactSearch}
-							onChange={this.setExactSearch.bind(this)}
-						/> Exact Search
+							/>
+						</div>
+					</div>
+					<div className=" row justify-content-center">
+						<form className="form-inline" style={{ width: "50%" }}>
+
+							<DropDownList
+
+								data={this.props.connections}
+								onChange={this.setConnectionForLevel.bind(this)}
+								style={{ width: '100%', marginTop: "1em" }}
+								label='Select Source Connection'
+								textField='connectionName'
+								dataItemKey='connectionID'
+								value={this.state.selectedConnection}
+
+							/>
+
+
+							<Switch
+								style={{ margin: "1em" }}
+								checked={this.state.exactSearch}
+								onChange={this.setExactSearch.bind(this)}
+							/> Exact Search
 						<DropDownList
 
-							data={this.state.objectList}
-							onChange={this.addSelectedObjectTry.bind(this)}
-							style={{ width: '100%', marginTop: "1em" }}
-							value={this.state.tempObject}
-							label='Select Sources'
-							virtual={{
-								total: this.state.total,
-								pageSize: pageSize,
-								skip: this.state.skip
-							}}
-							onPageChange={this.pageChange.bind(this)}
-							filterable={true}
-							onFilterChange={this.totalObjectListFilter.bind(this)}
-						/>
+								data={this.state.objectList}
+								onChange={this.addSelectedObjectTry.bind(this)}
+								style={{ width: '100%', marginTop: "1em" }}
+								value={this.state.tempObject}
+								label='Select Sources'
+								virtual={{
+									total: this.state.total,
+									pageSize: pageSize,
+									skip: this.state.skip
+								}}
+								onPageChange={this.pageChange.bind(this)}
+								filterable={true}
+								onFilterChange={this.totalObjectListFilter.bind(this)}
+							/>
 
-						<MultiSelect
-							placeholder="Selected Sources"
-							value={this.state.selectedObjectList}
-							onChange={this.removeSelectedObject.bind(this)}
-							textField='objectName'
-							dataItemKey='objectID'
-							loading={this.state.loading}
-							onChange={this.removeSelectedObject.bind(this)}
-							style={{ width: '100%', marginTop: "1em" }}
-						/>
+							<MultiSelect
+								placeholder="Selected Sources"
+								value={this.state.selectedObjectList}
+								onChange={this.removeSelectedObject.bind(this)}
+								textField='objectName'
+								dataItemKey='objectID'
+								loading={this.state.loading}
+								onChange={this.removeSelectedObject.bind(this)}
+								style={{ width: '100%', marginTop: "1em" }}
+							/>
 
-						<br />
-						<DropDownList
+							<br />
+							<DropDownList
 
-							data={this.state.selectedObjectList}
-							onChange={this.selectedObject.bind(this)}
-							style={{ width: '100%', marginTop: "1em" }}
-							value={this.state.selectedObject}
-							textField='objectName'
-							dataItemKey='objectID'
+								data={this.state.selectedObjectList}
+								onChange={this.selectedObject.bind(this)}
+								style={{ width: '100%', marginTop: "1em" }}
+								value={this.state.selectedObject}
+								textField='objectName'
+								dataItemKey='objectID'
 
-						/>
+							/>
 
-					</form>
-				</div>
-				<div className="row" style={{ marginTop: "2em" }}>
-					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
+						</form>
+					</div>
+					<div className="row" style={{ marginTop: "2em" }}>
+						<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto" }}>
 
-						<PanelBar >
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Select Attributes</i>}>
+							<PanelBar >
+								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Select Attributes</i>}>
 
-								<div className="row" >
+									<div className="row" >
 
-									<div className="col-lg-6 form-group" >
-										<select
-											multiple
-											className="form-control"
-											size={10}
-											onDoubleClick={this.addSelectedAttribute.bind(this)}
-											id="totalAttributes"
-											style={{ overflowX: "scroll" }}
-										>
-											{totalAttributesElement}
-										</select>
-										<br />
-										<div tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
-											<AutoComplete data={this.state.attributeListForSelectedObject} onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}  style={{ width: "100%" }} placeholder="Search Attribute" />
-										</div>
-									</div>
-									<div className="col-lg-2" style={{ padding: '0px' }}>
-										<form className="k-form" style={{ width: "100%", marginTop: "0px", padding: '0px' }}>
-											{attributesColumnsElement}
-										</form>
-									</div>
-
-									<div className="col-lg-4 form-group">
-										<select
-											className="form-control"
-											multiple
-											id="selectedAttributes"
-											style={{ overflowX: "scroll", overflowY: "hidden" }}
-											size={selectedAttributeElementSize}
-										>
-											{selectedAttributeListElement}
-										</select>
-									</div>
-
-								</div>
-								< div className="row justify-content-center">
-									<div className="col-lg-4">
-										<AutoComplete
-											data={this.state.attributeListForSelectedObject}
-											onChange={this.setID.bind(this)}
-											style={{ width: "100%" }}
-											value={this.state.ID[this.state.selectedObject.objectID]}
-											label="ID" />
-									</div>
-									<div className="col-lg-4">
-										<AutoComplete
-											data={this.state.attributeListForSelectedObject}
-											onChange={this.setPID.bind(this)}
-											style={{ width: "100%" }}
-											value={this.state.PID[this.state.selectedObject.objectID]}
-											label="PID" />
-									</div>
-									<div className="col-lg-4">
-										<AutoComplete
-											data={this.state.attributeListForSelectedObject}
-											onChange={this.setLEV.bind(this)}
-											style={{ width: "100%" }}
-											value={this.state.LEV[this.state.selectedObject.objectID]}
-											label="LEV" />
-									</div>
-								</div>
-								<PanelBarItem title={<i style={{ fintSize: "14px" }}>Add custom Attrbutes</i>}>
-									<div className="row">
-										<div className="col-lg-11" tabIndex="0" onKeyDown={this.addCustomAttributeToAttributeList.bind(this)}>
-											<Input
-												value={this.state.customAttribute}
-												placeholder="Custom Attribute"
-												style={{ width: "100%", textAlign: "center" }}
-												onChange={this.editCustomAttribute.bind(this)}
-
-											/>
-										</div>
-									</div>
-									<div className="row">
-
-										<div className="col-lg-5">
+										<div className="col-lg-6 form-group" >
 											<select
 												multiple
 												className="form-control"
 												size={10}
-												onDoubleClick={this.addCustomAttribute.bind(this)}
+												onDoubleClick={this.addSelectedAttribute.bind(this)}
 												id="totalAttributes"
 												style={{ overflowX: "scroll" }}
 											>
 												{totalAttributesElement}
 											</select>
+											<br />
+											<div tabIndex="0" onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)}>
+												<AutoComplete data={this.state.attributeListForSelectedObject} onKeyDown={this.addSelectedAttributeFromAutoComplete.bind(this)} style={{ width: "100%" }} placeholder="Search Attribute" />
+											</div>
 										</div>
-										<div className="col-lg-2">
+										<div className="col-lg-2" style={{ padding: '0px' }}>
+											<form className="k-form" style={{ width: "100%", marginTop: "0px", padding: '0px' }}>
+												{attributesColumnsElement}
+											</form>
+										</div>
+
+										<div className="col-lg-4 form-group">
 											<select
-												multiple
 												className="form-control"
-												size={10}
-												onDoubleClick={this.addCustomAttribute.bind(this)}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
+												multiple
+												id="selectedAttributes"
+												style={{ overflowX: "scroll", overflowY: "hidden" }}
+												size={selectedAttributeElementSize}
 											>
-												{
-													Constants.Constants.MLVOperators.map((operator) => {
-
-														return (
-
-															<option value={operator}>{operator}</option>
-														)
-													})
-												}
+												{selectedAttributeListElement}
 											</select>
 										</div>
-										<div className="col-lg-5">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												onDoubleClick={this.addCustomAttribute.bind(this)}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
-												{
-													Constants.Constants.MLVFunctions.map((func) => {
 
-														return (
-
-															<option value={func}>{func}</option>
-														)
-													})
-												}
-											</select>
-
+									</div>
+									< div className="row justify-content-center">
+										<div className="col-lg-4">
+											<AutoComplete
+												data={this.state.attributeListForSelectedObject}
+												onChange={this.setID.bind(this)}
+												style={{ width: "100%" }}
+												value={this.state.ID[this.state.selectedObject.objectID]}
+												label="ID" />
+										</div>
+										<div className="col-lg-4">
+											<AutoComplete
+												data={this.state.attributeListForSelectedObject}
+												onChange={this.setPID.bind(this)}
+												style={{ width: "100%" }}
+												value={this.state.PID[this.state.selectedObject.objectID]}
+												label="PID" />
+										</div>
+										<div className="col-lg-4">
+											<AutoComplete
+												data={this.state.attributeListForSelectedObject}
+												onChange={this.setLEV.bind(this)}
+												style={{ width: "100%" }}
+												value={this.state.LEV[this.state.selectedObject.objectID]}
+												label="LEV" />
 										</div>
 									</div>
+									<PanelBarItem title={<i style={{ fintSize: "14px" }}>Add custom Attrbutes</i>}>
+										<div className="row">
+											<div className="col-lg-11" tabIndex="0" onKeyDown={this.addCustomAttributeToAttributeList.bind(this)}>
+												<Input
+													value={this.state.customAttribute}
+													placeholder="Custom Attribute"
+													style={{ width: "100%", textAlign: "center" }}
+													onChange={this.editCustomAttribute.bind(this)}
+
+												/>
+											</div>
+										</div>
+										<div className="row">
+
+											<div className="col-lg-5">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													onDoubleClick={this.addCustomAttribute.bind(this)}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{totalAttributesElement}
+												</select>
+											</div>
+											<div className="col-lg-2">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													onDoubleClick={this.addCustomAttribute.bind(this)}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
+														Constants.Constants.MLVOperators.map((operator) => {
+
+															return (
+
+																<option value={operator}>{operator}</option>
+															)
+														})
+													}
+												</select>
+											</div>
+											<div className="col-lg-5">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													onDoubleClick={this.addCustomAttribute.bind(this)}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
+														Constants.Constants.MLVFunctions.map((func) => {
+
+															return (
+
+																<option value={func}>{func}</option>
+															)
+														})
+													}
+												</select>
+
+											</div>
+										</div>
 
 
+									</PanelBarItem>
 								</PanelBarItem>
-							</PanelBarItem>
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Details</i>}>
-								<div className="row justify-content-center">
-									<div className="col-lg-2 justify-content-center">
-										<Button
-											style={{ margin: "1em" }}
-											primary={true}
-											onClick={this.hideLevel.bind(this)}>
-											Hide Level
+								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Details</i>}>
+									<div className="row justify-content-center">
+										<div className="col-lg-2 justify-content-center">
+											<Button
+												style={{ margin: "1em" }}
+												primary={true}
+												onClick={this.hideLevel.bind(this)}>
+												Hide Level
 											</Button>
-										<Switch
-											style={{ margin: "1em" }}
-											checked={
-												this.state.selectedObject.objectName != "Selected Sources" ?
-													this.state[this.state.selectedObject.objectID].hideLevel : false
-											}
-										/>
-									</div>
-								</div>
-								<div className="row">
-									<div className="col-lg-6">
-										<Input
-
-											label="Fetch Size"
-											value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].fetchSize}
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											onChange={this.addFetchSize.bind(this)}
-
-										/>
-										<Input
-
-											label="Chunk Size"
-											value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].chunkSize}
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											onChange={this.addChunkSize.bind(this)}
-
-										/>
-									</div>
-									<div className="col-lg-6">
-										<Input
-
-											label="Level Weight"
-											value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].levelWeight}
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-											onChange={this.addLevelWeight.bind(this)}
-
-										/>
-										<Input
-
-											label="Delimiter"
-											value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].delimiter}
-											style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-
-
-										/>
-									</div>
-								</div>
-
-								<PanelBarItem title={<i style={{ fontSize: "14px" }}>Add Predicate</i>}>
-									<div className="row">
-										<div className="col-lg-11" tabIndex="0">
-											<Input
-												value={this.state[this.state.selectedObject.objectID] == null || this.state[this.state.selectedObject.objectID] == undefined ? "" : this.state[this.state.selectedObject.objectID].predicate}
-												placeholder="Predicate"
-												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
-												onChange={this.editPredicate.bind(this)}
-
+											<Switch
+												style={{ margin: "1em" }}
+												checked={
+													this.state.selectedObject.objectName != "Selected Sources" ?
+														this.state[this.state.selectedObject.objectID].hideLevel : false
+												}
 											/>
 										</div>
 									</div>
 									<div className="row">
+										<div className="col-lg-6">
+											<Input
 
-										<div className="col-lg-5">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												onDoubleClick={this.addPredicate.bind(this)}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
-												{(this.state.selectedObject.objectName !== "Selected Sources") &&
-													this.state.attributeListForSelectedObject.map((attribute) => {
+												label="Fetch Size"
+												value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].fetchSize}
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+												onChange={this.addFetchSize.bind(this)}
 
-														return (
+											/>
+											<Input
 
-															<option key={attribute} value={this.state[this.state.selectedObject.objectID].objectName + '.' + attribute}>{this.state[this.state.selectedObject.objectID].objectName + '.' + attribute}</option>
-														)
-													})
-												}
-											</select>
+												label="Chunk Size"
+												value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].chunkSize}
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+												onChange={this.addChunkSize.bind(this)}
+
+											/>
 										</div>
-										<div className="col-lg-2">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												onDoubleClick={this.addPredicate.bind(this)}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
-												{
-													Constants.Constants.MLVOperators.map((operator) => {
+										<div className="col-lg-6">
+											<Input
 
-														return (
+												label="Level Weight"
+												value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].levelWeight}
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+												onChange={this.addLevelWeight.bind(this)}
 
-															<option value={operator}>{operator}</option>
-														)
-													})
-												}
-											</select>
-										</div>
-										<div className="col-lg-5">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												onDoubleClick={this.addPredicate.bind(this)}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
-												{
-													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+											/>
+											<Input
 
-														return (
+												label="Delimiter"
+												value={this.state[this.state.selectedObject.objectID] === null || this.state[this.state.selectedObject.objectID] === undefined ? "" : this.state[this.state.selectedObject.objectID].delimiter}
+												style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
 
-															<option value={func}>{func}</option>
-														)
-													})
-												}
-											</select>
 
+											/>
 										</div>
 									</div>
-								</PanelBarItem>
-								<PanelBarItem title={<i style={{ fontSize: "14px" }}>Group By</i>}>
 
-									<div className="row">
-										<div className="col-lg-6">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
-												{
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Add Predicate</i>}>
+										<div className="row">
+											<div className="col-lg-11" tabIndex="0">
+												<Input
+													value={this.state[this.state.selectedObject.objectID] == null || this.state[this.state.selectedObject.objectID] == undefined ? "" : this.state[this.state.selectedObject.objectID].predicate}
+													placeholder="Predicate"
+													style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
+													onChange={this.editPredicate.bind(this)}
 
-													(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+												/>
+											</div>
+										</div>
+										<div className="row">
 
-														this.state[this.state.selectedObject.objectID].attributes.map((attribute) => {
+											<div className="col-lg-5">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													onDoubleClick={this.addPredicate.bind(this)}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{(this.state.selectedObject.objectName !== "Selected Sources") &&
+														this.state.attributeListForSelectedObject.map((attribute) => {
 
-															for (var i = 0; i < this.state[this.state.selectedObject.objectID].groupBy.attributes.length; i++) {
+															return (
 
-																if (attribute.columnName === this.state[this.state.selectedObject.objectID].groupBy.attributes[i].columnName) {
+																<option key={attribute} value={this.state[this.state.selectedObject.objectID].objectName + '.' + attribute}>{this.state[this.state.selectedObject.objectID].objectName + '.' + attribute}</option>
+															)
+														})
+													}
+												</select>
+											</div>
+											<div className="col-lg-2">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													onDoubleClick={this.addPredicate.bind(this)}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
+														Constants.Constants.MLVOperators.map((operator) => {
+
+															return (
+
+																<option value={operator}>{operator}</option>
+															)
+														})
+													}
+												</select>
+											</div>
+											<div className="col-lg-5">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													onDoubleClick={this.addPredicate.bind(this)}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
+														Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+
+															return (
+
+																<option value={func}>{func}</option>
+															)
+														})
+													}
+												</select>
+
+											</div>
+										</div>
+									</PanelBarItem>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Group By</i>}>
+
+										<div className="row">
+											<div className="col-lg-6">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
+
+														(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+
+															this.state[this.state.selectedObject.objectID].attributes.map((attribute) => {
+
+																for (var i = 0; i < this.state[this.state.selectedObject.objectID].groupBy.attributes.length; i++) {
+
+																	if (attribute.columnName === this.state[this.state.selectedObject.objectID].groupBy.attributes[i].columnName) {
 
 
-																} else {
+																	} else {
 
 
 
+																	}
 																}
-															}
 
-															return (
-
-
-																<option
-																	key={attribute.ID}
-																	id={attribute.ID}
-																	name={attribute.columnName}
-																	onDoubleClick={this.addGroupByAttribute.bind(this)}
-																	value={attribute.attributeName}>{attribute.columnName}
-
-																</option>
-
-															)
-														}) : ""
+																return (
 
 
-												}
+																	<option
+																		key={attribute.ID}
+																		id={attribute.ID}
+																		name={attribute.columnName}
+																		onDoubleClick={this.addGroupByAttribute.bind(this)}
+																		value={attribute.attributeName}>{attribute.columnName}
+
+																	</option>
+
+																)
+															}) : ""
 
 
-											</select>
+													}
+
+
+												</select>
+											</div>
+											<div className="col-lg-6">
+
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+
+													{
+
+														(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+
+															this.state[this.state.selectedObject.objectID].groupBy.attributes.map((attribute) => {
+
+																return (
+
+
+																	<option
+																		key={attribute.ID}
+																		id={attribute.ID}
+																		name={attribute.columnName}
+																		onDoubleClick={this.removeGroupByAttribute.bind(this)}
+																		value={attribute.attributeName}>{attribute.columnName}
+
+																	</option>
+
+																)
+															}) : ""
+
+
+													}
+
+												</select>
+											</div>
 										</div>
-										<div className="col-lg-6">
+									</PanelBarItem>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Order By</i>}>
+										<div className="row">
+											<div className="col-lg-6">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
 
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
+														(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
 
-												{
-
-													(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
-
-														this.state[this.state.selectedObject.objectID].groupBy.attributes.map((attribute) => {
-
-															return (
-
-
-																<option
-																	key={attribute.ID}
-																	id={attribute.ID}
-																	name={attribute.columnName}
-																	onDoubleClick={this.removeGroupByAttribute.bind(this)}
-																	value={attribute.attributeName}>{attribute.columnName}
-
-																</option>
-
-															)
-														}) : ""
+															this.state[this.state.selectedObject.objectID].attributes.map((attribute) => {
 
 
-												}
-
-											</select>
-										</div>
-									</div>
-								</PanelBarItem>
-								<PanelBarItem title={<i style={{ fontSize: "14px" }}>Order By</i>}>
-									<div className="row">
-										<div className="col-lg-6">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
-												{
-
-													(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
-
-														this.state[this.state.selectedObject.objectID].attributes.map((attribute) => {
+																return (
 
 
-															return (
+																	<option
+																		key={attribute.ID}
+																		id={attribute.ID}
+																		name={attribute.columnName}
+																		onDoubleClick={this.addOrderByAttribute.bind(this)}
+																		value={attribute.attributeName}>{attribute.columnName}
+
+																	</option>
+
+																)
+															}) : ""
 
 
-																<option
-																	key={attribute.ID}
-																	id={attribute.ID}
-																	name={attribute.columnName}
-																	onDoubleClick={this.addOrderByAttribute.bind(this)}
-																	value={attribute.attributeName}>{attribute.columnName}
-
-																</option>
-
-															)
-														}) : ""
+													}
 
 
-												}
+												</select>
+											</div>
+											<div className="col-lg-5">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+
+													{
+
+														(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+
+															this.state[this.state.selectedObject.objectID].orderBy.attributes.map((attribute) => {
+
+																return (
 
 
-											</select>
-										</div>
-										<div className="col-lg-5">
-											<select
-												multiple
-												className="form-control"
-												size={10}
-												id="totalAttributes"
-												style={{ overflowX: "scroll" }}
-											>
+																	<option
+																		key={attribute.ID}
+																		id={attribute.ID}
+																		name={attribute.columnName}
+																		onDoubleClick={this.removeOrderByAttribute.bind(this)}
+																		value={attribute.attributeName}>{attribute.columnName}
 
+																	</option>
+
+																)
+															}) : ""
+
+
+													}
+
+												</select>
+											</div>
+											<div className="col-lg-1 justify-content-start" >
 												{
 
 													(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
 
 														this.state[this.state.selectedObject.objectID].orderBy.attributes.map((attribute) => {
-
+															//console.log(attribute)
 															return (
 
+																<div className=" row justify-content-start">
+																	<form>
+																		<label style={{ float: "left", marginTop: "0.25em", marginBottom: "0px" }}>
+																			<input
+																				type="radio"
+																				key={attribute.ID}
+																				id={attribute.ID}
+																				name={attribute.ID}
+																				checked={attribute.order.asc}
+																				onClick={this.toggleOrderForOrderBy.bind(this)}
+																				component="asc"
 
-																<option
-																	key={attribute.ID}
-																	id={attribute.ID}
-																	name={attribute.columnName}
-																	onDoubleClick={this.removeOrderByAttribute.bind(this)}
-																	value={attribute.attributeName}>{attribute.columnName}
+																			/>ASC
+																	</label>
 
-																</option>
+																		<label style={{ float: "right", margin: "0.25em", marginBottom: "0px" }}>
+																			<input
+																				type="radio"
+																				key={attribute.ID}
+																				id={attribute.ID}
+																				name={attribute.ID}
+																				onClick={this.toggleOrderForOrderBy.bind(this)}
+																				component="desc"
+																				checked={attribute.order.desc}
+
+																			/>DESC
+																	</label>
+																	</form>
+																</div>
+
 
 															)
 														}) : ""
 
 
 												}
-
-											</select>
-										</div>
-										<div className="col-lg-1 justify-content-start" >
-											{
-
-												(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
-
-													this.state[this.state.selectedObject.objectID].orderBy.attributes.map((attribute) => {
-														//console.log(attribute)
-														return (
-
-															<div className=" row justify-content-start">
-																<form>
-																	<label style={{ float: "left", marginTop: "0.25em", marginBottom: "0px" }}>
-																		<input
-																			type="radio"
-																			key={attribute.ID}
-																			id={attribute.ID}
-																			name={attribute.ID}
-																			checked={attribute.order.asc}
-																			onClick={this.toggleOrderForOrderBy.bind(this)}
-																			component="asc"
-
-																		/>ASC
-																	</label>
-
-																	<label style={{ float: "right", margin: "0.25em", marginBottom: "0px" }}>
-																		<input
-																			type="radio"
-																			key={attribute.ID}
-																			id={attribute.ID}
-																			name={attribute.ID}
-																			onClick={this.toggleOrderForOrderBy.bind(this)}
-																			component="desc"
-																			checked={attribute.order.desc}
-
-																		/>DESC
-																	</label>
-																</form>
-															</div>
-
-
-														)
-													}) : ""
-
-
-											}
-										</div>
-									</div>
-								</PanelBarItem>
-							</PanelBarItem>
-							{this.state.selectedObjectList.map(function(object) { return object.objectID; }).indexOf(this.state.selectedObject.objectID) <= 0 ? "" :
-
-								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Add Relation</i>}>
-
-									<div className="row justify-content-center align-items-start">
-										<DropDownList
-											defaultValue={{ levelName: "Parent Level", id: 0 }}
-											data={parentObjectsForRelation}
-											textField='levelName'
-											dataItemKey="id"
-											style={{ margin: "0.5em" }}
-											onChange={this.setRelationShipParent.bind(this)}
-											value={this.state.parentObject}
-
-										/>
-									</div>
-									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Native Relations</i>}>
-										<div className="row justify-content-center">
-											<div className="col-lg-2">
-												<Button
-												primary={true}
-													style={{ margin: "1em" }}
-													onClick={this.toggleIsRecursionTrue.bind(this)}>
-													Recursion
-											</Button>
-												<Switch
-													style={{ margin: "1em" }}
-													checked={
-														this.state.selectedObject.objectName != "Selected Sources" ?
-															this.state[this.state.selectedObject.objectID].relation.isRecursionTrue : false
-													}
-												/>
-											</div>
-
-
-											<div className="col-lg-4 justify-content-center">
-												<MultiSelect
-													placeholder={"Native Relations"}
-													data={this.state.nativeRelationsData}
-													filterable={true}
-													style={{ margin: "1em", width: '100%' }}
-													onChange={this.addNativeRelation.bind(this)}
-													onFilterChange={this.nativeRelationsFilter.bind(this)}
-													value={this.state[this.state.selectedObject.objectID].relation.native}
-												/>
 											</div>
 										</div>
 									</PanelBarItem>
-									<PanelBarItem title={<i style={{ fontSize: "14px" }}>Explicit Relations</i>}>
+								</PanelBarItem>
+								{this.state.selectedObjectList.map(function(object) { return object.objectID; }).indexOf(this.state.selectedObject.objectID) <= 0 ? "" :
 
-										<div className="row justify-content-center">
-											<div className="col-lg-10 justify-content-center">
-												<Input
-													placeholder="Explicit Relation"
-													style={{ width: "100%", textAlign: "center", margin: "1em" }}
-													value={
-														this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ?
-															(this.state.explicitRelation.attribute.object + '.' + this.state.explicitRelation.attribute.attributeName + this.state.explicitRelation.operator.operator + this.state.explicitRelation.parentAttribute.level + '.' + this.state.explicitRelation.parentAttribute.attributeIndex) : (
-																this.state[this.state.selectedObject.objectID].relation.explicit.attribute.object + '.' + this.state[this.state.selectedObject.objectID].relation.explicit.attribute.attributeName + this.state[this.state.selectedObject.objectID].relation.explicit.operator.operator + this.state[this.state.selectedObject.objectID].relation.explicit.parentAttribute.level + '.' + this.state[this.state.selectedObject.objectID].relation.explicit.parentAttribute.attributeIndex)
-													}
-												/>
-											</div>
-											<div classNam="col-lg-2">
-												<Button
-												primary={true}
-													style={{ margin: "1em" }}
-													onClick={this.saveExplicitRelation.bind(this)}
-												>
-													Add
-												</Button>
-												<Button
-												primary={true}
-													style={{ margin: "1em" }}
-													onClick={this.removeExplictRelation.bind(this)}
-												>
-													Remove
-												</Button>
-											</div>
+									<PanelBarItem title={<i style={{ fontSize: "16px" }}>Add Relation</i>}>
+
+										<div className="row justify-content-center align-items-start">
+											<DropDownList
+												defaultValue={{ levelName: "Parent Level", id: 0 }}
+												data={parentObjectsForRelation}
+												textField='levelName'
+												dataItemKey="id"
+												style={{ margin: "0.5em" }}
+												onChange={this.setRelationShipParent.bind(this)}
+												value={this.state.parentObject}
+
+											/>
 										</div>
-										<div className="row">
-											<div className="col-lg-5">
+										<PanelBarItem title={<i style={{ fontSize: "14px" }}>Native Relations</i>}>
+											<div className="row justify-content-center">
+												<div className="col-lg-2">
+													<Button
+														primary={true}
+														style={{ margin: "1em" }}
+														onClick={this.toggleIsRecursionTrue.bind(this)}>
+														Recursion
+											</Button>
+													<Switch
+														style={{ margin: "1em" }}
+														checked={
+															this.state.selectedObject.objectName != "Selected Sources" ?
+																this.state[this.state.selectedObject.objectID].relation.isRecursionTrue : false
+														}
+													/>
+												</div>
 
-												<DropDownList
-													data={this.state.selectedObject.objectName != "Select Sources" ?
-														this.state[this.state.selectedObject.objectID].attributes.map((attribute, index) => {
-															return (
 
-																{
-																	key: attribute.ID,
-																	id: index,
-																	attributeName: attribute.attributeName,
-																	object: this.state[this.state.selectedObject.objectID].objectName,
-																	objectID: this.state[this.state.selectedObject.objectID].objectID
-
-																}
-
-															)
-														}) : []}
-													textField="attributeName"
-													dataItemKey="id"
-													style={{ width: "100%" }}
-													label="Select Attribute"
-													onChange={this.addChildAttributeForExplicitRelation.bind(this)}
-													value={
-														this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ? (
-															this.state.explicitRelation.attribute
-														) : (
-																this.state[this.state.selectedObject.objectID].relation.explicit.attribute
-															)
-													}
-
-												/>
+												<div className="col-lg-4 justify-content-center">
+													<MultiSelect
+														placeholder={"Native Relations"}
+														data={this.state.nativeRelationsData}
+														filterable={true}
+														style={{ margin: "1em", width: '100%' }}
+														onChange={this.addNativeRelation.bind(this)}
+														onFilterChange={this.nativeRelationsFilter.bind(this)}
+														value={this.state[this.state.selectedObject.objectID].relation.native}
+													/>
+												</div>
 											</div>
-											<div className="col-lg-2">
+										</PanelBarItem>
+										<PanelBarItem title={<i style={{ fontSize: "14px" }}>Explicit Relations</i>}>
 
-												<DropDownList
-													data={
-														Constants.Constants.MLVOperators.map((operator, index) => {
-															return (
-
-																{
-
-																	id: index,
-																	operator: operator,
-
-
-																}
-
-															)
-														})}
-													dataItemKey="id"
-													textField="operator"
-													style={{ width: "100%" }}
-													label="Select Operator"
-													onChange={this.addOperatorForExplicitRelation.bind(this)}
-													value={
-														this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ? (
-															this.state.explicitRelation.operator
-														) : (
-																this.state[this.state.selectedObject.objectID].relation.explicit.operator
-															)
-													}
-												/>
+											<div className="row justify-content-center">
+												<div className="col-lg-10 justify-content-center">
+													<Input
+														placeholder="Explicit Relation"
+														style={{ width: "100%", textAlign: "center", margin: "1em" }}
+														value={
+															this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ?
+																(this.state.explicitRelation.attribute.object + '.' + this.state.explicitRelation.attribute.attributeName + this.state.explicitRelation.operator.operator + this.state.explicitRelation.parentAttribute.level + '.' + this.state.explicitRelation.parentAttribute.attributeIndex) : (
+																	this.state[this.state.selectedObject.objectID].relation.explicit.attribute.object + '.' + this.state[this.state.selectedObject.objectID].relation.explicit.attribute.attributeName + this.state[this.state.selectedObject.objectID].relation.explicit.operator.operator + this.state[this.state.selectedObject.objectID].relation.explicit.parentAttribute.level + '.' + this.state[this.state.selectedObject.objectID].relation.explicit.parentAttribute.attributeIndex)
+														}
+													/>
+												</div>
+												<div classNam="col-lg-2">
+													<Button
+														primary={true}
+														style={{ margin: "1em" }}
+														onClick={this.saveExplicitRelation.bind(this)}
+													>
+														Add
+												</Button>
+													<Button
+														primary={true}
+														style={{ margin: "1em" }}
+														onClick={this.removeExplictRelation.bind(this)}
+													>
+														Remove
+												</Button>
+												</div>
 											</div>
-											<div className="col-lg-5">
+											<div className="row">
+												<div className="col-lg-5">
 
-												<DropDownList
-													data={this.state.parentObject.id !== 0 ?
-														this.state[this.state.parentObject.objectID].attributes.map((attribute, index) => {
-															return (
+													<DropDownList
+														data={this.state.selectedObject.objectName != "Select Sources" ?
+															this.state[this.state.selectedObject.objectID].attributes.map((attribute, index) => {
+																return (
 
-																{
-																	// key property can be used to compare the attribute while deleting attributes
-																	key: attribute.ID,
-																	id: index,
-																	attributeName: attribute.attributeName,
+																	{
+																		key: attribute.ID,
+																		id: index,
+																		attributeName: attribute.attributeName,
+																		object: this.state[this.state.selectedObject.objectID].objectName,
+																		objectID: this.state[this.state.selectedObject.objectID].objectID
 
-																	object: this.state[this.state.parentObject.objectID].objectName,
-																	objectID: this.state[this.state.parentObject.objectID].objectID,
-																	attributeIndex: (index + 1),
-																	level: 'level' + this.state.selectedObjectList.map((object) => { return object.objectID }).indexOf(this.state.parentObject.objectID)
-																}
+																	}
 
-															)
-														}) : []}
-													textField="attributeName"
-													dataItemKey="id"
-													style={{ width: "100%" }}
-													label="Select Attribute"
-													onChange={this.addParentAttributeForExplicitRelation.bind(this)}
-													value={
-														this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ? (
-															this.state.explicitRelation.parentAttribute
-														) : (
-																this.state[this.state.selectedObject.objectID].relation.explicit.parentAttribute
-															)
-													}
-												/>
+																)
+															}) : []}
+														textField="attributeName"
+														dataItemKey="id"
+														style={{ width: "100%" }}
+														label="Select Attribute"
+														onChange={this.addChildAttributeForExplicitRelation.bind(this)}
+														value={
+															this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ? (
+																this.state.explicitRelation.attribute
+															) : (
+																	this.state[this.state.selectedObject.objectID].relation.explicit.attribute
+																)
+														}
+
+													/>
+												</div>
+												<div className="col-lg-2">
+
+													<DropDownList
+														data={
+															Constants.Constants.MLVOperators.map((operator, index) => {
+																return (
+
+																	{
+
+																		id: index,
+																		operator: operator,
+
+
+																	}
+
+																)
+															})}
+														dataItemKey="id"
+														textField="operator"
+														style={{ width: "100%" }}
+														label="Select Operator"
+														onChange={this.addOperatorForExplicitRelation.bind(this)}
+														value={
+															this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ? (
+																this.state.explicitRelation.operator
+															) : (
+																	this.state[this.state.selectedObject.objectID].relation.explicit.operator
+																)
+														}
+													/>
+												</div>
+												<div className="col-lg-5">
+
+													<DropDownList
+														data={this.state.parentObject.id !== 0 ?
+															this.state[this.state.parentObject.objectID].attributes.map((attribute, index) => {
+																return (
+
+																	{
+																		// key property can be used to compare the attribute while deleting attributes
+																		key: attribute.ID,
+																		id: index,
+																		attributeName: attribute.attributeName,
+
+																		object: this.state[this.state.parentObject.objectID].objectName,
+																		objectID: this.state[this.state.parentObject.objectID].objectID,
+																		attributeIndex: (index + 1),
+																		level: 'level' + this.state.selectedObjectList.map((object) => { return object.objectID }).indexOf(this.state.parentObject.objectID)
+																	}
+
+																)
+															}) : []}
+														textField="attributeName"
+														dataItemKey="id"
+														style={{ width: "100%" }}
+														label="Select Attribute"
+														onChange={this.addParentAttributeForExplicitRelation.bind(this)}
+														value={
+															this.state[this.state.selectedObject.objectID].relation.type !== 'explicit' ? (
+																this.state.explicitRelation.parentAttribute
+															) : (
+																	this.state[this.state.selectedObject.objectID].relation.explicit.parentAttribute
+																)
+														}
+													/>
+												</div>
 											</div>
-										</div>
 
 
 
+
+										</PanelBarItem>
 
 									</PanelBarItem>
+								}
+								<PanelBarItem title={<i style={{ fontSize: "16px" }}>Global Properties</i>}>
 
-								</PanelBarItem>
-							}
-							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Global Properties</i>}>
-
-								<div className="row">
-									<div className="col-lg-6">
-										<Button
-										primary={true}
-											style={{ margin: "1em" }}
-											onClick={this.enableParallelExecution.bind(this)}>
-											Parallel Execution
+									<div className="row">
+										<div className="col-lg-6">
+											<Button
+												primary={true}
+												style={{ margin: "1em" }}
+												onClick={this.enableParallelExecution.bind(this)}>
+												Parallel Execution
 											</Button>
-										<Switch
-											style={{ margin: "1em" }}
-											checked={
+											<Switch
+												style={{ margin: "1em" }}
+												checked={
 
-												this.state.parallelExecution
-											}
-										/>
-										<Button
-										primary={true}
-											style={{ margin: "1em" }}
-											onClick={this.enableCache.bind(this)}>
-											Cache Enabled
+													this.state.parallelExecution
+												}
+											/>
+											<Button
+												primary={true}
+												style={{ margin: "1em" }}
+												onClick={this.enableCache.bind(this)}>
+												Cache Enabled
 											</Button>
-										<Switch
-											style={{ margin: "1em" }}
-											checked={
+											<Switch
+												style={{ margin: "1em" }}
+												checked={
 
-												this.state.cache.enabled
-											}
-										/>
-										<DropDownList
-											data={Constants.CacheTypes}
-											style={{ marginLeft: "1em" }}
-											value={
+													this.state.cache.enabled
+												}
+											/>
+											<DropDownList
+												data={Constants.CacheTypes}
+												style={{ marginLeft: "1em" }}
+												value={
 
-												this.state.cache.setting
-											}
-											onChange={this.setCacheSetting.bind(this)}
-										/>
+													this.state.cache.setting
+												}
+												onChange={this.setCacheSetting.bind(this)}
+											/>
 
+										</div>
 									</div>
-								</div>
-							</PanelBarItem>
-						</PanelBar>
-						<div className="row" style={{ marginTop: '1em' }}>
-							<div className="col-lg-6">
-
-								<Button primary={true} onClick={this.createMLV.bind(this)}>
-								
-									Generate MLV
-								</Button>
-							</div>
-							<div className="col-lg-6">
-								<Button primary={true} onClick={this.showGridView.bind(this)}>
-									Grid View
-								</Button>
-							</div>
-						</div>
-						<div className="row" style={{ marginTop: '1em' }}>
-							<div className="col-lg-12">
-
-								<textarea
-									label="MLV"
-									class="form-control rounded-0"
-									id="exampleFormControlTextarea1"
-									rows="5" value={this.state.mlv}
-									onChange={this.parseMLV.bind(this)}
-								>
-								</textarea>
-							</div>
-						</div>
-						{this.props.parent != undefined &&
+								</PanelBarItem>
+							</PanelBar>
 							<div className="row" style={{ marginTop: '1em' }}>
 								<div className="col-lg-6">
-									<Button primary={true} onClick={this.saveMLVToParent.bind(this)}>
-										Save
+
+									<Button primary={true} onClick={this.createMLV.bind(this)}>
+
+										Generate MLV
+								</Button>
+								</div>
+								<div className="col-lg-6">
+									<Button primary={true} onClick={this.showGridView.bind(this)}>
+										Grid View
 								</Button>
 								</div>
 							</div>
-						}
+							<div className="row" style={{ marginTop: '1em' }}>
+								<div className="col-lg-12">
 
-					</div>
-					
-				</div>
-				</div>
-				{
-						this.state.showGridView &&
-						<div className="fixed-bottom" style={{ width: "100%", height: '50%',position : 'absolute' }}>
-							<div className="row justify-content-right">
-								<div className='col-lg-2'></div>
-								<div className='col-lg-2'></div>
-								<div className='col-lg-2'></div>
-								<div className='col-lg-2'></div>
-								<div className='col-lg-1'></div>
-								<div className='col-lg-1'>
-									<Button
-										primary={true}
-										style={{ margin: "1em" }}
-										onClick={this.closeGridView.bind(this)}
+									<textarea
+										label="MLV"
+										class="form-control rounded-0"
+										id="exampleFormControlTextarea1"
+										rows="5" value={this.state.mlv}
+										onChange={this.parseMLV.bind(this)}
 									>
-										Close
-						</Button>
+									</textarea>
 								</div>
 							</div>
+							{this.props.parent != undefined &&
+								<div className="row" style={{ marginTop: '1em' }}>
+									<div className="col-lg-6">
+										<Button primary={true} onClick={this.saveMLVToParent.bind(this)}>
+											Save
+								</Button>
+									</div>
+								</div>
+							}
 
-							<div style={{ overflowY: "scroll" }}>
-								<Grid
-									style={{ height: "40em"}}
-									data={this.state.gridView.gridViewData}
-									resizable={true}
+						</div>
 
+					</div>
+				</div>
+				{
+					this.state.showGridView &&
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%', position: 'absolute' }}>
+						<div className="row justify-content-right">
+							<div className='col-lg-2'></div>
+							<div className='col-lg-2'></div>
+							<div className='col-lg-2'></div>
+							<div className='col-lg-2'></div>
+							<div className='col-lg-1'></div>
+							<div className='col-lg-1'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.closeGridView.bind(this)}
 								>
-									<Column
-										field="Source"
-										title="Source"
-										width="500px"
-									/>
-									<Column
-										field="Level"
-										title="Level"
-										width="500px"
-									/>
-									<Column
-										field="relation"
-										title="Relation"
-										width="500px"
-									/>
-									{
-										this.state.gridView.columns.map(column => {
-											return (
-												<Column
-													field={column}
-													title={column}
-													width="500px"
-												/>
-											)
-										})
-									}
-								</Grid>
+									Close
+						</Button>
 							</div>
 						</div>
-						
-					}
+
+						<div style={{ overflowY: "scroll" }}>
+							<Grid
+								style={{ height: "40em" }}
+								data={this.state.gridView.gridViewData}
+								resizable={true}
+
+							>
+								<Column
+									field="Source"
+									title="Source"
+									width="500px"
+								/>
+								<Column
+									field="Level"
+									title="Level"
+									width="500px"
+								/>
+								<Column
+									field="relation"
+									title="Relation"
+									width="500px"
+								/>
+								{
+									this.state.gridView.columns.map(column => {
+										return (
+											<Column
+												field={column}
+												title={column}
+												width="500px"
+											/>
+										)
+									})
+								}
+							</Grid>
+						</div>
+					</div>
+
+				}
 			</div>
 		)
 	}
@@ -3293,7 +3383,7 @@ export default class MLVGenerator extends Component {
 				gridViewData: gridViewData
 			},
 			showGridView: true,
-			blurState : true
+			blurState: true
 		})
 
 		/* COMPONENTS FOR GRID_VIEW_DATA
@@ -3311,7 +3401,7 @@ export default class MLVGenerator extends Component {
 		this.setState({
 			...this.state,
 			showGridView: false,
-			blurState:false
+			blurState: false
 		})
 	}
 

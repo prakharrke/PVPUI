@@ -44,7 +44,7 @@ export default class LoginForm extends Component {
 
 	render() {
 
-		var redirect = this.props.isUserAuthenticated ? <Redirect to={{ pathname: "/" }} /> : ''
+		var redirect = this.props.isUserAuthenticated ? <Redirect to={{ pathname: "/connections" }} /> : ''
 		console.log(this.props)
 		return (
 
