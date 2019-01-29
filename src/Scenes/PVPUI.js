@@ -30,7 +30,8 @@ export default class PVPUI extends Component {
 			connInfoList: [],
 			pluginList: [],
 			showPanel: false,
-			connections: [{connectionName : '', connectionID : '', objectList : '', connectionCreated : false}]
+			connections: [{connectionName : '', connectionID : "-100", objectList : '', connectionCreated : false}],
+			writeBaselineState : {}
 
 		}
 
@@ -61,7 +62,7 @@ export default class PVPUI extends Component {
 			pluginList = parsedJson.pluginList.split(",")
 
 			this.setState({
-
+				...this.state,
 				pluginList: pluginList
 			})
 
@@ -72,12 +73,42 @@ export default class PVPUI extends Component {
 			this.isNotLoading();
 			alert("Something went wrong")
 		})
+		this.isLoading()
+		axios.post(Constants.url + 'GetConnectionsList', { p: '1' }, {
+			headers: {
+
+				'Content-Type': 'application/json',
+
+
+
+			}
+
+
+		}).then(response=>{
+			this.isNotLoading()
+			this.setState({
+				connections : response.data
+			})
+		}).catch(e=>{
+
+			this.isNotLoading()
+			alert(e)
+		})
+	}
+
+	setBaseConnection(baseConnection){
+		this.setState({
+			...this.state,
+			baseConnection : {
+				...baseConnection
+			}
+		})
 	}
 
 	isLoading() {
 
 		this.setState({
-
+			...this.state,
 			isLoading: true
 		})
 
@@ -86,7 +117,7 @@ export default class PVPUI extends Component {
 	isNotLoading() {
 
 		this.setState({
-
+			...this.state,
 			isLoading: false
 		})
 	}
@@ -94,6 +125,7 @@ export default class PVPUI extends Component {
 	setObjectList(objectList) {
 
 		this.setState({
+			...this.state,
 			objectList: objectList
 		})
 	}
@@ -101,6 +133,7 @@ export default class PVPUI extends Component {
 	setConnInfoList(connectionList) {
 
 		this.setState({
+			...this.state,
 			connInfoList: connectionList
 		})
 	}
@@ -108,6 +141,7 @@ export default class PVPUI extends Component {
 	modelNotCreated() {
 
 		this.setState({
+			...this.state,
 			isModelCreated: false
 		})
 	}
@@ -115,6 +149,7 @@ export default class PVPUI extends Component {
 	modelCreated() {
 
 		this.setState({
+			...this.state,
 			isModelCreated: true
 		})
 
@@ -122,6 +157,7 @@ export default class PVPUI extends Component {
 
 	addMLV(mlv) {
 		this.setState({
+			...this.state,
 			mlv: mlv
 		})
 	}
@@ -129,13 +165,16 @@ export default class PVPUI extends Component {
 
 		event.preventDefault();
 		this.setState({
+			...this.state,
 			createBaseline: !this.state.createBaseline
 		})
 	}
 
 	// * MEHTOD TO STORE MLV GENERATOR STATE
 	loadMLVGeneratorState(mlvGeneratorState) {
+	
 		this.setState({
+			...this.state,
 			mlvGeneratorState: {
 				...mlvGeneratorState
 			}
@@ -187,13 +226,21 @@ export default class PVPUI extends Component {
 		
 		
 		var connections = this.state.connections
+		var connectionID =-100;
+		
+		if(!connections.length == 0){
+
+			connectionID = -109 - (connections.length)
+		}
+
 		connections.push({
 			connectionName: '',
-			connectionID: '',
+			connectionID: connectionID.toString(),
 			connectionCreated: false,
 			objectList: []
 		})
 		this.setState({
+			...this.state,
 			connections: connections
 		})
 
@@ -217,6 +264,27 @@ export default class PVPUI extends Component {
 
 	createModel(index) {
 
+		console.log(index)
+		if(this.state.connections[index].connectionName === ''){
+			alert('Please choose connection')
+			return
+		}
+		if(this.state.connections[index].connectionID === ''){
+			alert('Please set connection ID')
+			return
+		}
+		var connectionID = this.state.connections[index].connectionID;
+		var exit = false
+		this.state.connections.map((connection, connIndex)=>{
+
+			if(connection.connectionID === connectionID && index != connIndex){
+				alert('ConnectionID needs to be unique')
+				exit = true
+			}
+		})
+		if(exit){
+			return
+		}
 		this.isLoading()
 		//var index = event.target.getAttribute('index');
 		
@@ -249,6 +317,7 @@ export default class PVPUI extends Component {
 		var connections = this.state.connections;
 		connections[index].connectionName = value;
 		this.setState({
+			...this.state,
 			connections: connections
 		})
 
@@ -259,6 +328,7 @@ export default class PVPUI extends Component {
 		var connections = this.state.connections;
 		connections[index].connectionID = value;
 		this.setState({
+			...this.state,
 			connections: connections
 		})
 	}
@@ -270,13 +340,26 @@ export default class PVPUI extends Component {
 		var connections = this.state.connections;
 		connections.splice(index, 1)
 		this.setState({
+			...this.state,
 			connections: connections
 		})
 	}
 
-	render() {
+	saveWriteBaselineState(baselineState){
 
-		console.log(this.state.connections)
+		this.setState({
+
+			writeBaselineState : {...baselineState}
+		})
+	}
+
+	render() {
+		
+		var connections = new Array();
+		this.state.connections.map((connection, index)=>{
+			if(connection.connectionCreated)
+				connections.push(connection)
+		})
 		var loading = this.state.isLoading ? (<LoadingPanel />) : "";
 		var mountGenerator = "";
 
@@ -326,14 +409,13 @@ export default class PVPUI extends Component {
 				<div className="row">
 					<div className="col-lg-2">
 						<Button
-							
+							primary={true}
 							onMouseOver={this.togglePanel.bind(this)}
 
 						><Menu /></Button>
 					</div>
 				</div>
-				<div className="row"
-				>
+				<div className="row">
 
 
 					{this.state.showPanel &&
@@ -367,7 +449,8 @@ export default class PVPUI extends Component {
 									addMLV={this.addMLV.bind(this)}
 									oldState={this.state.mlvGeneratorState}
 									loadMLVGeneratorState={this.loadMLVGeneratorState.bind(this)}
-									connections={this.state.connections}
+									connections={connections}
+									setBaseConnection={this.setBaseConnection.bind(this)}
 								/>)
 							}} />
 							<Route path='/readBaseline' render={props => {
@@ -375,12 +458,14 @@ export default class PVPUI extends Component {
 									isLoading={this.isLoading.bind(this)}
 									isNotLoading={this.isNotLoading.bind(this)}
 									mlv={this.state.mlv}
+									connections={connections}
 									mlvGeneratorState={this.state.mlvGeneratorState}
+									baseConnection={this.state.mlvGeneratorState.baseConnection}
 								/>)
 							}} />
 
 							<Route path='/writeBaseline' render={props => {
-								return (<WriteBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} isLoading={this.isLoading.bind(this)} isNotLoading={this.isNotLoading.bind(this)} />
+								return (<WriteBaseline connections={connections} connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} isLoading={this.isLoading.bind(this)} isNotLoading={this.isNotLoading.bind(this)} saveWriteBaselineState={this.saveWriteBaselineState.bind(this)} writeBaselineState={this.state.writeBaselineState} />
 								)
 							}} />
 							<Route path='/activitiesBaseline' render={props => {

@@ -16,7 +16,7 @@ export default class Connections extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			connections: []
+			
 		}
 	}
 
@@ -26,15 +26,17 @@ export default class Connections extends Component {
 
 	}
 	testConnection(event) {
-
-		var index = event.target.getAttribute('index');
+		event.preventDefault()
+		var index = event.target.id;
 		this.props.testConnection(index)
 	}
 
 	createModel(event) {
-
-
-		var index = event.target.getAttribute('index');
+		
+		event.preventDefault()
+	
+		var index = event.target.id;
+		
 		this.props.createModel(index)
 
 
@@ -42,18 +44,18 @@ export default class Connections extends Component {
 	setConnectionName(event) {
 		
 		var connections = new Array();
-		this.props.setConnectionName(event.target.props.index, event.target.value)
+		this.props.setConnectionName(event.target.props.id, event.target.value)
 
 	}
 
 	setConnectionID(event) {
 		var connections = new Array();
-		this.props.setConnectionID(event.target.props.index, event.target.value)
+		this.props.setConnectionID(event.target.props.id, event.target.value)
 	}
 
 	deleteConnection(event) {
-
-		var index = event.target.getAttribute('index')
+		event.preventDefault()
+		var index = event.target.id
 		if(index === 0){
 			alert('Atleast one connection is required.')
 			return 
@@ -65,22 +67,24 @@ export default class Connections extends Component {
 	
 		return (
 			<div className="row justify-content-center">
-			<div className="col-lg-6">
+			<div className="col-lg-11">
 				<div className="row">
-					<div className="col-lg-2">
+					<div className="col-lg-1">
 						<Button
-							
-							style={{ margin: '1em' }}
+							primary={true}
+
+							style={{ marginTop: '1em' }}
 							onClick={this.addConnection.bind(this)}
 						>
-							<AddCircleOutline />
+							<span  className="k-icon  k-i-plus-outline"></span>
 						</Button>
 					</div>
 
 				</div>
 				{
 					this.props.connections.map((connection, index) => {
-
+						console.log('!!!!')
+						console.log(index)
 						return (
 							<div className="row justify-content-center d-flex align-items-baseline" style={{ width: '100%' }}>
 								<div className="col-lg-4 d-flex align-items-baseline">
@@ -88,16 +92,18 @@ export default class Connections extends Component {
 										data={this.props.pluginList}
 										style={{ width: '100%', margin : '1em' }}
 										label="Connection Name"
-										index={index}
+										disabled={connection.connectionCreated}
+										id={index}
 										value={connection.connectionName}
 										onChange={this.setConnectionName.bind(this)}
 									/>
 								</div>
 								<div className="col-lg-2 d-flex align-items-baseline">
 									<Input
-										index={index}
+										id={index}
 										style={{ width: '100%', margin: '1em' }}
 										label="ID"
+										disabled={connection.connectionCreated}
 										value={connection.connectionID}
 										onChange={this.setConnectionID.bind(this)}
 									/>
@@ -105,30 +111,31 @@ export default class Connections extends Component {
 								<div className="col-lg-4 d-flex align-items-baseline">
 									<Button
 										className="float-right"
-										
-										index={index}
+										primary={true}
+
+										id={index}
 										style={{ margin: '1em' }}
 										onClick={this.deleteConnection.bind(this)}
 									>
-										<Delete />
+										<span id={index} className="k-icon k-i-delete k-i-trash"></span>
 									</Button>
 									<Button
 										className="float-right"
-										
-										index={index}
+										primary={true}
+										id={index}
 										style={{ margin: '1em' }}
 										onClick={this.createModel.bind(this)}
 									>
-										<Create />
+										<span id={index} className="k-icon k-i-pencil"></span>
 									</Button>
 									<Button
 										className="float-right"
-										
-										index={index}
+										primary={true}
+										id={index}
 										style={{ margin: '1em' }}
 										onClick={this.testConnection.bind(this)}
 									>
-										<Star />
+										<span id={index} className=" k-icon k-i-star k-i-bookmark "></span>
 									</Button>
 								</div>
 								<div className='col-lg-1 d-flex align-items-baseline'>

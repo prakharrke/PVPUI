@@ -28,6 +28,31 @@ export default class MLVGenerator extends Component {
 			}
 		}
 		else
+			var baseConnection = {connectionName : '', connectionID : ''};
+			var selectedConnection = {connectionName : '', connectionID : '', objectList :[]}
+			var total = 0;
+			var objectList = new Array()
+		if(this.props.parent != undefined){
+
+			if(this.props.parent === 'fetchFromAnotherSource' || this.props.parent === 'fetchFromAnotherSourceForUpdate' || this.props.parent === 'fetchFromAnotherSourceForDelete'){
+				baseConnection = {...this.props.fetchFromAnotherSourceConnection}
+				
+				var connectionIndex = this.props.connections.map(connection=>{return connection.connectionID}).indexOf(this.props.fetchFromAnotherSourceConnection.connectionID)
+				objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
+				this.filteredData = this.props.connections[connectionIndex].objectList.slice();
+
+				selectedConnection = {...this.props.fetchFromAnotherSourceConnection, objectList : this.filteredData}
+				total = this.props.connections[connectionIndex].objectList.length;
+			}else{
+				baseConnection = {...this.props.writeConnection}
+				
+				var connectionIndex = this.props.connections.map(connection=>{return connection.connectionID}).indexOf(this.props.writeConnection.connectionID)
+				objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
+				this.filteredData = this.props.connections[connectionIndex].objectList.slice();
+				selectedConnection = {...this.props.writeConnection, objectList : this.filteredData}
+				total = this.props.connections[connectionIndex].objectList.length;
+			}
+		}
 			this.state = {
 				blurState: false,
 				ID: {
@@ -39,7 +64,7 @@ export default class MLVGenerator extends Component {
 				LEV: {
 
 				},
-				total: 0,
+				total: total,
 				skip: 0,
 				filterOperator: 'contains',
 				relationAttributes: [],
@@ -49,7 +74,7 @@ export default class MLVGenerator extends Component {
 				selectedObjectList: [],
 				loading: false,
 				//objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
-				objectList: [],
+				objectList: objectList,
 				connInfoList: this.props.connInfoList,
 				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
 				attributeListForSelectedObject: [],
@@ -96,13 +121,9 @@ export default class MLVGenerator extends Component {
 					gridViewData: []
 				},
 				showGridView: false,
-				selectedConnection: {
-					connectionName: '',
-					connectionID: '',
-					objectList: []
-				},
+				selectedConnection: {...selectedConnection},
 				mlvName : '',
-				baseConnection : {connectionName : '', connectionID : ''}
+				baseConnection : {...baseConnection}
 
 			}
 
@@ -237,12 +258,20 @@ export default class MLVGenerator extends Component {
 	}
 
 	setBaseConnection(event){
+		
+
+		this.filteredData = event.target.value.objectList.slice();
 		this.setState({
 			...this.state,
 			baseConnection : {
 				connectionName : event.target.value.connectionName,
 				connectionID : event.target.value.connectionID
-			}
+			},
+			selectedConnection: {...event.target.value},
+			objectList: event.target.value.objectList.slice(0, pageSize),
+			total: event.target.value.objectList.length,
+			skip: 0
+
 		})
 	}
 
@@ -773,10 +802,9 @@ export default class MLVGenerator extends Component {
 
 
 		this.isLoading();
-		console.log('!!!!!!!!!!!!!')
-		console.log(event.target.value)
+		
 		var data = `objectDetails=${JSON.stringify({ objectName: event.target.value.objectName, objectID: event.target.value.objectID, connectionID: event.target.value.connectionID })}`
-		alert(data)
+		
 		axios.post(Constants.url + 'GetAttributesForSelectedObject', data, {
 			headers: {
 			}
@@ -1573,7 +1601,9 @@ export default class MLVGenerator extends Component {
 					nativeRelations: [],
 					nativeRelationsData: [],
 					objectID: ''
-				}
+				},
+				nativeRelations : [],
+				nativeRelationsData : []
 			})
 
 			return
@@ -1627,7 +1657,9 @@ export default class MLVGenerator extends Component {
 	}
 
 	getNativeRelationAttributes(relation) {
-		axios.post(Constants.url + 'GetNativeRelationAttributes', `relationName=${relation}`, {
+		var indexOfObject = this.state.selectedObjectList.map(object=>{return object.objectID}).indexOf(this.state.selectedObject.objectID);
+		var connectionID = this.state.selectedObjectList[indexOfObject].connectionID
+		axios.post(Constants.url + 'GetNativeRelationAttributes', `details=${JSON.stringify({relation : relation, connectionID : connectionID})}`, {
 			headers: {
 			}
 
@@ -1852,28 +1884,28 @@ export default class MLVGenerator extends Component {
 
 	saveMLVToParent(event) {
 		if (this.props.parent === 'fetchFromAnotherSource') {
-			this.props.saveMLVForFetchFromAnotherSource(this.state.mlv, this.props.connInfoList[0].pluginName)
+			this.props.saveMLVForFetchFromAnotherSource(this.state.mlv, '')
 		}
 		if (this.props.parent === 'insertMLV') {
 			this.props.saveInsertMLV(this.state.mlv)
 		}
 		if (this.props.parent === 'fetchMLVForInsert') {
-			this.props.saveFetchMLVForInsert(this.state.mlv, this.props.connInfoList[0].pluginName)
+			this.props.saveFetchMLVForInsert(this.state.mlv, '')
 		}
 		if (this.props.parent === 'fetchFromAnotherSourceForUpdate') {
-			this.props.saveMLVForFetchFromAnotherSourceForUpdate(this.state.mlv, this.props.connInfoList[0].pluginName)
+			this.props.saveMLVForFetchFromAnotherSourceForUpdate(this.state.mlv, '')
 		}
 		if (this.props.parent === 'updateMLV') {
 			this.props.saveUpdateMLV(this.state.mlv)
 		}
 		if (this.props.parent == 'fetchMLVForUpdate') {
-			this.props.saveFetchMLVForUpdate(this.state.mlv, this.props.connInfoList[0].pluginName)
+			this.props.saveFetchMLVForUpdate(this.state.mlv, '')
 		}
 		if (this.props.parent === 'deleteMLV') {
 			this.props.saveDeleteMLV(this.state.mlv)
 		}
 		if (this.props.parent === 'fetchMLVForDelete') {
-			this.props.saveFetchMLVForDelete(this.state.mlv, this.props.connInfoList[0].pluginName)
+			this.props.saveFetchMLVForDelete(this.state.mlv, ''	)
 		}
 		if (this.props.parent === 'deleteAllMLV') {
 			this.props.saveDeleteAllMLV(this.state.mlv)
@@ -2012,7 +2044,6 @@ export default class MLVGenerator extends Component {
 
 	componentWillUnmount() {
 		if (this.props.parent == undefined)
-
 			this.props.loadMLVGeneratorState(this.state);
 	}
 
