@@ -14,7 +14,7 @@ class App extends Component {
 	componentWillMount(){
 
 		Constants.url = 'http://localhost:' + '9090' + '/PVPUI/'
-		console.log("LOCATION PORT " + window.location)
+		console.log("LOCATION PORT " + window.location.port)
 	}
   render() {
     return (

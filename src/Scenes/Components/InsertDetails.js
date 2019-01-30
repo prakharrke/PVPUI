@@ -645,7 +645,7 @@ export default class InsertDetails extends Component {
 												onDoubleClick={this.addFilterForFetchFromAnotherSourceForInsert.bind(this)}
 											>
 												{
-													Constants.Constants.MLVOperators.map((operator) => {
+													Constants.MLVOperators.map((operator) => {
 
 														return (
 
@@ -665,7 +665,7 @@ export default class InsertDetails extends Component {
 												style={{ overflowX: "scroll" }}
 											>
 												{
-													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+													Constants.MLVWhereClauseFunctions.map((func) => {
 
 														return (
 
@@ -769,7 +769,7 @@ export default class InsertDetails extends Component {
 											onDoubleClick={this.addFilterForFetchMLVForInsert.bind(this)}
 										>
 											{
-												Constants.Constants.MLVOperators.map((operator) => {
+												Constants.MLVOperators.map((operator) => {
 
 													return (
 
@@ -789,7 +789,7 @@ export default class InsertDetails extends Component {
 											style={{ overflowX: "scroll" }}
 										>
 											{
-												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+												Constants.MLVWhereClauseFunctions.map((func) => {
 
 													return (
 

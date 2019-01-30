@@ -55,9 +55,12 @@ export default class PVPUI extends Component {
 
 			this.isNotLoading();
 			var parsedJson = response.data;
-			Constants.Constants.MLVFunctions = parsedJson.MLVFunctions;
-			Constants.Constants.MLVWhereClauseFunctions = parsedJson.MLVWhereClauseFunctions;
-			Constants.Constants.MLVOperators = parsedJson.MLVOperators;
+			Constants.MLVFunctions = parsedJson.MLVFunctions;
+			Constants.MLVWhereClauseFunctions = parsedJson.MLVWhereClauseFunctions;
+			Constants.MLVOperators = parsedJson.MLVOperators;
+			console.log(Constants.MLVFunctions)
+			console.log(Constants.MLVWhereClauseFunctions)
+			console.log(Constants.MLVOperators)
 			var pluginList = new Array();
 			pluginList = parsedJson.pluginList.split(",")
 

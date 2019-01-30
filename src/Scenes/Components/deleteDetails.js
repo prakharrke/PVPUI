@@ -164,7 +164,7 @@ export default class DeleteDetails extends Component {
 								style={{ overflowX: "scroll" }}
 							>
 								{
-									Constants.Constants.MLVOperators.map((operator) => {
+									Constants.MLVOperators.map((operator) => {
 
 										return (
 
@@ -186,7 +186,7 @@ export default class DeleteDetails extends Component {
 								style={{ overflowX: "scroll" }}
 							>
 								{
-									Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+									Constants.MLVWhereClauseFunctions.map((func) => {
 
 										return (
 
@@ -292,7 +292,7 @@ export default class DeleteDetails extends Component {
 												onDoubleClick={this.addFilterForFetchFromAnotherSourceForDelete.bind(this)}
 											>
 												{
-													Constants.Constants.MLVOperators.map((operator) => {
+													Constants.MLVOperators.map((operator) => {
 
 														return (
 
@@ -312,7 +312,7 @@ export default class DeleteDetails extends Component {
 												style={{ overflowX: "scroll" }}
 											>
 												{
-													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+													Constants.MLVWhereClauseFunctions.map((func) => {
 
 														return (
 
@@ -424,7 +424,7 @@ export default class DeleteDetails extends Component {
 											onDoubleClick={this.addFilterForFetchMLVForDelete.bind(this)}
 										>
 											{
-												Constants.Constants.MLVOperators.map((operator) => {
+												Constants.MLVOperators.map((operator) => {
 
 													return (
 
@@ -444,7 +444,7 @@ export default class DeleteDetails extends Component {
 											style={{ overflowX: "scroll" }}
 										>
 											{
-												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+												Constants.MLVWhereClauseFunctions.map((func) => {
 
 													return (
 

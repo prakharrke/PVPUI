@@ -28,104 +28,104 @@ export default class MLVGenerator extends Component {
 			}
 		}
 		else
-			var baseConnection = {connectionName : '', connectionID : ''};
-			var selectedConnection = {connectionName : '', connectionID : '', objectList :[]}
-			var total = 0;
-			var objectList = new Array()
-		if(this.props.parent != undefined){
+			var baseConnection = { connectionName: '', connectionID: '' };
+		var selectedConnection = { connectionName: '', connectionID: '', objectList: [] }
+		var total = 0;
+		var objectList = new Array()
+		if (this.props.parent != undefined) {
 
-			if(this.props.parent === 'fetchFromAnotherSource' || this.props.parent === 'fetchFromAnotherSourceForUpdate' || this.props.parent === 'fetchFromAnotherSourceForDelete'){
-				baseConnection = {...this.props.fetchFromAnotherSourceConnection}
-				
-				var connectionIndex = this.props.connections.map(connection=>{return connection.connectionID}).indexOf(this.props.fetchFromAnotherSourceConnection.connectionID)
+			if (this.props.parent === 'fetchFromAnotherSource' || this.props.parent === 'fetchFromAnotherSourceForUpdate' || this.props.parent === 'fetchFromAnotherSourceForDelete') {
+				baseConnection = { ...this.props.fetchFromAnotherSourceConnection }
+
+				var connectionIndex = this.props.connections.map(connection => { return connection.connectionID }).indexOf(this.props.fetchFromAnotherSourceConnection.connectionID)
 				objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
 				this.filteredData = this.props.connections[connectionIndex].objectList.slice();
 
-				selectedConnection = {...this.props.fetchFromAnotherSourceConnection, objectList : this.filteredData}
+				selectedConnection = { ...this.props.fetchFromAnotherSourceConnection, objectList: this.filteredData }
 				total = this.props.connections[connectionIndex].objectList.length;
-			}else{
-				baseConnection = {...this.props.writeConnection}
-				
-				var connectionIndex = this.props.connections.map(connection=>{return connection.connectionID}).indexOf(this.props.writeConnection.connectionID)
+			} else {
+				baseConnection = { ...this.props.writeConnection }
+
+				var connectionIndex = this.props.connections.map(connection => { return connection.connectionID }).indexOf(this.props.writeConnection.connectionID)
 				objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
 				this.filteredData = this.props.connections[connectionIndex].objectList.slice();
-				selectedConnection = {...this.props.writeConnection, objectList : this.filteredData}
+				selectedConnection = { ...this.props.writeConnection, objectList: this.filteredData }
 				total = this.props.connections[connectionIndex].objectList.length;
 			}
 		}
-			this.state = {
-				blurState: false,
-				ID: {
+		this.state = {
+			blurState: false,
+			ID: {
+
+			},
+			PID: {
+
+			},
+			LEV: {
+
+			},
+			total: total,
+			skip: 0,
+			filterOperator: 'contains',
+			relationAttributes: [],
+			exactSearch: false,
+			selectedConnectionID: -1,
+			tempObject: '',
+			selectedObjectList: [],
+			loading: false,
+			//objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
+			objectList: objectList,
+			connInfoList: this.props.connInfoList,
+			selectedObject: { objectName: 'Selected Sources', objectID: 0 },
+			attributeListForSelectedObject: [],
+			isLoading: false,
+			customAttribute: "",
+			parentObjectsForRelation: [],
+			parentObject: {
+				levelName: "Select Parent",
+				id: 0,
+				level: '',
+				objectName: '',
+				nativeRelations: [],
+				nativeRelationsData: [],
+				objectID: ''
+			},
+			explicitRelation: {
+
+				attribute: {
+					attributeName: '',
+					object: ''
 
 				},
-				PID: {
-
-				},
-				LEV: {
-
-				},
-				total: total,
-				skip: 0,
-				filterOperator: 'contains',
-				relationAttributes: [],
-				exactSearch: false,
-				selectedConnectionID: -1,
-				tempObject: '',
-				selectedObjectList: [],
-				loading: false,
-				//objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
-				objectList: objectList,
-				connInfoList: this.props.connInfoList,
-				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
-				attributeListForSelectedObject: [],
-				isLoading: false,
-				customAttribute: "",
-				parentObjectsForRelation: [],
-				parentObject: {
-					levelName: "Select Parent",
-					id: 0,
+				parentAttribute: {
 					level: '',
-					objectName: '',
-					nativeRelations: [],
-					nativeRelationsData: [],
-					objectID: ''
+					object: '',
+					attributeIndex: ''
 				},
-				explicitRelation: {
-
-					attribute: {
-						attributeName: '',
-						object: ''
-
-					},
-					parentAttribute: {
-						level: '',
-						object: '',
-						attributeIndex: ''
-					},
-					operator: {
-						operator: '',
-
-					},
-					expression: '',
-
-
+				operator: {
+					operator: '',
 
 				},
-				parallelExecution: false,
-				cache: {
-					enabled: false,
-					setting: "USE SITE SETTING"
-				},
-				gridView: {
-					columns: [],
-					gridViewData: []
-				},
-				showGridView: false,
-				selectedConnection: {...selectedConnection},
-				mlvName : '',
-				baseConnection : {...baseConnection}
+				expression: '',
 
-			}
+
+
+			},
+			parallelExecution: false,
+			cache: {
+				enabled: false,
+				setting: "USE SITE SETTING"
+			},
+			gridView: {
+				columns: [],
+				gridViewData: []
+			},
+			showGridView: false,
+			selectedConnection: { ...selectedConnection },
+			mlvName: '',
+			baseConnection: { ...baseConnection }
+
+		}
 
 	}
 	componentDidMount() {
@@ -249,25 +249,25 @@ export default class MLVGenerator extends Component {
 		}*/
 	}
 
-	setMLVName(event){
+	setMLVName(event) {
 
 		this.setState({
 			...this.state,
-			mlvName : event.target.value
+			mlvName: event.target.value
 		})
 	}
 
-	setBaseConnection(event){
-		
+	setBaseConnection(event) {
+
 
 		this.filteredData = event.target.value.objectList.slice();
 		this.setState({
 			...this.state,
-			baseConnection : {
-				connectionName : event.target.value.connectionName,
-				connectionID : event.target.value.connectionID
+			baseConnection: {
+				connectionName: event.target.value.connectionName,
+				connectionID: event.target.value.connectionID
 			},
-			selectedConnection: {...event.target.value},
+			selectedConnection: { ...event.target.value },
 			objectList: event.target.value.objectList.slice(0, pageSize),
 			total: event.target.value.objectList.length,
 			skip: 0
@@ -352,7 +352,13 @@ export default class MLVGenerator extends Component {
 				parentTo: [],
 
 				hideLevel: false,
-				connectionID: this.state.selectedConnectionID
+				connectionID: this.state.selectedConnectionID,
+				ifExists: {
+
+					attributes: [],
+					eqAction: ''
+				},
+				onError: ''
 
 			}
 		})
@@ -802,9 +808,9 @@ export default class MLVGenerator extends Component {
 
 
 		this.isLoading();
-		
+
 		var data = `objectDetails=${JSON.stringify({ objectName: event.target.value.objectName, objectID: event.target.value.objectID, connectionID: event.target.value.connectionID })}`
-		
+
 		axios.post(Constants.url + 'GetAttributesForSelectedObject', data, {
 			headers: {
 			}
@@ -1602,8 +1608,8 @@ export default class MLVGenerator extends Component {
 					nativeRelationsData: [],
 					objectID: ''
 				},
-				nativeRelations : [],
-				nativeRelationsData : []
+				nativeRelations: [],
+				nativeRelationsData: []
 			})
 
 			return
@@ -1657,9 +1663,9 @@ export default class MLVGenerator extends Component {
 	}
 
 	getNativeRelationAttributes(relation) {
-		var indexOfObject = this.state.selectedObjectList.map(object=>{return object.objectID}).indexOf(this.state.selectedObject.objectID);
+		var indexOfObject = this.state.selectedObjectList.map(object => { return object.objectID }).indexOf(this.state.selectedObject.objectID);
 		var connectionID = this.state.selectedObjectList[indexOfObject].connectionID
-		axios.post(Constants.url + 'GetNativeRelationAttributes', `details=${JSON.stringify({relation : relation, connectionID : connectionID})}`, {
+		axios.post(Constants.url + 'GetNativeRelationAttributes', `details=${JSON.stringify({ relation: relation, connectionID: connectionID })}`, {
 			headers: {
 			}
 
@@ -1905,7 +1911,7 @@ export default class MLVGenerator extends Component {
 			this.props.saveDeleteMLV(this.state.mlv)
 		}
 		if (this.props.parent === 'fetchMLVForDelete') {
-			this.props.saveFetchMLVForDelete(this.state.mlv, ''	)
+			this.props.saveFetchMLVForDelete(this.state.mlv, '')
 		}
 		if (this.props.parent === 'deleteAllMLV') {
 			this.props.saveDeleteAllMLV(this.state.mlv)
@@ -2126,6 +2132,111 @@ export default class MLVGenerator extends Component {
 		});
 	}
 
+	// *METHOD TO ADD IF EXISTS ATTRIBUTES
+
+	addIfExistsAttributes(event) {
+
+		var ifExistsAttributes = new Array();
+		ifExistsAttributes = this.state[this.state.selectedObject.objectID].ifExists.attributes;
+		ifExistsAttributes.push({
+			attributeName: event.target.value,
+			value: ''
+		})
+
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID]: {
+
+				...this.state[this.state.selectedObject.objectID],
+				ifExists: {
+					...this.state[this.state.selectedObject.objectID].ifExists,
+					attributes: ifExistsAttributes
+				}
+			}
+		})
+	}
+
+	setIfExistsAttributeValue(event) {
+		var ifExistsAttributes = new Array();
+		ifExistsAttributes = this.state[this.state.selectedObject.objectID].ifExists.attributes;
+		ifExistsAttributes[event.target.props.index].value = event.target.value
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID]: {
+
+				...this.state[this.state.selectedObject.objectID],
+				ifExists: {
+					...this.state[this.state.selectedObject.objectID].ifExists,
+					attributes: ifExistsAttributes
+				}
+			}
+		})
+	}
+
+	deleteIfExistsAttribute(event) {
+		event.preventDefault();
+		var ifExistsAttributes = new Array();
+		ifExistsAttributes = this.state[this.state.selectedObject.objectID].ifExists.attributes;
+		ifExistsAttributes.splice(event.target.getAttribute('index'), 1);
+		var eqAction = this.state[this.state.selectedObject.objectID].ifExists.eqAction;
+		if (ifExistsAttributes.length === 0)
+			eqAction = 'SELECT EQACTION'
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID]: {
+
+				...this.state[this.state.selectedObject.objectID],
+				ifExists: {
+					...this.state[this.state.selectedObject.objectID].ifExists,
+					attributes: ifExistsAttributes,
+					eqAction: eqAction
+				}
+			}
+		})
+
+	}
+	setIfExistsAction(event) {
+
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID]: {
+				...this.state[this.state.selectedObject.objectID],
+				ifExists: {
+					...this.state[this.state.selectedObject.objectID].ifExists,
+					eqAction: event.target.value
+				}
+			}
+		})
+	}
+
+	addOnError(event){
+		
+		if (this.state.selectedObject.objectName != "Selected Sources"){
+
+		var onError = this.state[this.state.selectedObject.objectID].onError
+
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID] : {
+			...this.state[this.state.selectedObject.objectID],
+			onError : onError + ' ' + event.target.value
+		}
+		})
+	}
+	}
+
+	editOnError(event){
+		if (this.state.selectedObject.objectName != "Selected Sources"){
+
+		this.setState({
+			...this.state,
+			[this.state.selectedObject.objectID] : {
+			...this.state[this.state.selectedObject.objectID],
+			onError :  event.target.value
+		}
+		})
+	}
+	}
 
 	render() {
 		console.log('STATE')
@@ -2240,17 +2351,17 @@ export default class MLVGenerator extends Component {
 					<div className="row justify-content-center">
 						<div className="col-lg-4">
 							<Input
-								
+
 								value={this.state.mlvName}
 								placeholder="MLV Name*"
-								style={{ width: "100%", textAlign: "center", margin : '1em' }}
+								style={{ width: "100%", textAlign: "center", margin: '1em' }}
 								onChange={this.setMLVName.bind(this)}
 
 							/>
 						</div>
 						<div className="col-lg-4">
 							<DropDownList
-								
+
 								data={this.props.connections}
 								onChange={this.setBaseConnection.bind(this)}
 								style={{ width: '100%' }}
@@ -2430,7 +2541,7 @@ export default class MLVGenerator extends Component {
 													style={{ overflowX: "scroll" }}
 												>
 													{
-														Constants.Constants.MLVOperators.map((operator) => {
+														Constants.MLVOperators.map((operator) => {
 
 															return (
 
@@ -2450,7 +2561,7 @@ export default class MLVGenerator extends Component {
 													style={{ overflowX: "scroll" }}
 												>
 													{
-														Constants.Constants.MLVFunctions.map((func) => {
+														Constants.MLVFunctions.map((func) => {
 
 															return (
 
@@ -2567,7 +2678,7 @@ export default class MLVGenerator extends Component {
 													style={{ overflowX: "scroll" }}
 												>
 													{
-														Constants.Constants.MLVOperators.map((operator) => {
+														Constants.MLVOperators.map((operator) => {
 
 															return (
 
@@ -2587,7 +2698,7 @@ export default class MLVGenerator extends Component {
 													style={{ overflowX: "scroll" }}
 												>
 													{
-														Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+														Constants.MLVWhereClauseFunctions.map((func) => {
 
 															return (
 
@@ -2809,6 +2920,209 @@ export default class MLVGenerator extends Component {
 											</div>
 										</div>
 									</PanelBarItem>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>IF EXISTS</i>}>
+										<div className="row justify-content-center">
+											<div className="col-lg-6">
+												<select
+													multiple
+													className="form-control"
+													size={10}
+													id="totalAttributes"
+													style={{ overflowX: "scroll" }}
+												>
+													{
+
+														(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+
+															this.state[this.state.selectedObject.objectID].attributes.map((attribute, index) => {
+
+																return (
+
+																	<option
+																		key={attribute.ID}
+																		id={attribute.ID}
+																		name={attribute.columnName}
+																		onDoubleClick={this.addIfExistsAttributes.bind(this)}
+																		value={attribute.columnName}>{attribute.columnName}
+
+																	</option>
+
+																)
+
+															})
+
+															: ""
+													}
+
+												</select>
+
+											</div>
+											<div className="col-lg-6">
+												{
+													(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+														this.state[this.state.selectedObject.objectID].ifExists.attributes.map((attribute, index) => {
+															return (
+																<div>
+																	<Input
+
+																		value={attribute.value}
+																		index={index}
+																		label={attribute.attributeName}
+																		style={{ width: "80%", textAlign: "center", margin: '1em' }}
+																		onChange={this.setIfExistsAttributeValue.bind(this)}
+
+																	/>
+																	<Button
+																		primary={true}
+																		index={index}
+																		style={{ margin: "1em" }}
+																		onClick={this.deleteIfExistsAttribute.bind(this)}>
+																		Remove
+											</Button>
+																</div>
+
+															)
+														}) : ""
+												}
+
+											</div>
+											{/*<div className="col-lg-1">
+																							{
+																								(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+																									this.state[this.state.selectedObject.objectID].ifExists.attributes.map((attribute, index) => {
+																										return (
+											
+																											<Button
+																												primary={true}
+																												index={index}
+																												style={{ margin: "1em" }}
+																												onClick={this.deleteIfExistsAttribute.bind(this)}>
+																												Remove
+																						</Button>
+																										)
+																									}) : ""
+																							}
+																						</div>*/}
+
+										</div>
+										<div className="row justify-content-center">
+											<div className="col-lg-4">
+												{
+													this.state[this.state.selectedObject.objectID] != null && this.state.selectedObject.objectName != "Selected Sources" &&
+													<DropDownList
+														defaultValue={'SELECT ACTION'}
+														data={['SELECT EQACTION'].concat(Constants.ifExistsOperations)}
+														//textField='levelName'
+														//dataItemKey="id"
+														style={{ margin: "0.5em", width: '100%' }}
+														onChange={this.setIfExistsAction.bind(this)}
+														value={this.state[this.state.selectedObject.objectID].ifExists.eqAction == '' ? 'SELECT EQACTION' : this.state[this.state.selectedObject.objectID].ifExists.eqAction}
+
+													/>}
+											</div>
+										</div>
+									</PanelBarItem>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>ON ERROR</i>}>
+										<div>
+											<div className="row justify-content-center">
+												<div className="col-lg-10">
+													{this.state[this.state.selectedObject.objectID] != null && this.state.selectedObject.objectName != "Selected Sources" &&
+														<Input
+
+															value={this.state[this.state.selectedObject.objectID].onError}
+
+															label={'ON ERROR'}
+															style={{ width: "100%", textAlign: "center", margin: '1em' }}
+														onChange={this.editOnError.bind(this)}
+
+														/>
+													}
+												</div>
+											</div>
+											<div className="row justify-content-center">
+												<div className="col-lg-5">
+													<select
+														multiple
+														className="form-control"
+														size={10}
+														id="totalAttributes"
+														style={{ overflowX: "scroll" }}
+													>
+														{
+															Constants.onErrorOperations.map(operation => {
+																return (
+
+																	<option
+																		key={operation}
+																		id={operation}
+																		name={operation}
+																		onDoubleClick={this.addOnError.bind(this)}
+																		value={operation}>{operation}
+
+																	</option>
+
+																)
+															})
+														}
+													</select>
+												</div>
+												<div className="col-lg-2">
+													<select
+														multiple
+														className="form-control"
+														size={10}
+														id="totalAttributes"
+														style={{ overflowX: "scroll" }}
+													>
+														{
+															Constants.MLVOperators.map(operator => {
+																return (
+
+																	<option
+																		key={operator}
+																		id={operator}
+																		name={operator}
+																		onDoubleClick={this.addOnError.bind(this)}
+																		value={operator}>{operator}
+
+																	</option>
+
+																)
+															})
+														}
+													</select>
+												</div>
+												<div className="col-lg-5">
+													<select
+														multiple
+														className="form-control"
+														size={10}
+														id="totalAttributes"
+														style={{ overflowX: "scroll" }}
+													>
+														{
+															Constants.MLVWhereClauseFunctions.concat(Constants.MLVFunctions).map((value, index) => {
+																return (
+
+																	<option
+																		key={index}
+																		id={value}
+																		name={value}
+																		onDoubleClick={this.addOnError.bind(this)}
+																		value={value}>{value}
+
+																	</option>
+
+																)
+															})
+														}
+													</select>
+												</div>
+											</div>
+										</div>
+									</PanelBarItem>
+									<PanelBarItem title={<i style={{ fontSize: "14px" }}>ON SUCCESS</i>}>
+									</PanelBarItem>
 								</PanelBarItem>
 								{this.state.selectedObjectList.map(function(object) { return object.objectID; }).indexOf(this.state.selectedObject.objectID) <= 0 ? "" :
 
@@ -2927,7 +3241,7 @@ export default class MLVGenerator extends Component {
 
 													<DropDownList
 														data={
-															Constants.Constants.MLVOperators.map((operator, index) => {
+															Constants.MLVOperators.map((operator, index) => {
 																return (
 
 																	{
@@ -3157,6 +3471,37 @@ export default class MLVGenerator extends Component {
 	relationTypeRegex = new RegExp(/(?<=relationtype\s*?=)(.*?)(?=;)/);
 	predicateRegex = new RegExp(/(?<=predicate\s*?=)(.*?)(?=;)/);
 	attributeSplitReges = new RegExp();
+	generateAttributeNamesFromAttributeValuesString(str) {
+
+		var arr = [];
+		var newStr = '';
+		var bCounter = 0;
+		for (var i = 0; i < str.length; i++) {
+			if (str[i] != ',')
+				newStr = newStr + str[i];
+			else
+				if (bCounter != 0)
+					newStr = newStr + str[i];
+			if (str[i] == '(')
+				bCounter++;
+			if (str[i] == ')')
+				bCounter--;
+
+
+			if (str[i] == ',' && bCounter == 0) {
+				arr.push(newStr)
+				newStr = '';
+
+			}
+
+			if (i == str.length - 1)
+				arr.push(newStr)
+		}
+
+		console.log(arr)
+		return arr
+
+	}
 	parseMLV(event) {
 		var mlv = event.target.value.replace('Level', "Level".fontcolor("red"));
 
@@ -3184,7 +3529,10 @@ export default class MLVGenerator extends Component {
 				var objectID = indexOfSource + '_' + new Date().getTime();
 				selectedObjectList.push({
 					objectName: source,
-					objectID: objectID
+					objectID: objectID,
+					connectionName: this.state.selectedConnection.connectionName,
+					connectionID: this.state.selectedConnection.connectionID,
+					objectList: this.state.selectedConnection.objectList
 				})
 				// * ADDIND SOURCE OBJECT TO STATE 
 				mlvState = {
@@ -3242,7 +3590,7 @@ export default class MLVGenerator extends Component {
 					}
 				}
 				// * GET ATTRIBUTE_NAMES FROM attvalues expression
-				var attvaluesArray = levelString.match(this.attributeNamesRegex)[0].split(',');
+				var attvaluesArray = this.generateAttributeNamesFromAttributeValuesString(levelString.match(this.attributeNamesRegex)[0]);
 				var attributeValuesArray = new Array();
 				attvaluesArray.map((attvalue, index) => {
 					if (attvalue.trim() != "null") {

@@ -19,92 +19,92 @@ export default class WriteBaseline extends Component {
 	listOfResultSetList = new Array()
 	constructor(props) {
 		super(props);
-		if(Object.keys(this.props.writeBaselineState).length != 0){
+		if (Object.keys(this.props.writeBaselineState).length != 0) {
 
 			this.state = {
 				...this.props.writeBaselineState
 			}
-		}else{
-		this.state = {
-			insertState: {},
-			blurState: false,
-			writeConnection: {connectionName : '', connectionID : ''},
-			fetchFromAnotherSourceConnection: {connectionName : '', connectionID : ''},
-			showConnectionSelectionDialog: false,
-			resultSetList: [],
-			resultsetOperation: '',
-			showResultSet: false,
-			isLoading: false,
-			baselineFilesList: [],
-			selected: 0,
-			testCaseSummary: '',
-			testCaseDescription: '',
-			mountMLVGenerator: false,
-			operation: '',
-			columnNames: [],
-			fetchFromAnotherSourceForInsertFlag: false,
-			fetchFromAnotherSourceForUpdateFlag: false,
-			fetchFromAnotherSourceForDeleteFlag: false,
-			fetchFromAnotherSourceForInsert: {
-				mlv: '',
-				attributes: [],
-				filter: '',
-				selectedPlugin: ''
-			},
-			fetchFromAnotherSourceForUpdate: {
-				mlv: '',
-				attributes: [],
-				filter: '',
-				selectedPlugin: ''
-			},
-			fetchFromAnotherSourceForDelete: {
-				mlv: '',
-				attributes: [],
-				filter: '',
-				selectedPlugin: ''
-			},
-			insertMLVs: {
-				currentIndex: 0,
-				insertMLVArray: []
-			},
-			updateMLVs: {
-				currentIndex: 0,
-				updateMLVArray: []
-			},
-			deleteMLVs: {
-				currentIndex: 0,
-				deleteMLVArray: []
-			},
-			deleteAllMLVs: {
-				currentIndex: 0,
-				deleteAllMLVArray: []
-			},
-			fetchMLVForinsert: {
-				mlv: '',
-				filter: '',
-				attributes: [],
-				selectedPlugin: ''
-			},
-			fetchMLVForUpdate: {
-				mlv: '',
-				filter: '',
-				attributes: [],
-				selectedPlugin: ''
-			},
-			fetchMLVForDelete: {
-				mlv: '',
-				filter: '',
-				attributes: [],
-				selectedPlugin: ''
-			},
-			rsInsertFlag: false,
-			bulkInsertFlag: false,
-			selectedBaseline: '',
-			newBaselineName: '',
+		} else {
+			this.state = {
+				insertState: {},
+				blurState: false,
+				writeConnection: { connectionName: '', connectionID: '' },
+				fetchFromAnotherSourceConnection: { connectionName: '', connectionID: '' },
+				showConnectionSelectionDialog: false,
+				resultSetList: [],
+				resultsetOperation: '',
+				showResultSet: false,
+				isLoading: false,
+				baselineFilesList: [],
+				selected: 0,
+				testCaseSummary: '',
+				testCaseDescription: '',
+				mountMLVGenerator: false,
+				operation: '',
+				columnNames: [],
+				fetchFromAnotherSourceForInsertFlag: false,
+				fetchFromAnotherSourceForUpdateFlag: false,
+				fetchFromAnotherSourceForDeleteFlag: false,
+				fetchFromAnotherSourceForInsert: {
+					mlv: '',
+					attributes: [],
+					filter: '',
+					selectedPlugin: ''
+				},
+				fetchFromAnotherSourceForUpdate: {
+					mlv: '',
+					attributes: [],
+					filter: '',
+					selectedPlugin: ''
+				},
+				fetchFromAnotherSourceForDelete: {
+					mlv: '',
+					attributes: [],
+					filter: '',
+					selectedPlugin: ''
+				},
+				insertMLVs: {
+					currentIndex: 0,
+					insertMLVArray: []
+				},
+				updateMLVs: {
+					currentIndex: 0,
+					updateMLVArray: []
+				},
+				deleteMLVs: {
+					currentIndex: 0,
+					deleteMLVArray: []
+				},
+				deleteAllMLVs: {
+					currentIndex: 0,
+					deleteAllMLVArray: []
+				},
+				fetchMLVForinsert: {
+					mlv: '',
+					filter: '',
+					attributes: [],
+					selectedPlugin: ''
+				},
+				fetchMLVForUpdate: {
+					mlv: '',
+					filter: '',
+					attributes: [],
+					selectedPlugin: ''
+				},
+				fetchMLVForDelete: {
+					mlv: '',
+					filter: '',
+					attributes: [],
+					selectedPlugin: ''
+				},
+				rsInsertFlag: false,
+				bulkInsertFlag: false,
+				selectedBaseline: '',
+				newBaselineName: '',
 
 
+			}
 		}
-	}
 	}
 
 	componentWillMount() {
@@ -140,7 +140,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLV(operation) {
-		
+
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -255,7 +255,7 @@ export default class WriteBaseline extends Component {
 
 	// * METHOD TO GENERATE INSERT MLV
 	generateInsertMLV(index) {
-		
+
 
 		this.setState({
 			...this.state,
@@ -441,7 +441,8 @@ export default class WriteBaseline extends Component {
 		value = value.trim();
 		var valueString = value.substring(1, value.length - 1);
 		var insertValues = new Array();
-		insertValues = valueString.split(',');
+		insertValues = this.generateColumnValuesFromRawData(valueString);
+
 		var insertMLVArray = this.state.insertMLVs.insertMLVArray;
 		var values = insertMLVArray[index].values;
 
@@ -479,6 +480,37 @@ export default class WriteBaseline extends Component {
 				insertMLVArray: insertMLVArray
 			}
 		})
+
+	}
+
+	// * HELPER METHOD TO GENEREATE COLUMN VALUES FROM RAW DATA 
+	generateColumnValuesFromRawData(str) {
+		var arr = []
+		var newStr = '';
+		var bCounter = 0;
+		for (var i = 0; i < str.length; i++) {
+			if (str[i] != ',')
+				newStr = newStr + str[i];
+			else
+				if (bCounter != 0)
+					newStr = newStr + str[i];
+			if (str[i] == '(')
+				bCounter++;
+			if (str[i] == ')')
+				bCounter--;
+
+
+			if (str[i] == ',' && bCounter == 0) {
+				arr.push(newStr)
+				newStr = '';
+
+			}
+
+			if (i == str.length - 1)
+				arr.push(newStr)
+		}
+
+		return arr
 
 	}
 	// * METHOD TO ADD ATTRIBUTE VALUE PAIR FOR INSERT
@@ -628,7 +660,7 @@ export default class WriteBaseline extends Component {
 
 	// * GENERATE FETCH MLV FOR INSERT
 	generateFetchMLVForInsert() {
-		
+
 		this.setState({
 			...this.state,
 			mountMLVGenerator: true,
@@ -734,15 +766,15 @@ export default class WriteBaseline extends Component {
 
 		}
 
-		if(this.state.writeConnection.connectionID === ''){
+		if (this.state.writeConnection.connectionID === '') {
 			alert('Please select at least write destination connection');
 			return
 		}
-		if(this.state.fetchFromAnotherSourceForInsertFlag || this.state.fetchFromAnotherSourceForUpdateFlag || this.state.fetchFromAnotherSourceForDeleteFlag ){
-			if(this.state.fetchFromAnotherSourceConnection.connectionID === ''){
-			alert('You have set fetch from another source as true in one of the cases. Please select fetch from another source connection')
-			return
-		}
+		if (this.state.fetchFromAnotherSourceForInsertFlag || this.state.fetchFromAnotherSourceForUpdateFlag || this.state.fetchFromAnotherSourceForDeleteFlag) {
+			if (this.state.fetchFromAnotherSourceConnection.connectionID === '') {
+				alert('You have set fetch from another source as true in one of the cases. Please select fetch from another source connection')
+				return
+			}
 		}
 
 
@@ -806,7 +838,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLVFetchFromAnotherSourceForUpdate(operation) {
-		
+
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -901,7 +933,7 @@ export default class WriteBaseline extends Component {
 	}
 	// * METHOD TO GENERATE UPDATE MLV
 	generateUpdateMLV(index) {
-		
+
 
 		this.setState({
 			...this.state,
@@ -1115,7 +1147,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateFetchMLVForUpdate(operation) {
-		
+
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -1188,7 +1220,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLVFetchFromAnotherSourceForDelete(operation) {
-		
+
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -1284,7 +1316,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateDeleteMLV(index) {
-		
+
 
 		this.setState({
 			...this.state,
@@ -1402,7 +1434,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateFetchMLVForDelete(operation) {
-		
+
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -1497,7 +1529,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateDeleteAllMLV(index) {
-		
+
 
 		this.setState({
 			...this.state,
@@ -1781,28 +1813,28 @@ export default class WriteBaseline extends Component {
 	}
 
 	setWriteConnection(event) {
-		var connectionName=event.target.getAttribute('connectionName');
+		var connectionName = event.target.getAttribute('connectionName');
 		this.setState({
 			...this.state,
 			writeConnection: {
-				connectionID : event.target.value,
-				connectionName : connectionName
+				connectionID: event.target.value,
+				connectionName: connectionName
 			}
 		})
 	}
 
 	setFetchFromAnotherSourceConnection(event) {
-		var connectionName=event.target.getAttribute('connectionName');
+		var connectionName = event.target.getAttribute('connectionName');
 		this.setState({
 			...this.state,
 			fetchFromAnotherSourceConnection: {
-				connectionID : event.target.value,
-				connectionName : connectionName
+				connectionID: event.target.value,
+				connectionName: connectionName
 			}
 		})
 	}
 
-	componentWillUnmount(){
+	componentWillUnmount() {
 		this.props.saveWriteBaselineState(this.state)
 	}
 
@@ -1834,7 +1866,7 @@ export default class WriteBaseline extends Component {
 												onDoubleClick={this.setWriteConnection.bind(this)}
 												value={connection.connectionID}
 												connectionName={connection.connectionName}
-												>{connection.connectionName}</option>
+											>{connection.connectionName}</option>
 										)
 									})
 								}
@@ -1864,7 +1896,7 @@ export default class WriteBaseline extends Component {
 												onDoubleClick={this.setFetchFromAnotherSourceConnection.bind(this)}
 												value={connection.connectionID}
 												connectionName={connection.connectionName}
-												>{connection.connectionName}</option>
+											>{connection.connectionName}</option>
 										)
 									})
 								}
@@ -1886,7 +1918,7 @@ export default class WriteBaseline extends Component {
 							Cancel
 					</Button>
 						<Button
-						primary={true}
+							primary={true}
 							onClick={this.toggleDialog.bind(this)}
 						>
 							Save
@@ -1900,7 +1932,7 @@ export default class WriteBaseline extends Component {
 		)
 		console.log(this.state)
 		var mlvGenerator = this.state.mountMLVGenerator ? (
-			<MLVGenerator 
+			<MLVGenerator
 				oldState={{}}
 				parent={this.state.operation}
 				connections={this.props.connections}
@@ -2158,7 +2190,7 @@ export default class WriteBaseline extends Component {
 					this.state.resultSetList.length > 0 &&
 					this.state.showResultSet == true &&
 
-					<div className="fixed-bottom" style={{ width: "100%", height: '50%', position : 'absolute' }}>
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%', position: 'absolute' }}>
 						<div className="row justify-content-right">
 							<div className='col-lg-2'>
 								<Button

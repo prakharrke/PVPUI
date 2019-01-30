@@ -169,6 +169,10 @@ export default class CreateBaseline extends Component {
 			alert("MLV not present")
 			return
 		}
+		if(this.state.baseConnection.connectionID === ''){
+			alert('Please select base connection')
+			return
+		}
 		this.isLoading();
 		axios.post(Constants.url + 'ExecuteMLV', `MLV=${encodeURIComponent(JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter, connectionName : this.state.baseConnection.connectionName, connectionID : this.state.baseConnection.connectionID }))}`, {
 			headers: {
@@ -302,6 +306,10 @@ export default class CreateBaseline extends Component {
 		}
 		if (this.state.selectedBaseline === '' && this.state.newBaselineName === '') {
 			alert('Please select baseline name')
+			return
+		}
+		if(this.state.baseConnection.connectionID === ''){
+			alert('Please select base connection')
 			return
 		}
 		this.isLoading();
@@ -439,6 +447,10 @@ export default class CreateBaseline extends Component {
 	// * METHOD TO EXECUTE FILTER MLVs
 	executeFilterMLVs(event) {
 
+		if(this.state.baseConnection.connectionID === ''){
+			alert('Please select base connection')
+			return
+		}
 		var temp = {
 			mlv: this.state.mlv,
 			filters: {
@@ -500,6 +512,10 @@ export default class CreateBaseline extends Component {
 	// * METHOD TO ADD FILTERS GENERATED TO BASELINE
 
 	addFiltersGeneratedToBaseline(event) {
+		if(this.state.baseConnection.connectionID === ''){
+			alert('Please select base connection')
+			return
+		}
 		this.isLoading();
 		event.preventDefault();
 		var baselineDetails = {
@@ -704,7 +720,7 @@ export default class CreateBaseline extends Component {
 												onDoubleClick={this.addFilter.bind(this)}
 											>
 												{
-													Constants.Constants.MLVOperators.map((operator) => {
+													Constants.MLVOperators.map((operator) => {
 
 														return (
 
@@ -724,7 +740,7 @@ export default class CreateBaseline extends Component {
 												style={{ overflowX: "scroll" }}
 											>
 												{
-													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+													Constants.MLVWhereClauseFunctions.map((func) => {
 
 														return (
 

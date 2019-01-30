@@ -15,3 +15,5 @@ exports.activityTypes = ['Insert', 'Update', 'Delete', 'Select', 'Stored Procedu
 exports.mlvObjects = ['MLVLEFTOBJ','MLVRIGHTOBJ'];
 exports.eQAttributes = ['eQBusinessRule','LEVELIDENTIFIER','LEVELROWNUM','EQMLVDEPTH','EQUBENONE','STOP_RECURSION_CONDITION'];
 exports.url = '';
+exports.ifExistsOperations = ['CONTINUE','EXIT', 'IGNORE', 'SKIPLEVEL', 'UPDATE_CURRENT_ROW']
+exports.onErrorOperations = ['EQACTION', 'CONTINUE', 'ERRORCODE', 'ERRORDESC', 'EXIT', 'IGNORE', 'SKIPLEVEL'];

@@ -131,7 +131,7 @@ export default class DeleteAllDetails extends Component {
 								style={{ overflowX: "scroll" }}
 							>
 								{
-									Constants.Constants.MLVOperators.map((operator) => {
+									Constants.MLVOperators.map((operator) => {
 
 										return (
 
@@ -153,7 +153,7 @@ export default class DeleteAllDetails extends Component {
 								style={{ overflowX: "scroll" }}
 							>
 								{
-									Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+									Constants.MLVWhereClauseFunctions.map((func) => {
 
 										return (
 
