@@ -22,13 +22,14 @@ export default class MLVGenerator extends Component {
 		super(props);
 		this.filteredData = [];
 		if (Object.keys(this.props.oldState).length != 0) {
-
+			
 			this.state = {
 				...this.props.oldState
 			}
 		}
-		else
+		else{
 			var baseConnection = { connectionName: '', connectionID: '' };
+		
 		var selectedConnection = { connectionName: '', connectionID: '', objectList: [] }
 		var total = 0;
 		var objectList = new Array()
@@ -126,6 +127,7 @@ export default class MLVGenerator extends Component {
 			baseConnection: { ...baseConnection }
 
 		}
+	}
 
 	}
 	componentDidMount() {
@@ -422,8 +424,10 @@ export default class MLVGenerator extends Component {
 				if (newState[object.objectID].attributes.length != 0) {
 
 					newState[object.objectID].attributes.map((attribute, attIndex) => {
+						var parsedObjectName = helper.generateColumnName(object.objectName)
+						if(attribute.columnName.includes(parsedObjectName))
+							attribute.columnName = helper.generateColumnName(`level_${newState[object.objectID].level}_${object.objectName}_${attribute.attributeName}_${attIndex}`);
 
-						attribute.columnName = `level_${newState[object.objectID].level}_${object.objectName}_${attribute.attributeName}_${attIndex}`;
 						//attribute.ID = `level_${temp[objectName].level}_${objectName}_${event.target.value}_${attIndex}`
 						newState[object.objectID].attributes[attIndex] = attribute;
 
@@ -781,8 +785,8 @@ export default class MLVGenerator extends Component {
 					levelName: this.state[event.target.value.objectID].relation.parentLevelName,
 					level: this.state[event.target.value.objectID].relation.level,
 					id: this.state[event.target.value.objectID].relation.id,
-					objectName: this.state[event.target.value.objectID].relation.parentObject,
-					objectID: this.state[event.target.value.objectID].objectID
+					objectID: this.state[event.target.value.objectID].relation.parentObject,
+					objectName: this.state[this.state[event.target.value.objectID].relation.parentObject].objectName
 				},
 				explicitRelation: {
 					attribute: {
@@ -862,7 +866,8 @@ export default class MLVGenerator extends Component {
 				columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 				attributeName: event.target.value,
 				attributeValue: event.target.value,
-				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				customColumnName : false
 			})
 			this.setState({
 				customAttribute: "",
@@ -886,7 +891,8 @@ export default class MLVGenerator extends Component {
 			columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 			attributeName: event.target.value,
 			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
-			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`)
+			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+			customColumnName : false
 		})
 		this.setState({
 			customAttribute: "",
@@ -912,19 +918,21 @@ export default class MLVGenerator extends Component {
 		temp.map((attribute) => {
 
 			if (attribute.ID === event.target.name) {
+				
+					
+					attribute.columnName = helper.generateColumnName(event.target.value)
 
-				attribute.columnName = helper.generateColumnName(event.target.value)
 				groupByAttributes.map((groupByAttribute, index) => {
 
 					if (groupByAttribute.ID === attribute.ID) {
-						console.log(groupByAttribute.ID)
-						console.log(attribute.ID)
-						groupByAttributes[index].columnName = helper.generateColumnName(event.target.value)
+						
+							groupByAttributes[index].columnName = helper.generateColumnName(event.target.value)
 					}
 				})
 				orderByAttributes.map((orderByAttribute, index) => {
 					if (orderByAttribute.ID === attribute.ID) {
-						orderByAttributes[index].columnName = helper.generateColumnName(event.target.value)
+						
+							orderByAttributes[index].columnName = helper.generateColumnName(event.target.value)
 					}
 				})
 
@@ -1824,11 +1832,11 @@ export default class MLVGenerator extends Component {
 		var indexToSplice = 0
 		parentTo.map((attribute, index) => {
 
-			if (attribute.objectName === this.state[this.state.selectedObject.objectID].objectName && attribute.level === this.state[this.state.selectedObject.objectID].level) {
+			if (attribute.objectID === this.state[this.state.selectedObject.objectID].objectID && attribute.level === this.state[this.state.selectedObject.objectID].level) {
 				indexToSplice = index
 			}
 		})
-
+		alert(indexToSplice)
 		parentTo.splice(indexToSplice, 1);
 		this.setState({
 			[this.state.selectedObject.objectID]: {
@@ -1918,7 +1926,8 @@ export default class MLVGenerator extends Component {
 		}
 		if (this.props.parent === 'fetchFromAnotherSourceForDelete') {
 			this.props.saveMLVForFetchFromAnotherSourceForDelete(this.state.mlv)
-		}
+		}if(this.props.parent === 'Activities')
+			this.props.saveGeneratedMLV(this.state.mlv)
 	}
 	createMLV(event) {
 		event.preventDefault();
@@ -3690,7 +3699,11 @@ export default class MLVGenerator extends Component {
 						...mlvState[objectID],
 						attributes: attributeValuesArray,
 						delimiter: delimiter,
-						predicate: predicate
+						predicate: predicate,
+						ifExists : {
+							attributes : []
+						},
+						onError : ''
 
 					}
 				}

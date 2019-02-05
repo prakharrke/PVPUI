@@ -101,6 +101,7 @@ export default class WriteBaseline extends Component {
 				bulkInsertFlag: false,
 				selectedBaseline: '',
 				newBaselineName: '',
+				resultSetCount : 0
 
 
 			}
@@ -140,7 +141,10 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLV(operation) {
-
+		if(operation === 'fetchFromAnotherSource' && this.state.fetchFromAnotherSourceConnection.connectionID === ''){
+			alert('Please select Fetch From Another Source Connection')
+			return
+		}
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -838,7 +842,10 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLVFetchFromAnotherSourceForUpdate(operation) {
-
+		if(this.state.fetchFromAnotherSourceConnection.connectionID === ''){
+			alert('Select Fetch From Another Source Connection')
+			return
+		}
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -1220,7 +1227,10 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLVFetchFromAnotherSourceForDelete(operation) {
-
+		if(this.state.fetchFromAnotherSourceConnection.connectionID === ''){
+			alert('Please select Fetch From Another Source Connection')
+			return
+		}
 		console.log(operation)
 		this.setState({
 			...this.state,
@@ -1724,7 +1734,7 @@ export default class WriteBaseline extends Component {
 
 
 		try {
-
+			console.log('^^^^^^^^^^^^^^^^^^')
 			console.log(response)
 			var resultsetList = new Array();
 
@@ -1784,12 +1794,16 @@ export default class WriteBaseline extends Component {
 			console.log(temp)
 
 			console.log(resultsetList);
+
 			//this.isNotLoading();
 			this.setState({
 				...this.state,
+				columnNames: JSON.parse(parsed[0]).columnNames,
+				resultsetOperation: resultsetOperation,
 				resultSetList: resultsetList,
 				showResultSet: true,
-				blurState: true
+				blurState: true,
+				resultSetCount : resultsetList.length
 
 			})
 
@@ -2211,11 +2225,13 @@ export default class WriteBaseline extends Component {
 
 							<div className='col-lg-2'></div>
 							<div className='col-lg-4'>
-								{this.state.resultsetOperation}
+								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>{this.state.resultsetOperation}</span></b>
 							</div>
 
-							<div className='col-lg-2'></div>
-							<div className='col-lg-1'></div>
+							<div className='col-lg-3'>
+								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>RS Count : {this.state.resultSetCount}</span></b>
+							</div>
+							
 							<div className='col-lg-1'>
 								<Button
 									primary={true}

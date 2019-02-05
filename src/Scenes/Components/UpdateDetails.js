@@ -323,7 +323,7 @@ export default class UpdateDetails extends Component {
 								style={{ overflowX: "scroll" }}
 							>
 								{
-									Constants.Constants.MLVOperators.map((operator) => {
+									Constants.MLVOperators.map((operator) => {
 
 										return (
 
@@ -345,7 +345,7 @@ export default class UpdateDetails extends Component {
 								style={{ overflowX: "scroll" }}
 							>
 								{
-									Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+									Constants.MLVWhereClauseFunctions.map((func) => {
 
 										return (
 
@@ -453,7 +453,7 @@ export default class UpdateDetails extends Component {
 												onDoubleClick={this.addFilterForFetchFromAnotherSourceForUpdate.bind(this)}
 											>
 												{
-													Constants.Constants.MLVOperators.map((operator) => {
+													Constants.MLVOperators.map((operator) => {
 
 														return (
 
@@ -473,7 +473,7 @@ export default class UpdateDetails extends Component {
 												style={{ overflowX: "scroll" }}
 											>
 												{
-													Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+													Constants.MLVWhereClauseFunctions.map((func) => {
 
 														return (
 
@@ -584,7 +584,7 @@ export default class UpdateDetails extends Component {
 											onDoubleClick={this.addFilterForFetchMLVForUpdate.bind(this)}
 										>
 											{
-												Constants.Constants.MLVOperators.map((operator) => {
+												Constants.MLVOperators.map((operator) => {
 
 													return (
 
@@ -604,7 +604,7 @@ export default class UpdateDetails extends Component {
 											style={{ overflowX: "scroll" }}
 										>
 											{
-												Constants.Constants.MLVWhereClauseFunctions.map((func) => {
+												Constants.MLVWhereClauseFunctions.map((func) => {
 
 													return (
 

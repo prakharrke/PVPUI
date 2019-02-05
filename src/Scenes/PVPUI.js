@@ -472,7 +472,8 @@ export default class PVPUI extends Component {
 								)
 							}} />
 							<Route path='/activitiesBaseline' render={props => {
-								return (<ActivitiesBaseline connInfoList={this.state.connInfoList} pluginList={this.state.pluginList} />
+								return (<ActivitiesBaseline connections={this.state.connections} pluginList={this.state.pluginList} isLoading={this.isLoading.bind(this)}
+									isNotLoading={this.isNotLoading.bind(this)} />
 								)
 							}} />
 							<Route path='/connections' render={props => {
