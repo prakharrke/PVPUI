@@ -2065,6 +2065,7 @@ export default class MLVGenerator extends Component {
 	// * METHOD TO SET ID
 
 	setID(event) {
+
 		if (event.target.value === '') {
 			delete this.state.ID[this.state.selectedObject.objectID]
 			this.setState({
@@ -2075,7 +2076,7 @@ export default class MLVGenerator extends Component {
 			return
 		}
 		var value = '';
-		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+		if (this.state.attributeListForSelectedObject.includes(event.target.value) && !Constants.eQAttributes.includes(event.target.value))
 			value = `${this.state.selectedObject.objectName}.${event.target.value}`
 		else
 			value = event.target.value
@@ -2098,7 +2099,7 @@ export default class MLVGenerator extends Component {
 			return
 		}
 		var value = '';
-		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+		if (this.state.attributeListForSelectedObject.includes(event.target.value) && !Constants.eQAttributes.includes(event.target.value))
 			value = `${this.state.selectedObject.objectName}.${event.target.value}`
 		else
 			value = event.target.value
@@ -2121,7 +2122,7 @@ export default class MLVGenerator extends Component {
 			return
 		}
 		var value = '';
-		if (this.state.attributeListForSelectedObject.includes(event.target.value))
+		if (this.state.attributeListForSelectedObject.includes(event.target.value) && !Constants.eQAttributes.includes(event.target.value))
 			value = `${this.state.selectedObject.objectName}.${event.target.value}`
 		else
 			value = event.target.value

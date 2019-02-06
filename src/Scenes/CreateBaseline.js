@@ -23,6 +23,8 @@ export default class CreateBaseline extends Component {
 				connectionID: ''
 			},
 			blurState: false,
+			resultSetCount : 0,
+			resultsetOperation: '',
 			testCaseSummary: '',
 			testCaseDescription: '',
 			runFlag: '',
@@ -180,7 +182,7 @@ export default class CreateBaseline extends Component {
 
 
 		}).then(response => {
-
+			this.isNotLoading();
 			this.computeResultSet(response.data)
 		})
 
@@ -191,7 +193,7 @@ export default class CreateBaseline extends Component {
 
 
 		try {
-
+			console.log('^^^^^^^^^^^^^^^^^^')
 			console.log(response)
 			var resultsetList = new Array();
 
@@ -199,7 +201,7 @@ export default class CreateBaseline extends Component {
 
 			//alert(response.length)
 
-			var parsed = response;
+			var parsed = JSON.parse(response);
 
 			// columnsNames array to hold decoded keys (columns in resultset)
 
@@ -207,22 +209,24 @@ export default class CreateBaseline extends Component {
 
 
 
-			var keys = Object.keys(parsed[0]);
-
+			//var keys = Object.keys(parsed[0]);
+			columnNames = JSON.parse(parsed[0]).columnNames;
+			var resultsetOperation = JSON.parse(parsed[0]).operation;
 			// populating columnNames array by decoding every element of keys array
 
-			for (var i = 0; i < keys.length; i++) {
+			/*for (var i = 0; i < keys.length; i++) {
 
 				var key = keys[i];
 
 				columnNames[i] = atob(key);
 
 
-			}
+			}*/
 
 			this.setState({
 				...this.state,
-				columnNames: columnNames
+				columnNames: JSON.parse(parsed[0]).columnNames,
+				resultsetOperation: resultsetOperation
 			})
 
 			// * Populating resultsetList array with decoded values from the parsed resultset received.
@@ -232,15 +236,15 @@ export default class CreateBaseline extends Component {
 
 				var temp = {};
 
-				for (var j = 0; j < keys.length; j++) {
+				for (var j = 0; j < columnNames.length; j++) {
 
 
-					var value = parsed[i][keys[j]];
+					var value = JSON.parse(parsed[i])[columnNames[j]];
 
 					// * fetching value from pared resultset and decoding it
-					console.log(atob(value));
+					console.log(value);
 
-					temp[columnNames[j]] = atob(value);
+					temp[columnNames[j]] = value;
 				}
 
 				resultsetList[i] = temp;
@@ -249,17 +253,21 @@ export default class CreateBaseline extends Component {
 			console.log(temp)
 
 			console.log(resultsetList);
-			this.isNotLoading();
+
+			//this.isNotLoading();
 			this.setState({
 				...this.state,
+				columnNames: JSON.parse(parsed[0]).columnNames,
+				resultsetOperation: resultsetOperation,
 				resultSetList: resultsetList,
 				showResultSet: true,
-				blurState: true
+				blurState: true,
+				resultSetCount : resultsetList.length
 
 			})
 
 		} catch{
-			this.isNotLoading();
+			//this.isNotLoading();
 			alert("Error occurred while executing MLV.")
 		}
 
@@ -469,14 +477,17 @@ export default class CreateBaseline extends Component {
 			}
 
 
-		}).then((response) => {
-
+		}).then(response => {
+			this.isNotLoading();
+			console.log('RESULT SET DATA')
 			console.log(response.data)
-			this.listOfResultSetList = response.data;
-
+			var resultSets = response.data
+			this.listOfResultSetList = response.data
 			this.computeResultSet(this.listOfResultSetList[this.resultSetListIndex])
 		}).catch(e => {
-			this.isNotLoading()
+			this.isNotLoading();
+			console.log(e)
+			alert(e)
 		})
 	}
 
@@ -886,58 +897,62 @@ export default class CreateBaseline extends Component {
 					</div>
 					{loadingComponent}
 					{
-						this.state.resultSetList.length > 0 &&
-						this.state.showResultSet == true &&
+					this.state.resultSetList.length > 0 &&
+					this.state.showResultSet == true &&
 
-						<div className="fixed-bottom" style={{ width: "100%", height: '50%', position: 'absolute' }}>
-							<div className="row justify-content-right">
-								<div className='col-lg-2'>
-									<Button
-										primary={true}
-										style={{ margin: "1em" }}
-										onClick={this.decreaseIndex.bind(this)}
-									>
-										Left
+					<div className="fixed-bottom" style={{ width: "100%", height: '50%', position: 'absolute' }}>
+						<div className="row justify-content-right">
+							<div className='col-lg-2'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.decreaseIndex.bind(this)}
+								>
+									Left
 						</Button>
-									<Button
-										primary={true}
-										style={{ margin: "1em" }}
-										onClick={this.increaseIndex.bind(this)}
-									>
-										Right
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.increaseIndex.bind(this)}
+								>
+									Right
 						</Button>
-								</div>
-
-								<div className='col-lg-2'></div>
-								<div className='col-lg-2'></div>
-								<div className='col-lg-2'></div>
-								<div className='col-lg-2'></div>
-								<div className='col-lg-1'></div>
-								<div className='col-lg-1'>
-									<Button
-										primary={true}
-										style={{ margin: "1em" }}
-										onClick={this.closeResultSet.bind(this)}
-									>
-										Close
-						</Button>
-								</div>
 							</div>
 
-							<div style={{ overflowY: "scroll" }}>
-								<Grid
-									style={{ height: "40em" }}
-									data={this.state.resultSetList}
-									resizable={true}
-									scrollable="scrollable"
+							<div className='col-lg-2'></div>
+							<div className='col-lg-4'>
+								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>{this.state.resultsetOperation}</span></b>
+							</div>
+
+							<div className='col-lg-3'>
+								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>RS Count : {this.state.resultSetCount}</span></b>
+							</div>
+							
+							<div className='col-lg-1'>
+								<Button
+									primary={true}
+									style={{ margin: "1em" }}
+									onClick={this.closeResultSet.bind(this)}
 								>
-									{
-										columnsElement
-									}
-								</Grid>
+									Close
+						</Button>
 							</div>
 						</div>
-					}
+
+						<div style={{ overflowY: "scroll" }}>
+							<Grid
+								style={{ height: "40em" }}
+								data={this.state.resultSetList}
+								resizable={true}
+								scrollable="scrollable"
+							>
+								{
+									columnsElement
+								}
+							</Grid>
+						</div>
+					</div>
+				}
 				</div>
 			</div>
 
