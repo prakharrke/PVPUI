@@ -1671,7 +1671,11 @@ export default class WriteBaseline extends Component {
 			isLoading: true
 		})
 		this.props.isLoading();
-		axios.post(constants.url + 'GenerateWriteBaseline', 'writeBaselineDetails=' + (encodeURIComponent(JSON.stringify(this.state))), {
+		var requestBody = {
+			...this.state
+		}
+		requestBody.newBaselineName = requestBody.newBaselineName + '.xlsx'
+		axios.post(constants.url + 'GenerateWriteBaseline', 'writeBaselineDetails=' + (encodeURIComponent(JSON.stringify(requestBody))), {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}

@@ -331,7 +331,7 @@ export default class CreateBaseline extends Component {
 			viewOnview: this.state.viewOnview,
 			mlvQualification: this.state.mlvQualification,
 			selectedBaseline: this.state.selectedBaseline,
-			newBaselineName: this.state.newBaselineName,
+			newBaselineName: this.state.newBaselineName + '.xlsx',
 			filters: {
 				...this.state.filters
 			},

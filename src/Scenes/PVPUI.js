@@ -10,6 +10,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import WriteBaseline from './WriteBaseline'
 import ActivitiesBaseline from './ActivitiesBaseline'
+import Settings from './Settings'
 import '../css/transition.css';
 import axios from 'axios';
 import Connections from './Connections'
@@ -439,6 +440,7 @@ export default class PVPUI extends Component {
 									<PanelBarItem title={'Write Baseline'} route="/writeBaseline" />
 									<PanelBarItem title={'Activities Baseline'} route="/activitiesBaseline" />
 									<PanelBarItem title={'Connections'} route="/connections" />
+									<PanelBarItem title={'Settings'} route="/settings" />
 								</PanelBar>
 							</ReactCSSTransitionGroup>
 						</div>}
@@ -489,6 +491,10 @@ export default class PVPUI extends Component {
 									addConnection={this.addConnection.bind(this)}
 									deleteConnection={this.deleteConnection.bind(this)}
 									/>
+								)
+							}} />
+							<Route path='/settings' render={props => {
+								return (<Settings />
 								)
 							}} />
 						</Switch>
