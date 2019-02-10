@@ -3774,6 +3774,41 @@ export default class MLVGenerator extends Component {
 		return arr
 
 	}
+
+	generateAttributeValue(str){
+
+		var arr = [];
+		var newStr = '';
+		var bCounter = 0;
+		var curlyBCounter = 0;
+		for (var i = 0; i < str.length; i++) {
+			if (str[i] != '.')
+				newStr = newStr + str[i];
+			else
+				if (bCounter != 0)
+					newStr = newStr + str[i];
+			if (str[i] == '[')
+				bCounter++;
+			if (str[i] == ']')
+				bCounter--;
+			if (str[i] == '(')
+				curlyBCounter++;
+			if (str[i] == ')')
+				curlyBCounter--;
+
+			if (str[i] == '.' && bCounter == 0 && curlyBCounter == 0) {
+				arr.push(newStr)
+				newStr = '';
+
+			}
+
+			if (i == str.length - 1)
+				arr.push(newStr)
+		}
+
+		console.log(arr)
+		return arr
+	}
 	parseMLV(event) {
 		var mlv = event.target.value.replace('Level', "Level".fontcolor("red"));
 
@@ -3787,7 +3822,7 @@ export default class MLVGenerator extends Component {
 			var levelStringsArray = event.target.value.split('Level')
 			levelStringsArray.splice(0, 1)
 			//var index = this.findClosingBracket(levelStringsArray[0].trim(),levelStringsArray[0].trim().indexOf('{'))
-			levelStringsArray.map(level => {
+			levelStringsArray.map((level, levelIndex) => {
 				// * THIS IS ENTIRE LEVEL STRING. FETCH INDEX OF LAST CLOSING CURLY BRACE AND GET SUBSTRING FROM THE OPENING AND CLOSING CURLY BRACES FOR LEVEL DETAILS
 				var levelString = level.substring(
 					level.indexOf('{') + 1, this.findClosingBracket(level, level.indexOf('{'))
@@ -3798,7 +3833,7 @@ export default class MLVGenerator extends Component {
 				var source = levelString.match(this.sourceRegex)[0].trim();
 				// * ADDING SOURCE TO SELECTED_OBJECT_LIST
 				var indexOfSource = selectedObjectList.length;
-				var objectID = indexOfSource + '_' + new Date().getTime();
+				var objectID = indexOfSource + '_' + new Date().getTime()+levelIndex;
 				selectedObjectList.push({
 					objectName: source,
 					objectID: objectID,
@@ -3866,10 +3901,13 @@ export default class MLVGenerator extends Component {
 				var attributeValuesArray = new Array();
 				attvaluesArray.map((attvalue, index) => {
 					if (attvalue.trim() != "null") {
-						if (attvalue.includes('.') && attvalue.split('.')[0].trim() === source) {
-							console.log(attvalue.split('.')[0].trim())
-							console.log(source)
-							var attributeName = attvalue.split('.')[1].trim()
+						//alert(source)
+						if (attvalue.includes(source)) {
+							//alert(attvalue.split(source+'.')[1])
+							//console.log(attvalue.split('.')[0].trim())
+							//console.log(source)
+							//var attributeName = this.generateAttributeValue(attvalue)[1]
+							var attributeName = attvalue.split(source+'.')[1];
 						}
 						else
 							var attributeName = attvalue;
