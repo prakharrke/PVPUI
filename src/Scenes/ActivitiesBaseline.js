@@ -46,12 +46,12 @@ export default class ActivitiesBaseline extends Component {
 
 	addActivity(event) {
 		console.log(event.item)
-		console.log(event.target.props.id)
-
+		var index = event.target.props.id
+		
 		if(event.item === 'Before')
-			this.addActivityBefore();
+			this.addActivityBefore(index);
 		if(event.item === 'After')
-			this.addActivityAfter();
+			this.addActivityAfter(index);
 		
 		
 		
@@ -351,6 +351,7 @@ export default class ActivitiesBaseline extends Component {
 
 	}
 	addActivityAfter(index) {
+		
 		//event.preventDefault();
 		//var index = event.target.getAttribute('id')
 		var activities = this.state.activities;
@@ -388,6 +389,7 @@ export default class ActivitiesBaseline extends Component {
 
 	}
 	addActivityBefore(index) {
+
 		//event.preventDefault();
 		//var index = event.target.getAttribute('id')
 		var activities = this.state.activities;

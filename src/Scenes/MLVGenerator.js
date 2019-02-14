@@ -23,114 +23,115 @@ export default class MLVGenerator extends Component {
 		super(props);
 		this.filteredData = [];
 		if (Object.keys(this.props.oldState).length != 0) {
-			
+
 			this.state = {
 				...this.props.oldState
 			}
 		}
-		else{
+		else {
 			var baseConnection = { connectionName: '', connectionID: '' };
-		
-		var selectedConnection = { connectionName: '', connectionID: '', objectList: [] }
-		var total = 0;
-		var objectList = new Array()
-		if (this.props.parent != undefined) {
 
-			if (this.props.parent === 'fetchFromAnotherSource' || this.props.parent === 'fetchFromAnotherSourceForUpdate' || this.props.parent === 'fetchFromAnotherSourceForDelete') {
-				baseConnection = { ...this.props.fetchFromAnotherSourceConnection }
+			var selectedConnection = { connectionName: '', connectionID: '', objectList: [] }
+			var total = 0;
+			var objectList = new Array()
+			if (this.props.parent != undefined) {
 
-				var connectionIndex = this.props.connections.map(connection => { return connection.connectionID }).indexOf(this.props.fetchFromAnotherSourceConnection.connectionID)
-				objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
-				this.filteredData = this.props.connections[connectionIndex].objectList.slice();
+				if (this.props.parent === 'fetchFromAnotherSource' || this.props.parent === 'fetchFromAnotherSourceForUpdate' || this.props.parent === 'fetchFromAnotherSourceForDelete') {
+					baseConnection = { ...this.props.fetchFromAnotherSourceConnection }
 
-				selectedConnection = { ...this.props.fetchFromAnotherSourceConnection, objectList: this.filteredData }
-				total = this.props.connections[connectionIndex].objectList.length;
-			} else {
-				baseConnection = { ...this.props.writeConnection }
+					var connectionIndex = this.props.connections.map(connection => { return connection.connectionID }).indexOf(this.props.fetchFromAnotherSourceConnection.connectionID)
+					objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
+					this.filteredData = this.props.connections[connectionIndex].objectList.slice();
 
-				var connectionIndex = this.props.connections.map(connection => { return connection.connectionID }).indexOf(this.props.writeConnection.connectionID)
-				objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
-				this.filteredData = this.props.connections[connectionIndex].objectList.slice();
-				selectedConnection = { ...this.props.writeConnection, objectList: this.filteredData }
-				total = this.props.connections[connectionIndex].objectList.length;
+					selectedConnection = { ...this.props.fetchFromAnotherSourceConnection, objectList: this.filteredData }
+					total = this.props.connections[connectionIndex].objectList.length;
+				} else {
+					baseConnection = { ...this.props.writeConnection }
+
+					var connectionIndex = this.props.connections.map(connection => { return connection.connectionID }).indexOf(this.props.writeConnection.connectionID)
+					objectList = this.props.connections[connectionIndex].objectList.slice(0, pageSize)
+					this.filteredData = this.props.connections[connectionIndex].objectList.slice();
+					selectedConnection = { ...this.props.writeConnection, objectList: this.filteredData }
+					total = this.props.connections[connectionIndex].objectList.length;
+				}
+			}
+			this.state = {
+				blurState: false,
+				ID: {
+
+				},
+				PID: {
+
+				},
+				LEV: {
+
+				},
+				columnCount: 3,
+				total: total,
+				skip: 0,
+				filterOperator: 'contains',
+				relationAttributes: [],
+				exactSearch: false,
+				selectedConnectionID: -1,
+				tempObject: '',
+				selectedObjectList: [],
+				loading: false,
+				//objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
+				objectList: objectList,
+				connInfoList: this.props.connInfoList,
+				selectedObject: { objectName: 'Selected Sources', objectID: 0 },
+				attributeListForSelectedObject: [],
+				isLoading: false,
+				customAttribute: "",
+				parentObjectsForRelation: [],
+				parentObject: {
+					levelName: "Select Parent",
+					id: 0,
+					level: '',
+					objectName: '',
+					nativeRelations: [],
+					nativeRelationsData: [],
+					objectID: ''
+				},
+				explicitRelation: {
+
+					attribute: {
+						attributeName: '',
+						object: ''
+
+					},
+					parentAttribute: {
+						level: '',
+						object: '',
+						attributeIndex: ''
+					},
+					operator: {
+						operator: '',
+
+					},
+					expression: '',
+
+
+
+				},
+				parallelExecution: false,
+				cache: {
+					enabled: false,
+					setting: "USE SITE SETTING"
+				},
+				gridView: {
+					columns: [],
+					gridViewData: []
+				},
+				showGridView: false,
+				selectedConnection: { ...selectedConnection },
+				mlvName: '',
+				baseConnection: { ...baseConnection },
+				storedProcedures: []
+
+
 			}
 		}
-		this.state = {
-			blurState: false,
-			ID: {
-
-			},
-			PID: {
-
-			},
-			LEV: {
-
-			},
-			columnCount : 3,
-			total: total,
-			skip: 0,
-			filterOperator: 'contains',
-			relationAttributes: [],
-			exactSearch: false,
-			selectedConnectionID: -1,
-			tempObject: '',
-			selectedObjectList: [],
-			loading: false,
-			//objectList: this.props.connInfoList[0].objectList.slice(0, pageSize),
-			objectList: objectList,
-			connInfoList: this.props.connInfoList,
-			selectedObject: { objectName: 'Selected Sources', objectID: 0 },
-			attributeListForSelectedObject: [],
-			isLoading: false,
-			customAttribute: "",
-			parentObjectsForRelation: [],
-			parentObject: {
-				levelName: "Select Parent",
-				id: 0,
-				level: '',
-				objectName: '',
-				nativeRelations: [],
-				nativeRelationsData: [],
-				objectID: ''
-			},
-			explicitRelation: {
-
-				attribute: {
-					attributeName: '',
-					object: ''
-
-				},
-				parentAttribute: {
-					level: '',
-					object: '',
-					attributeIndex: ''
-				},
-				operator: {
-					operator: '',
-
-				},
-				expression: '',
-
-
-
-			},
-			parallelExecution: false,
-			cache: {
-				enabled: false,
-				setting: "USE SITE SETTING"
-			},
-			gridView: {
-				columns: [],
-				gridViewData: []
-			},
-			showGridView: false,
-			selectedConnection: { ...selectedConnection },
-			mlvName: '',
-			baseConnection: { ...baseConnection }
-			
-
-		}
-	}
 
 	}
 	componentDidMount() {
@@ -266,6 +267,7 @@ export default class MLVGenerator extends Component {
 
 
 		this.filteredData = event.target.value.objectList.slice();
+		this.getStoredProcedureForConnection(event.target.value.connectionID)
 		this.setState({
 			...this.state,
 			baseConnection: {
@@ -284,7 +286,10 @@ export default class MLVGenerator extends Component {
 		var selectedConnection = {
 			...event.target.value
 		}
+		this.getStoredProcedureForConnection(event.target.value.connectionID)
 		this.filteredData = event.target.value.objectList.slice();
+
+
 		this.setState({
 			...this.state,
 			selectedConnection: selectedConnection,
@@ -292,6 +297,23 @@ export default class MLVGenerator extends Component {
 			total: event.target.value.objectList.length,
 			skip: 0
 
+		})
+	}
+
+	getStoredProcedureForConnection(connectionID) {
+
+		axios.post(Constants.url + 'GetStoredProcedureList', `connectionDetails=${JSON.stringify({ connectionID: connectionID })}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+
+			console.log(response.data)
+			this.setState({
+				...this.state,
+				storedProcedures: response.data
+			})
 		})
 	}
 	addSelectedObjectTry(event) {
@@ -314,7 +336,7 @@ export default class MLVGenerator extends Component {
 				objectID: newObjectID,
 				objectName: event.target.value,
 				level: indexOfNewObject,
-				attributes: [{attributeName : '', columnName : 'ID', attributeValue : '', ID : 'ID'},{attributeName : '', columnName : 'PID', attributeValue : '', ID : 'PID'},{attributeName : '', columnName : 'LEV', attributeValue : '', ID : 'LEV'}],
+				attributes: [{ attributeName: '', columnName: 'ID', attributeValue: '', ID: 'ID' }, { attributeName: '', columnName: 'PID', attributeValue: '', ID: 'PID' }, { attributeName: '', columnName: 'LEV', attributeValue: '', ID: 'LEV' }],
 				predicate: "",
 				fetchSize: "",
 				chunkSize: "",
@@ -361,7 +383,9 @@ export default class MLVGenerator extends Component {
 				ifExists: {
 
 					attributes: [],
-					eqAction: ''
+					eqAction: { procedureName: '', procedureSignature: '' },
+					isStoredProcedure: false,
+					actionParameters: []
 				},
 				onError: ''
 
@@ -853,7 +877,7 @@ export default class MLVGenerator extends Component {
 
 	addSelectedAttribute(event) {
 
-		
+
 
 		if (event.target.value === "") {
 
@@ -862,12 +886,11 @@ export default class MLVGenerator extends Component {
 
 		var selectedIndex = '';
 		var selectedIndexFlag = false;
-		if(this.state.selectedElement != undefined){
+		if (this.state.selectedElement != undefined) {
 
 			var options = this.state.selectedElement.target.options;
-			for(var i=0;i<options.length;i++){
-				if(options[i].selected)
-				{
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].selected) {
 					selectedIndex = i;
 					selectedIndexFlag = true
 					break;
@@ -875,7 +898,7 @@ export default class MLVGenerator extends Component {
 			}
 		}
 
-		
+
 
 
 		if (event.target.value.split('.')[0] === 'MLVRELATION' || event.target.value.split('.')[0] === 'MLVOBJECTRELATION' || Constants.eQAttributes.includes(event.target.value)) {
@@ -889,25 +912,22 @@ export default class MLVGenerator extends Component {
 				columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
 				attributeName: event.target.value,
 				attributeValue: event.target.value,
-				ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-				customColumnName : false
+				ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+				customColumnName: false
 			}
-			if(selectedIndexFlag){
+			if (selectedIndexFlag) {
 				attributeObject.columnName = attributes[selectedIndex].columnName
-				if(attributes[selectedIndex].ID === 'ID')
-				{
+				if (attributes[selectedIndex].ID === 'ID') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
 				}
-				if(attributes[selectedIndex].ID === 'PID' )
-				{
+				if (attributes[selectedIndex].ID === 'PID') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
 				}
-				if(attributes[selectedIndex].ID === 'LEV' )
-				{
+				if (attributes[selectedIndex].ID === 'LEV') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
-				}	
+				}
 				attributes[selectedIndex] = attributeObject
-			}else{
+			} else {
 				attributes.push(attributeObject)
 			}
 			this.setState({
@@ -918,7 +938,7 @@ export default class MLVGenerator extends Component {
 					...this.state[selectedObject.objectID],
 					attributes: attributes
 				},
-				
+
 
 			})
 
@@ -935,46 +955,42 @@ export default class MLVGenerator extends Component {
 			columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
 			attributeName: event.target.value,
 			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
-			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			customColumnName : false
+			ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+			customColumnName: false
 		}
-			if(selectedIndexFlag){
-				attributeObject.columnName = attributes[selectedIndex].columnName
-				if(attributes[selectedIndex].ID === 'ID')
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
-				}
-				if(attributes[selectedIndex].ID === 'PID' )
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
-				}
-				if(attributes[selectedIndex].ID === 'LEV' )
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
-				}	
-				attributes[selectedIndex] = attributeObject
-			}else{
-				attributes.push(attributeObject)
+		if (selectedIndexFlag) {
+			attributeObject.columnName = attributes[selectedIndex].columnName
+			if (attributes[selectedIndex].ID === 'ID') {
+				attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
 			}
+			if (attributes[selectedIndex].ID === 'PID') {
+				attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
+			}
+			if (attributes[selectedIndex].ID === 'LEV') {
+				attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
+			}
+			attributes[selectedIndex] = attributeObject
+		} else {
+			attributes.push(attributeObject)
+		}
 		this.setState({
 			...this.state,
-			
+
 			customAttribute: "",
 			[this.state.selectedObject.objectID]: {
 
 				...this.state[selectedObject.objectID],
 				attributes: attributes
 			},
-			
+
 
 		})
 
-		if(this.state.selectedElement != undefined){
+		if (this.state.selectedElement != undefined) {
 
 			var options = this.state.selectedElement.target.options;
-			for(var i=0;i<options.length;i++){
-				if(options[i].selected)
-				{
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].selected) {
 					options[i].selected = false
 				}
 			}
@@ -982,9 +998,9 @@ export default class MLVGenerator extends Component {
 
 		this.setState({
 			...this.state,
-			['selectedElement'] : undefined,
-			columnCount : (this.state.columnCount + 1),
-			
+			['selectedElement']: undefined,
+			columnCount: (this.state.columnCount + 1),
+
 		})
 
 	}
@@ -1002,21 +1018,21 @@ export default class MLVGenerator extends Component {
 		temp.map((attribute) => {
 
 			if (attribute.ID === event.target.name) {
-				
-					
-					attribute.columnName = helper.generateColumnName(event.target.value)
+
+
+				attribute.columnName = helper.generateColumnName(event.target.value)
 
 				groupByAttributes.map((groupByAttribute, index) => {
 
 					if (groupByAttribute.ID === attribute.ID) {
-						
-							groupByAttributes[index].columnName = helper.generateColumnName(event.target.value)
+
+						groupByAttributes[index].columnName = helper.generateColumnName(event.target.value)
 					}
 				})
 				orderByAttributes.map((orderByAttribute, index) => {
 					if (orderByAttribute.ID === attribute.ID) {
-						
-							orderByAttributes[index].columnName = helper.generateColumnName(event.target.value)
+
+						orderByAttributes[index].columnName = helper.generateColumnName(event.target.value)
 					}
 				})
 
@@ -1062,12 +1078,11 @@ export default class MLVGenerator extends Component {
 
 		var selectedIndex = '';
 		var selectedIndexFlag = false;
-		if(this.state.selectedElement != undefined){
+		if (this.state.selectedElement != undefined) {
 
 			var options = this.state.selectedElement.target.options;
-			for(var i=0;i<options.length;i++){
-				if(options[i].selected)
-				{
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].selected) {
 					selectedIndex = i;
 					selectedIndexFlag = true
 					break;
@@ -1087,42 +1102,39 @@ export default class MLVGenerator extends Component {
 				attributes = this.state[selectedObject.objectID].attributes;
 				var attributesLength = attributes.length
 				var attributeObject = {
-			//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
-			attributeName: event.target.value,
-			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
-			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			customColumnName : false
-		}
-			if(selectedIndexFlag){
-				attributeObject.columnName = attributes[selectedIndex].columnName
-				if(attributes[selectedIndex].ID === 'ID')
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
+					//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+					columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+					attributeName: event.target.value,
+					attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
+					ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+					customColumnName: false
 				}
-				if(attributes[selectedIndex].ID === 'PID' )
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
+				if (selectedIndexFlag) {
+					attributeObject.columnName = attributes[selectedIndex].columnName
+					if (attributes[selectedIndex].ID === 'ID') {
+						attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
+					}
+					if (attributes[selectedIndex].ID === 'PID') {
+						attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
+					}
+					if (attributes[selectedIndex].ID === 'LEV') {
+						attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
+					}
+					attributes[selectedIndex] = attributeObject
+				} else {
+					attributes.push(attributeObject)
 				}
-				if(attributes[selectedIndex].ID === 'LEV' )
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
-				}	
-				attributes[selectedIndex] = attributeObject
-			}else{
-				attributes.push(attributeObject)
-			}
 
 				this.setState({
 					...this.state,
-					
+
 					customAttribute: "",
 					[this.state.selectedObject.objectID]: {
 
 						...this.state[selectedObject.objectID],
 						attributes: attributes
 					},
-					
+
 
 				})
 				event.target.value = ""
@@ -1136,52 +1148,48 @@ export default class MLVGenerator extends Component {
 			attributes = this.state[selectedObject.objectID].attributes;
 			var attributesLength = attributes.length
 			var attributeObject = {
-			//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
-			attributeName: event.target.value,
-			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
-			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			customColumnName : false
-		}
-			if(selectedIndexFlag){
+				//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+				attributeName: event.target.value,
+				attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
+				ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+				customColumnName: false
+			}
+			if (selectedIndexFlag) {
 				attributeObject.columnName = attributes[selectedIndex].columnName
-				if(attributes[selectedIndex].ID === 'ID')
-				{
+				if (attributes[selectedIndex].ID === 'ID') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
 				}
-				if(attributes[selectedIndex].ID === 'PID' )
-				{
+				if (attributes[selectedIndex].ID === 'PID') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
 				}
-				if(attributes[selectedIndex].ID === 'LEV' )
-				{
+				if (attributes[selectedIndex].ID === 'LEV') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
-				}	
+				}
 				attributes[selectedIndex] = attributeObject
-			}else{
+			} else {
 				attributes.push(attributeObject)
 			}
 			this.setState({
 				...this.state,
-				
+
 				[this.state.selectedObject.objectID]: {
 
 					...this.state[selectedObject.objectID],
 					attributes: attributes
 				},
 				customAttribute: "",
-				
+
 			})
 
 
 
 		}
-			if(this.state.selectedElement != undefined){
+		if (this.state.selectedElement != undefined) {
 
 			var options = this.state.selectedElement.target.options;
-			for(var i=0;i<options.length;i++){
-				if(options[i].selected)
-				{
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].selected) {
 					options[i].selected = false
 				}
 			}
@@ -1189,20 +1197,19 @@ export default class MLVGenerator extends Component {
 
 		this.setState({
 			...this.state,
-			['selectedElement'] : undefined,
-			columnCount : (this.state.columnCount + 1),
+			['selectedElement']: undefined,
+			columnCount: (this.state.columnCount + 1),
 		})
 	}
 
 	addCustomAttributeToAttributeList(event) {
 		var selectedIndex = '';
 		var selectedIndexFlag = false;
-		if(this.state.selectedElement != undefined){
+		if (this.state.selectedElement != undefined) {
 
 			var options = this.state.selectedElement.target.options;
-			for(var i=0;i<options.length;i++){
-				if(options[i].selected)
-				{
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].selected) {
 					selectedIndex = i;
 					selectedIndexFlag = true
 					break;
@@ -1218,41 +1225,38 @@ export default class MLVGenerator extends Component {
 				attributes = this.state[selectedObject.objectID].attributes;
 				var attributesLength = attributes.length
 				var attributeObject = {
-			//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
-			attributeName: event.target.value,
-			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
-			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			customColumnName : false
-		}
-			if(selectedIndexFlag){
-				attributeObject.columnName = attributes[selectedIndex].columnName
-				if(attributes[selectedIndex].ID === 'ID')
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
+					//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+					columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+					attributeName: event.target.value,
+					attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
+					ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+					customColumnName: false
 				}
-				if(attributes[selectedIndex].ID === 'PID' )
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
+				if (selectedIndexFlag) {
+					attributeObject.columnName = attributes[selectedIndex].columnName
+					if (attributes[selectedIndex].ID === 'ID') {
+						attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
+					}
+					if (attributes[selectedIndex].ID === 'PID') {
+						attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
+					}
+					if (attributes[selectedIndex].ID === 'LEV') {
+						attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
+					}
+					attributes[selectedIndex] = attributeObject
+				} else {
+					attributes.push(attributeObject)
 				}
-				if(attributes[selectedIndex].ID === 'LEV' )
-				{
-					attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
-				}	
-				attributes[selectedIndex] = attributeObject
-			}else{
-				attributes.push(attributeObject)
-			}
 				this.setState({
 					...this.state,
-					
+
 					customAttribute: "",
 					[this.state.selectedObject.objectID]: {
 
 						...this.state[selectedObject.objectID],
 						attributes: attributes
 					},
-					
+
 
 				})
 
@@ -1266,50 +1270,46 @@ export default class MLVGenerator extends Component {
 			attributes = this.state[selectedObject.objectID].attributes;
 			var attributesLength = attributes.length
 			var attributeObject = {
-			//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
-			attributeName: event.target.value,
-			attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
-			ID: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
-			customColumnName : false
-		}
-			if(selectedIndexFlag){
+				//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
+				columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+				attributeName: event.target.value,
+				attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
+				ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
+				customColumnName: false
+			}
+			if (selectedIndexFlag) {
 				attributeObject.columnName = attributes[selectedIndex].columnName
-				if(attributes[selectedIndex].ID === 'ID')
-				{
+				if (attributes[selectedIndex].ID === 'ID') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "ID"
 				}
-				if(attributes[selectedIndex].ID === 'PID' )
-				{
+				if (attributes[selectedIndex].ID === 'PID') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "PID"
 				}
-				if(attributes[selectedIndex].ID === 'LEV' )
-				{
+				if (attributes[selectedIndex].ID === 'LEV') {
 					attributeObject.ID = attributes[selectedIndex].ID + "_" + "LEV"
-				}	
+				}
 				attributes[selectedIndex] = attributeObject
-			}else{
+			} else {
 				attributes.push(attributeObject)
 			}
 			this.setState({
 				...this.state,
-				
+
 				[this.state.selectedObject.objectID]: {
 
 					...this.state[selectedObject.objectID],
 					attributes: attributes
 				},
 				customAttribute: "",
-				
+
 			})
 		}
 
-			if(this.state.selectedElement != undefined){
+		if (this.state.selectedElement != undefined) {
 
 			var options = this.state.selectedElement.target.options;
-			for(var i=0;i<options.length;i++){
-				if(options[i].selected)
-				{
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].selected) {
 					options[i].selected = false
 				}
 			}
@@ -1317,8 +1317,8 @@ export default class MLVGenerator extends Component {
 
 		this.setState({
 			...this.state,
-			['selectedElement'] : undefined,
-			columnCount : (this.state.columnCount + 1),
+			['selectedElement']: undefined,
+			columnCount: (this.state.columnCount + 1),
 		})
 	}
 
@@ -2169,12 +2169,16 @@ export default class MLVGenerator extends Component {
 		}
 		if (this.props.parent === 'fetchFromAnotherSourceForDelete') {
 			this.props.saveMLVForFetchFromAnotherSourceForDelete(this.state.mlv)
-		}if(this.props.parent === 'Activities')
+		} if (this.props.parent === 'Activities')
 			this.props.saveGeneratedMLV(this.state.mlv)
+		if (this.props.parent === 'read') {
+			this.props.saveMLVForRead(this.state.mlv, this.state)
+
+		}
+
 	}
 	createMLV(event) {
-		if(this.state.baseConnection.connectionID === '')
-		{
+		if (this.state.baseConnection.connectionID === '') {
 			alert('Please select Base Connection')
 			return
 		}
@@ -2456,51 +2460,99 @@ export default class MLVGenerator extends Component {
 	}
 	setIfExistsAction(event) {
 
+		var isProcedure = false;
+		if (event.target.value.isProcedure)
+			isProcedure = true
+		else
+			isProcedure = false
+
 		this.setState({
 			...this.state,
 			[this.state.selectedObject.objectID]: {
 				...this.state[this.state.selectedObject.objectID],
 				ifExists: {
 					...this.state[this.state.selectedObject.objectID].ifExists,
-					eqAction: event.target.value
+					eqAction: { ...event.target.value },
+					isProcedure: isProcedure
 				}
 			}
 		})
 	}
 
-	addOnError(event){
-		
-		if (this.state.selectedObject.objectName != "Selected Sources"){
-
-		var onError = this.state[this.state.selectedObject.objectID].onError
-
+	addIfExistsActionParameters(event) {
+		var actionParameters = this.state[this.state.selectedObject.objectID].ifExists.actionParameters;
+		actionParameters.push({ ID: event.target.getAttribute('id'), columnName: event.target.getAttribute('name') })
 		this.setState({
 			...this.state,
-			[this.state.selectedObject.objectID] : {
-			...this.state[this.state.selectedObject.objectID],
-			onError : onError + ' ' + event.target.value
-		}
+			[this.state.selectedObject.objectID]: {
+				...this.state[this.state.selectedObject.objectID],
+				ifExists: {
+					...this.state[this.state.selectedObject.objectID].ifExists,
+
+					actionParameters: actionParameters
+				}
+			}
 		})
 	}
-	}
 
-	editOnError(event){
-		if (this.state.selectedObject.objectName != "Selected Sources"){
-
-		this.setState({
+	deleteIfExistsActionParameter(event){
+		var index = event.target.getAttribute('index')
+		var actionParameters = this.state[this.state.selectedObject.objectID].ifExists.actionParameters;
+		actionParameters.splice(index, 1)
+			this.setState({
 			...this.state,
-			[this.state.selectedObject.objectID] : {
-			...this.state[this.state.selectedObject.objectID],
-			onError :  event.target.value
-		}
+			[this.state.selectedObject.objectID]: {
+				...this.state[this.state.selectedObject.objectID],
+				ifExists: {
+					...this.state[this.state.selectedObject.objectID].ifExists,
+
+					actionParameters: actionParameters
+				}
+			}
 		})
 	}
+
+	addOnError(event) {
+
+		if (this.state.selectedObject.objectName != "Selected Sources") {
+
+			var onError = this.state[this.state.selectedObject.objectID].onError
+
+			this.setState({
+				...this.state,
+				[this.state.selectedObject.objectID]: {
+					...this.state[this.state.selectedObject.objectID],
+					onError: onError + ' ' + event.target.value
+				}
+			})
+		}
 	}
 
-	selectedAttributeIndex(event){
+	editOnError(event) {
+		if (this.state.selectedObject.objectName != "Selected Sources") {
+
+			this.setState({
+				...this.state,
+				[this.state.selectedObject.objectID]: {
+					...this.state[this.state.selectedObject.objectID],
+					onError: event.target.value
+				}
+			})
+		}
+	}
+
+	selectedAttributeIndex(event) {
+
 		event.persist();
 		this.setState({
-			['selectedElement'] : event
+			['selectedElement']: event
+		})
+	}
+
+	setUserMLV(event) {
+		this.setState({
+			...this.state,
+			userMLV: event.target.value
 		})
 	}
 
@@ -2531,14 +2583,14 @@ export default class MLVGenerator extends Component {
 						var objectName = this.state.selectedObject.objectName;
 
 						return (
-							<div id = "attributeColumnName" style={{margin:"0", padding : "0"}}>
-							<Input
-								value={attribute.columnName}
-								
-								name={attribute.ID}
-								style={{ width: "100%", textAlign: "center" }}
-								onChange={this.changeColumnName.bind(this)}
-							/>
+							<div id="attributeColumnName" style={{ margin: "0", padding: "0" }}>
+								<Input
+									value={attribute.columnName}
+
+									name={attribute.ID}
+									style={{ width: "100%", textAlign: "center" }}
+									onChange={this.changeColumnName.bind(this)}
+								/>
 							</div>
 						)
 					})
@@ -2546,19 +2598,19 @@ export default class MLVGenerator extends Component {
 			}
 
 			if (this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] != undefined) {
-
+				selectedAttributeListElement = "";
 				selectedAttributeListElement = (this.state[this.state.selectedObject.objectID].attributes.length === 0 || this.state.selectedObject.objectName === "Selected Sources") ? "" :
 					this.state[this.state.selectedObject.objectID].attributes.map((attribute) => {
 
 						return (
 
 							<option
-							class="d-flex align-items-center "
+								class="d-flex align-items-center "
 								key={attribute.ID}
 								id={attribute.ID}
 								name={attribute.ID}
 								onDoubleClick={this.removeSelectedAttribute.bind(this)}
-								style={{height : document.getElementById('attributeColumnName') != undefined ? document.getElementById('attributeColumnName').clientHeight : '1em', margin : '0', padding : '0'}}
+								style={{ height: document.getElementById('attributeColumnName') != undefined ? document.getElementById('attributeColumnName').clientHeight : '1em', margin: '0', padding: '0' }}
 								value={attribute.attributeName}>{attribute.attributeName}
 
 
@@ -2742,16 +2794,32 @@ export default class MLVGenerator extends Component {
 												className="form-control"
 												multiple
 												id="selectedAttributes"
-												style={{ overflowX: "scroll", overflowY: "hidden", margin : '0', padding : '0' }}
+												style={{ overflowX: "scroll", overflowY: "hidden", margin: '0', padding: '0' }}
 												onChange={this.selectedAttributeIndex.bind(this)}
 												size={selectedAttributeElementSize}
 											>
-												{selectedAttributeListElement}
+												{this.state[this.state.selectedObject.objectID] != undefined && this.state[this.state.selectedObject.objectID].attributes.map((attribute) => {
+
+													return (
+
+														<option
+															class="d-flex align-items-center "
+															key={attribute.ID}
+															id={attribute.ID}
+															name={attribute.ID}
+															onDoubleClick={this.removeSelectedAttribute.bind(this)}
+															style={{ height: document.getElementById('attributeColumnName') != undefined ? document.getElementById('attributeColumnName').clientHeight : '1em', margin: '0', padding: '0' }}
+															value={attribute.attributeName}>{attribute.attributeName}
+
+
+														</option>
+													)
+												})}
 											</select>
 										</div>
 
 									</div>
-								{/*	< div className="row justify-content-center">
+									{/*	< div className="row justify-content-center">
 																		<div className="col-lg-4">
 																			<AutoComplete
 																				data={this.state.attributeListForSelectedObject}
@@ -3258,23 +3326,6 @@ export default class MLVGenerator extends Component {
 												}
 
 											</div>
-											{/*<div className="col-lg-1">
-																							{
-																								(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
-																									this.state[this.state.selectedObject.objectID].ifExists.attributes.map((attribute, index) => {
-																										return (
-											
-																											<Button
-																												primary={true}
-																												index={index}
-																												style={{ margin: "1em" }}
-																												onClick={this.deleteIfExistsAttribute.bind(this)}>
-																												Remove
-																						</Button>
-																										)
-																									}) : ""
-																							}
-																						</div>*/}
 
 										</div>
 										<div className="row justify-content-center">
@@ -3283,16 +3334,100 @@ export default class MLVGenerator extends Component {
 													this.state[this.state.selectedObject.objectID] != null && this.state.selectedObject.objectName != "Selected Sources" &&
 													<DropDownList
 														defaultValue={'SELECT ACTION'}
-														data={['SELECT EQACTION'].concat(Constants.ifExistsOperations)}
-														//textField='levelName'
-														//dataItemKey="id"
+														data={[{ procedureName: 'SELECT EQACTION', procedureSignature: 'SELECT EQACTION', isProcedure: false }].concat(Constants.ifExistsOperations).concat(this.state.storedProcedures)}
+														textField='procedureName'
+														dataItemKey="procedureSignature"
 														style={{ margin: "0.5em", width: '100%' }}
 														onChange={this.setIfExistsAction.bind(this)}
-														value={this.state[this.state.selectedObject.objectID].ifExists.eqAction == '' ? 'SELECT EQACTION' : this.state[this.state.selectedObject.objectID].ifExists.eqAction}
+														value={this.state[this.state.selectedObject.objectID].ifExists.eqAction.procedureName == '' ? { procedureName: 'SELECT EQACTION', procedureSignature: 'SELECT EQACTION', isProcedure: false } : this.state[this.state.selectedObject.objectID].ifExists.eqAction}
 
 													/>}
 											</div>
 										</div>
+
+										<div>
+											{
+												this.state[this.state.selectedObject.objectID] != null && this.state.selectedObject.objectName != "Selected Sources" && this.state[this.state.selectedObject.objectID].ifExists.isProcedure &&
+												<div>
+													<div className="row justify-content-center">
+														<div className="col-lg-6">
+															<select
+																multiple
+																className="form-control"
+																size={10}
+																id="totalAttributes"
+																style={{ overflowX: "scroll" }}
+															>
+																{
+
+																	(this.state[this.state.selectedObject.objectID] != null && this.state[this.state.selectedObject.objectID] && this.state.selectedObject.objectName != "Selected Sources") ?
+
+																		this.state[this.state.selectedObject.objectID].attributes.map((attribute, index) => {
+
+																			return (
+
+																				<option
+																					key={attribute.ID}
+																					id={attribute.ID}
+																					name={attribute.columnName}
+																					onDoubleClick={this.addIfExistsActionParameters.bind(this)}
+																					value={attribute.columnName}>{attribute.columnName}
+
+																				</option>
+
+																			)
+
+																		})
+
+																		: ""
+																}
+
+															</select>
+														</div>
+														<div className="col-lg-6">
+															{
+																this.state[this.state.selectedObject.objectID].ifExists.actionParameters.map((action, index) => {
+																	return (
+																		<div>
+																		<Input
+
+																			//value={action.attributeName}
+																			label={action.columnName}
+																			style={{ width: "80%", textAlign: "center", margin: '1em' }}
+
+
+																		/>
+																		<Button
+																			primary={true}
+																			index={index}
+																			style={{ margin: "1em" }}
+																			onClick={this.deleteIfExistsActionParameter.bind(this)}>
+																			Remove
+																		</Button>
+																		</div>
+																)
+																})
+															}
+														</div>
+													</div>
+
+													<div className="row justify-content-center">
+														<div className="col-lg-10">
+															<Input
+
+																value={this.state[this.state.selectedObject.objectID].ifExists.eqAction.procedureSignature}
+																label={"Signature"}
+																style={{ width: "80%", textAlign: "center", margin: '1em' }}
+
+
+															/>
+														</div>
+													</div>
+												</div>
+											}
+										</div>
+
+
 									</PanelBarItem>
 									<PanelBarItem title={<i style={{ fontSize: "14px" }}>ON ERROR</i>}>
 										<div>
@@ -3305,7 +3440,7 @@ export default class MLVGenerator extends Component {
 
 															label={'ON ERROR'}
 															style={{ width: "100%", textAlign: "center", margin: '1em' }}
-														onChange={this.editOnError.bind(this)}
+															onChange={this.editOnError.bind(this)}
 
 														/>
 													}
@@ -3646,14 +3781,38 @@ export default class MLVGenerator extends Component {
 								<div className="col-lg-12">
 
 									<textarea
-										label="MLV"
+										placeholder="MLV"
 										class="form-control rounded-0"
 										id="exampleFormControlTextarea1"
 										rows="5" value={this.state.mlv}
-										onChange={this.parseMLV.bind(this)}
+									//onChange={this.parseMLV.bind(this)}
 									>
 									</textarea>
 								</div>
+							</div>
+
+							<div className="row" style={{ marginTop: '1em' }}>
+								<div className="col-lg-12">
+
+									<textarea
+										placeholder="Parse MLV"
+										class="form-control rounded-0"
+										id="exampleFormControlTextarea1"
+										rows="5" value={this.state.useMLV}
+										onChange={this.setUserMLV.bind(this)}
+									>
+									</textarea>
+								</div>
+							</div>
+							<div className="row" style={{ marginTop: '1em' }}>
+								<div className="col-lg-6">
+
+									<Button primary={true} onClick={this.parseMLV.bind(this)}>
+
+										Parse MLV
+								</Button>
+								</div>
+
 							</div>
 							{this.props.parent != undefined &&
 								<div className="row" style={{ marginTop: '1em' }}>
@@ -3775,7 +3934,7 @@ export default class MLVGenerator extends Component {
 
 	}
 
-	generateAttributeValue(str){
+	generateAttributeValue(str) {
 
 		var arr = [];
 		var newStr = '';
@@ -3809,221 +3968,360 @@ export default class MLVGenerator extends Component {
 		console.log(arr)
 		return arr
 	}
-	parseMLV(event) {
-		var mlv = event.target.value.replace('Level', "Level".fontcolor("red"));
+	parseMLV() {
+		if (this.state.userMLV === '') {
+			alert('Nothing to parse')
+			return
+		}
+		if (this.state.baseConnection.connectionID === '') {
+			alert('Please select MLV base connection first')
+			return
+		}
+
+		try {
+			var mlv = this.state.userMLV;
 
 
-		if (event.target.value != '') {
-			var mlvState = {};
-			var selectedObjectList = new Array();
-			var mlvDetailsString = event.target.value.split('Level')[0].trim();
-			var attributeNames = mlvDetailsString.split('attributes')[1].trim().split('=')[1].trim().split(';')[0].split(',')
-			var attributeIndex = 0;
-			var levelStringsArray = event.target.value.split('Level')
-			levelStringsArray.splice(0, 1)
-			//var index = this.findClosingBracket(levelStringsArray[0].trim(),levelStringsArray[0].trim().indexOf('{'))
-			levelStringsArray.map((level, levelIndex) => {
-				// * THIS IS ENTIRE LEVEL STRING. FETCH INDEX OF LAST CLOSING CURLY BRACE AND GET SUBSTRING FROM THE OPENING AND CLOSING CURLY BRACES FOR LEVEL DETAILS
-				var levelString = level.substring(
-					level.indexOf('{') + 1, this.findClosingBracket(level, level.indexOf('{'))
-				)
+			if (mlv != '') {
+				var mlvState = {};
+				var selectedObjectList = new Array();
+				var mlvDetailsString = mlv.split('Level')[0].trim();
+				var attributeNames = mlvDetailsString.split('attributes')[1].trim().split('=')[1].trim().split(';')[0].split(',')
+				console.log('ATTRIBUTE NAMES ')
+				console.log(attributeNames)
+				var attributeIndex = 0;
+				var levelStringsArray = mlv.split('Level')
+				levelStringsArray.splice(0, 1)
+				//var index = this.findClosingBracket(levelStringsArray[0].trim(),levelStringsArray[0].trim().indexOf('{'))
+				levelStringsArray.map((level, levelIndex) => {
+					// * THIS IS ENTIRE LEVEL STRING. FETCH INDEX OF LAST CLOSING CURLY BRACE AND GET SUBSTRING FROM THE OPENING AND CLOSING CURLY BRACES FOR LEVEL DETAILS
+					var levelString = level.substring(
+						level.indexOf('{') + 1, this.findClosingBracket(level, level.indexOf('{'))
+					)
 
-				//console.log(levelString)
-				// * FETCH SOURCE_NAME FROM THE LEVEL STRING
-				var source = levelString.match(this.sourceRegex)[0].trim();
-				// * ADDING SOURCE TO SELECTED_OBJECT_LIST
-				var indexOfSource = selectedObjectList.length;
-				var objectID = indexOfSource + '_' + new Date().getTime()+levelIndex;
-				selectedObjectList.push({
-					objectName: source,
-					objectID: objectID,
-					connectionName: this.state.selectedConnection.connectionName,
-					connectionID: this.state.selectedConnection.connectionID,
-					objectList: this.state.selectedConnection.objectList
-				})
-				// * ADDIND SOURCE OBJECT TO STATE 
-				mlvState = {
-					...mlvState,
-					[objectID]: {
-						objectID: objectID,
+					//console.log(levelString)
+					// * FETCH SOURCE_NAME FROM THE LEVEL STRING
+					var source = levelString.match(this.sourceRegex)[0].trim();
+					// * ADDING SOURCE TO SELECTED_OBJECT_LIST
+					var indexOfSource = selectedObjectList.length;
+					var objectID = indexOfSource + '_' + new Date().getTime() + levelIndex;
+					selectedObjectList.push({
 						objectName: source,
-						level: indexOfSource,
-						levelExpresion: '',
-						attributes: [],
-						predicate: "",
-						fetchSize: "",
-						chunkSize: "",
-						levelWeight: -1,
-						delimiter: '',
-						groupBy: {
-							attributes: []
-						},
-						orderBy: {
+						objectID: objectID,
+						connectionName: this.state.selectedConnection.connectionName,
+						connectionID: this.state.selectedConnection.connectionID,
+						objectList: this.state.selectedConnection.objectList
+					})
+					// * ADDIND SOURCE OBJECT TO STATE 
+					mlvState = {
+						...mlvState,
+						[objectID]: {
+
+							onError: '',
+							objectID: objectID,
+							objectName: source,
+							level: indexOfSource,
+							levelExpresion: '',
 							attributes: [],
+							predicate: "",
+							fetchSize: "",
+							chunkSize: "",
+							levelWeight: -1,
+							delimiter: '',
+							groupBy: {
+								attributes: []
+							},
+							orderBy: {
+								attributes: [],
 
-						},
-						relation: {
+							},
+							relation: {
 
-							parentLevelName: '',
-							id: '',
-							level: '',
-							parentObject: '',
-							type: '',
-							native: '',
-							isRecursionTrue: false,
-							explicit: {
-								attribute: {
+								parentLevelName: '',
+								id: '',
+								level: '',
+								parentObject: '',
+								type: '',
+								native: '',
+								isRecursionTrue: false,
+								explicit: {
+									attribute: {
 
-								},
-								parentAttribute: {
-									level: '',
-									attributeIndex: ''
-								},
-								operator: {
-									operator: '',
+									},
+									parentAttribute: {
+										level: '',
+										attributeIndex: ''
+									},
+									operator: {
+										operator: '',
 
-								},
-								expression: ''
+									},
+									expression: ''
+
+								}
+
+
+							},
+							parentTo: [],
+
+							hideLevel: false,
+							connectionID: this.state.selectedConnectionID,
+
+
+						}
+					}
+					// * GET ATTRIBUTE_NAMES FROM attvalues expression
+					var attvaluesArray = this.generateAttributeNamesFromAttributeValuesString(levelString.match(this.attributeNamesRegex)[0]);
+					var attributeValuesArray = new Array();
+					attvaluesArray.map((attvalue, index) => {
+						if (attvalue.trim() != "null") {
+							//alert(source)
+							var sourceLength = source.trim().length
+							var temp = {}
+							if (attvalue.trim().substring(0, sourceLength) === source.trim() && source.trim() != '') {
+								//alert(attvalue.split(source+'.')[1])
+								//console.log(attvalue.split('.')[0].trim())
+								//console.log(source)
+								//var attributeName = this.generateAttributeValue(attvalue)[1]
+								var attributeName = attvalue.split(source + '.')[1];
+								temp = {
+									attributeName: attributeName,
+									attributeValue: source.trim() + "." + attributeName,
+									columnName: attributeNames[index],
+									ID: attributeName + '_' + new Date().getTime() + index
+								}
+
+							}
+							else {
+								var attributeName = attvalue;
+								temp = {
+									attributeName: attributeName,
+									attributeValue: attributeName,
+									columnName: attributeNames[index],
+									ID: attributeName + '_' + new Date().getTime() + index
+								}
+
+							}
+
+							attributeValuesArray.push(temp);
+							attributeIndex++;
+						}
+						else {
+							var attributeName = attvalue;
+							temp = {
+								attributeName: attributeName,
+								attributeValue: attributeName,
+								columnName: attributeNames[index],
+								ID: attributeName + '_' + new Date().getTime() + index
+							}
+
+							attributeValuesArray.push(temp);
+							attributeIndex++;
+						}
+					})
+					console.log(attributeValuesArray)
+
+
+					var delimiter = levelString.match(this.delimiterRegex)[0].trim();
+					delimiter = delimiter.substring(1, delimiter.length - 1);
+					var mlvLevelName = levelString.match(this.mlvLevelNameRegex)[0].trim();
+					var predicate = '';
+					if (levelString.search('predicate') > -1) {
+						predicate = levelString.match(this.predicateRegex)[0].trim();
+					}
+
+					// * CHECK IF RELATION IS PRESENT
+					if (levelString.search('Relation') > -1) {
+						var relationString = levelString.match(this.relationRegex)[0];
+						var relationName = relationString.match(this.relationNameRegex)[0].trim();
+						var parentLevel = relationName.split('.')[0].trim();
+						var parentIndex = parseInt(parentLevel[parentLevel.length - 1]);
+						var parentObjectID = selectedObjectList[parentIndex].objectID;
+						var isRecursionTrue = relationString.match(this.isRecursionTrueRegex)[0].trim();
+						var relationship = relationString.match(this.relationshipRegex)[0].trim();
+						console.log(relationString.match(this.relationTypeRegex));
+						var relationType = relationString.match(this.relationTypeRegex)[0].trim();
+						var relation = {
+
+						}
+						if (relationType === 'NATIVE') {
+							relation = {
+
+								parentLevelName: parentLevel,
+								id: parentIndex + 1,
+								level: parentLevel,
+								parentObject: parentObjectID,
+								type: 'native',
+								native: [relationship], // PUTTING NATIVE RELATION NAME IN ARRAY BECAUSE WE HAVE USED A MULTISELECT LIST TO DISPLAY
+								isRecursionTrue: isRecursionTrue,
+								explicit: {
+									attribute: {
+
+									},
+									parentAttribute: {
+										level: '',
+										attributeIndex: ''
+									},
+									operator: {
+										operator: '',
+
+									},
+									expression: ''
+
+								}
+
+
+							}
+						}
+						if (relationType === 'EXPLICIT') {
+							// * check for relation operator
+							var selectedOperator = '';
+							Constants.explicitRelationOperators.map((operator, index) => {
+
+								if (relationship.includes(operator)) {
+									selectedOperator = operator;
+									return
+								}
+							})
+
+							var operatorID = 0;
+							Constants.MLVOperators.map((operator, index) => {
+								if (selectedOperator === operator) {
+									operatorID = index
+									return
+								}
+							})
+
+							var relatedAttributeName = relationship.split(selectedOperator)[0].trim();
+							var relatedParentAttribute = relationship.split(selectedOperator)[1].trim();
+							var indexOfParentAttribute = relatedParentAttribute.split('.')[1].trim();
+							var relatedAttributeNameWithoutObject = relatedAttributeName.split(source + '.')[1].trim()
+							var attributeKey = '';
+							var attributeCountID = ''
+							attributeValuesArray.map((attribute, index) => {
+								if (attribute.attributeValue.trim() === relatedAttributeName) {
+									attributeKey = attribute.ID
+									attributeCountID = index
+									return;
+								}
+							})
+
+							alert(attributeKey)
+							var attribute = {
+								attributeName: relatedAttributeNameWithoutObject,
+								key: attributeKey,
+								id: attributeCountID,
+								objectID: objectID,
+								object: source
+							}
+
+							var parentAttribute = mlvState[parentObjectID].attributes[indexOfParentAttribute - 1];
+							console.log('@@@@@@@@@@@@@')
+
+							var relationParentAttribute = {
+								attributeIndex: indexOfParentAttribute,
+								attributeName: parentAttribute.attributeName,
+								object: mlvState[parentObjectID].objectName,
+								objectID: parentObjectID,
+								level: parentLevel,
+								key: parentAttribute.ID
+							}
+
+							var operator = {
+								id: operatorID,
+								operator: selectedOperator
+							}
+
+							relation = {
+
+								parentLevelName: parentLevel,
+								id: parentIndex + 1,
+								level: parentLevel,
+								parentObject: parentObjectID,
+								type: 'explicit',
+								native: '', // PUTTING NATIVE RELATION NAME IN ARRAY BECAUSE WE HAVE USED A MULTISELECT LIST TO DISPLAY
+								isRecursionTrue: false,
+								explicit: {
+									attribute: {
+										...attribute
+									},
+									parentAttribute: {
+										...relationParentAttribute
+									},
+									operator: {
+										...operator
+
+									},
+									expression: relationship
+
+								}
+
 
 							}
 
 
-						},
-						parentTo: [],
-
-						hideLevel: false,
-						connectionID: this.state.selectedConnectionID
-
-					}
-				}
-				// * GET ATTRIBUTE_NAMES FROM attvalues expression
-				var attvaluesArray = this.generateAttributeNamesFromAttributeValuesString(levelString.match(this.attributeNamesRegex)[0]);
-				var attributeValuesArray = new Array();
-				attvaluesArray.map((attvalue, index) => {
-					if (attvalue.trim() != "null") {
-						//alert(source)
-						if (attvalue.includes(source)) {
-							//alert(attvalue.split(source+'.')[1])
-							//console.log(attvalue.split('.')[0].trim())
-							//console.log(source)
-							//var attributeName = this.generateAttributeValue(attvalue)[1]
-							var attributeName = attvalue.split(source+'.')[1];
 						}
-						else
-							var attributeName = attvalue;
-						var temp = {
-							attributeName: attributeName,
-							columnName: attributeNames[index],
-							ID: attributeName + '_' + new Date().getTime()
+						// * MODIFYING PARENT_TO ARRAY OF THE PARENT AND ADDING CHILD OBJECT IN IT
+						var parentTo = mlvState[parentObjectID].parentTo;
+						parentTo.push({
+							objectName: source,
+							objectID: objectID,
+							level: indexOfSource
+						})
+
+						mlvState = {
+							...mlvState,
+							[objectID]: {
+								...mlvState[objectID],
+								relation: {
+									...relation
+								}
+							},
+							[parentObjectID]: {
+								...mlvState[parentObjectID],
+								parentTo: parentTo
+							}
 						}
-						attributeValuesArray.push(temp);
-						attributeIndex++;
-					}
-				})
-				console.log(attributeValuesArray)
-
-
-				var delimiter = levelString.match(this.delimiterRegex)[0].trim();
-
-				var mlvLevelName = levelString.match(this.mlvLevelNameRegex)[0].trim();
-				var predicate = '';
-				if (levelString.search('predicate') > -1) {
-					predicate = levelString.match(this.predicateRegex)[0].trim();
-				}
-
-				// * CHECK IF RELATION IS PRESENT
-				if (levelString.search('Relation') > -1) {
-					var relationString = levelString.match(this.relationRegex)[0];
-					var relationName = relationString.match(this.relationNameRegex)[0].trim();
-					var parentLevel = relationName.split('.')[0].trim();
-					var parentIndex = parseInt(parentLevel[parentLevel.length - 1]);
-					var parentObjectID = selectedObjectList[parentIndex].objectID;
-					var isRecursionTrue = relationString.match(this.isRecursionTrueRegex)[0].trim();
-					var relationship = relationString.match(this.relationshipRegex)[0].trim();
-					console.log(relationString.match(this.relationTypeRegex));
-					var relationType = relationString.match(this.relationTypeRegex)[0].trim();
-					var relation = {
-
-						parentLevelName: parentLevel,
-						id: parentIndex + 1,
-						level: parentLevel,
-						parentObject: parentObjectID,
-						type: relationType,
-						native: [relationship], // PUTTING NATIVE RELATION NAME IN ARRAY BECAUSE WE HAVE USED A MULTISELECT LIST TO DISPLAY
-						isRecursionTrue: false,
-						explicit: {
-							attribute: {
-
-							},
-							parentAttribute: {
-								level: '',
-								attributeIndex: ''
-							},
-							operator: {
-								operator: '',
-
-							},
-							expression: ''
-
-						}
-
-
 					}
 
-					// * MODIFYING PARENT_TO ARRAY OF THE PARENT AND ADDING CHILD OBJECT IN IT
-					var parentTo = mlvState[parentObjectID].parentTo;
-					parentTo.push({
-						objectName: source,
-						objectID: objectID,
-						level: indexOfSource
-					})
-
+					// SETTING ATTRIBUTES FOR THE OBJECT IN STATE OBJECT
 					mlvState = {
 						...mlvState,
 						[objectID]: {
 							...mlvState[objectID],
-							relation: {
-								...relation
-							}
-						},
-						[parentObjectID]: {
-							...mlvState[parentObjectID],
-							parentTo: parentTo
+							attributes: attributeValuesArray,
+							delimiter: delimiter,
+							predicate: predicate,
+							ifExists: {
+								attributes: [],
+								eqAction: ''
+							},
+							onError: ''
+
 						}
 					}
-				}
 
-				// SETTING ATTRIBUTES FOR THE OBJECT IN STATE OBJECT
+
+
+
+				})
 				mlvState = {
 					...mlvState,
-					[objectID]: {
-						...mlvState[objectID],
-						attributes: attributeValuesArray,
-						delimiter: delimiter,
-						predicate: predicate,
-						ifExists : {
-							attributes : []
-						},
-						onError : ''
-
-					}
+					selectedObjectList: selectedObjectList
 				}
-
-
-
-
-			})
-			mlvState = {
-				...mlvState,
-				selectedObjectList: selectedObjectList
+				//console.log(mlvState)
+				this.setState({
+					...this.state,
+					...mlvState,
+					mlv: mlv
+				})
+				//this.props.addMLV(mlv)
 			}
-			//console.log(mlvState)
-			this.setState({
-				...this.state,
-				...mlvState
-			})
-		}
 
+		} catch{
+
+			alert('Error while parsing MLV')
+		}
 
 	}
 

@@ -8,6 +8,7 @@ import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 import * as Constants from '../Constants.js';
 import * as helper from '../helper.js';
+import MLVGenerator from './MLVGenerator';
 
 export default class CreateBaseline extends Component {
 
@@ -22,8 +23,10 @@ export default class CreateBaseline extends Component {
 				connectionName: '',
 				connectionID: ''
 			},
+			mountMLVGenerator: false,
+			operation: 'read',
 			blurState: false,
-			resultSetCount : 0,
+			resultSetCount: 0,
 			resultsetOperation: '',
 			testCaseSummary: '',
 			testCaseDescription: '',
@@ -51,13 +54,16 @@ export default class CreateBaseline extends Component {
 			},
 			filters: {
 
+			},
+			mlvGeneratorState : {
+
 			}
 		}
 	}
-	componentWillUpdate(){
-		if(this.props.baseConnection != undefined && this.props.baseConnection.connectionID != '' && this.props.baseConnection.connectionID != this.state.baseConnection.connectionID){
+	componentWillUpdate() {
+		if (this.props.baseConnection != undefined && this.props.baseConnection.connectionID != '' && this.props.baseConnection.connectionID != this.state.baseConnection.connectionID) {
 			this.setState({
-				baseConnection : {
+				baseConnection: {
 					...this.props.baseConnection
 				}
 			})
@@ -171,12 +177,12 @@ export default class CreateBaseline extends Component {
 			alert("MLV not present")
 			return
 		}
-		if(this.state.baseConnection.connectionID === ''){
+		if (this.state.baseConnection.connectionID === '') {
 			alert('Please select base connection')
 			return
 		}
 		this.isLoading();
-		axios.post(Constants.url + 'ExecuteMLV', `MLV=${encodeURIComponent(JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter, connectionName : this.state.baseConnection.connectionName, connectionID : this.state.baseConnection.connectionID }))}`, {
+		axios.post(Constants.url + 'ExecuteMLV', `MLV=${encodeURIComponent(JSON.stringify({ mlv: this.state.mlv, filter: this.state.testFilter, connectionName: this.state.baseConnection.connectionName, connectionID: this.state.baseConnection.connectionID }))}`, {
 			headers: {
 			}
 
@@ -262,7 +268,7 @@ export default class CreateBaseline extends Component {
 				resultSetList: resultsetList,
 				showResultSet: true,
 				blurState: true,
-				resultSetCount : resultsetList.length
+				resultSetCount: resultsetList.length
 
 			})
 
@@ -316,7 +322,7 @@ export default class CreateBaseline extends Component {
 			alert('Please select baseline name')
 			return
 		}
-		if(this.state.baseConnection.connectionID === ''){
+		if (this.state.baseConnection.connectionID === '') {
 			alert('Please select base connection')
 			return
 		}
@@ -335,8 +341,8 @@ export default class CreateBaseline extends Component {
 			filters: {
 				...this.state.filters
 			},
-			connectionName : this.state.baseConnection.connectionName,
-			connectionID : this.state.baseConnection.connectionID
+			connectionName: this.state.baseConnection.connectionName,
+			connectionID: this.state.baseConnection.connectionID
 
 		}
 
@@ -362,7 +368,7 @@ export default class CreateBaseline extends Component {
 	// * METHOD TO SELECT DATA TYPE FOR FILTER GENERATION
 	selectDataType(event) {
 
-		if (this.props.mlvGeneratorState.selectedObjectList === undefined) {
+		if (this.state.mlvGeneratorState.selectedObjectList === undefined) {
 			alert('Only available if mlv is generated using generator')
 			return
 		}
@@ -374,16 +380,16 @@ export default class CreateBaseline extends Component {
 			},
 			selectedSuitableAttribute: {}
 		})
-		console.log(this.props.mlvGeneratorState)
+		console.log(this.state.mlvGeneratorState)
 		var requestData = {}
-		this.props.mlvGeneratorState.selectedObjectList.map(object => {
+		this.state.mlvGeneratorState.selectedObjectList.map(object => {
 
-			requestData[object.objectID] = this.props.mlvGeneratorState[object.objectID];
+			requestData[object.objectID] = this.state.mlvGeneratorState[object.objectID];
 
 		})
-		requestData['selectedObjectList'] = this.props.mlvGeneratorState.selectedObjectList;
-		requestData['parallelExecution'] = this.props.mlvGeneratorState.parallelExecution;
-		requestData['cache'] = this.props.mlvGeneratorState.cache;
+		requestData['selectedObjectList'] = this.state.mlvGeneratorState.selectedObjectList;
+		requestData['parallelExecution'] = this.state.mlvGeneratorState.parallelExecution;
+		requestData['cache'] = this.state.mlvGeneratorState.cache;
 		var state = {
 			...requestData,
 			dataType: {
@@ -455,7 +461,7 @@ export default class CreateBaseline extends Component {
 	// * METHOD TO EXECUTE FILTER MLVs
 	executeFilterMLVs(event) {
 
-		if(this.state.baseConnection.connectionID === ''){
+		if (this.state.baseConnection.connectionID === '') {
 			alert('Please select base connection')
 			return
 		}
@@ -464,9 +470,9 @@ export default class CreateBaseline extends Component {
 			filters: {
 				...this.state.filters
 			},
-			connectionName : this.state.baseConnection.connectionName,
-			connectionID : this.state.baseConnection.connectionID
-			
+			connectionName: this.state.baseConnection.connectionName,
+			connectionID: this.state.baseConnection.connectionID
+
 		}
 		console.log(JSON.stringify(temp));
 
@@ -523,7 +529,7 @@ export default class CreateBaseline extends Component {
 	// * METHOD TO ADD FILTERS GENERATED TO BASELINE
 
 	addFiltersGeneratedToBaseline(event) {
-		if(this.state.baseConnection.connectionID === ''){
+		if (this.state.baseConnection.connectionID === '') {
 			alert('Please select base connection')
 			return
 		}
@@ -540,9 +546,9 @@ export default class CreateBaseline extends Component {
 			viewOnView: this.state.viewOnview,
 			mlvQualification: this.state.mlvQualification,
 			selectedBaseline: this.state.selectedBaseline,
-			newBaselineName: this.state.newBaselineName,
-			connectionName : this.state.baseConnection.connectionName,
-			connectionID : this.state.baseConnection.connectionID
+			newBaselineName: this.state.newBaselineName + '.xlsx',
+			connectionName: this.state.baseConnection.connectionName,
+			connectionID: this.state.baseConnection.connectionID
 
 		}
 
@@ -559,18 +565,50 @@ export default class CreateBaseline extends Component {
 			alert("Error occured. Please follow logs")
 		})
 	}
-	setBaseConnection(event){
+	setBaseConnection(event) {
 		this.setState({
 			...this.state,
-			baseConnection : {
+			baseConnection: {
 				...event.target.value
+			}
+		})
+	}
+
+	generateMLV(event){
+		event.preventDefault();
+		if(this.state.baseConnection.connectionID === ''){
+			alert('Please select base connection first')
+			return
+		}
+		this.setState({
+			...this.state,
+			mountMLVGenerator : true
+		})
+	}
+
+	saveMLVForRead(mlv, state){
+		this.setState({
+			...this.state,
+			mlv : mlv,
+			mountMLVGenerator : false,
+			mlvGeneratorState : {
+				...state
 			}
 		})
 	}
 
 	render() {
 		console.log(this.state)
+		var mlvGenerator = this.state.mountMLVGenerator ? (
+			<MLVGenerator
+				oldState={{}}
+				parent={this.state.operation}
+				connections={this.props.connections}
+				writeConnection={this.state.baseConnection}
+				saveMLVForRead={this.saveMLVForRead.bind(this)}
 
+			/>
+		) : ''
 		var columnsElement = this.state.columnNames.map((column) => {
 
 
@@ -602,7 +640,7 @@ export default class CreateBaseline extends Component {
 			<div>
 
 				<div className="container-fluid" style={{ marginTop: "2em" }}>
-
+					{mlvGenerator}
 					<div className="col-lg-12 justify-content-center panel-wrapper" style={{ maxWidth: "100%", margin: "0 auto", filter: this.state.blurState ? "blur(40px)" : "none" }}>
 						<PanelBar >
 							<PanelBarItem title={<i style={{ fontSize: "16px" }}>Baseline Details</i>}>
@@ -683,6 +721,13 @@ export default class CreateBaseline extends Component {
 									</div>
 
 									<div className="row justify-content-center">
+										<div className="col-lg-1" style={{ margin: '1em' }}>
+											<Button
+												primary={true}
+												style={{ margin: '1em' }}
+												onClick={this.generateMLV.bind(this)}
+											>Genrate</Button>
+										</div>
 										<div className="col-lg-10">
 
 											<textarea label="MLV*" class="form-control rounded-0" id="exampleFormControlTextarea1" rows="5" value={this.state.mlv} onChange={this.addMLV.bind(this)}>
@@ -827,7 +872,7 @@ export default class CreateBaseline extends Component {
 											<DropDownList
 												style={{ margin: "1em", width: "100%" }}
 												data={this.state.suitableAttributes}
-												textField="attributeName"
+												textField="attributeValue"
 												dataItemKey="index"
 												label="Attribute To Apply Filter On"
 												value={this.state.selectedSuitableAttribute}
@@ -897,62 +942,62 @@ export default class CreateBaseline extends Component {
 					</div>
 					{loadingComponent}
 					{
-					this.state.resultSetList.length > 0 &&
-					this.state.showResultSet == true &&
+						this.state.resultSetList.length > 0 &&
+						this.state.showResultSet == true &&
 
-					<div className="fixed-bottom" style={{ width: "100%", height: '50%', position: 'absolute' }}>
-						<div className="row justify-content-right">
-							<div className='col-lg-2'>
-								<Button
-									primary={true}
-									style={{ margin: "1em" }}
-									onClick={this.decreaseIndex.bind(this)}
-								>
-									Left
+						<div className="fixed-bottom" style={{ width: "100%", height: '50%', position: 'absolute' }}>
+							<div className="row justify-content-right">
+								<div className='col-lg-2'>
+									<Button
+										primary={true}
+										style={{ margin: "1em" }}
+										onClick={this.decreaseIndex.bind(this)}
+									>
+										Left
 						</Button>
-								<Button
-									primary={true}
-									style={{ margin: "1em" }}
-									onClick={this.increaseIndex.bind(this)}
-								>
-									Right
+									<Button
+										primary={true}
+										style={{ margin: "1em" }}
+										onClick={this.increaseIndex.bind(this)}
+									>
+										Right
 						</Button>
+								</div>
+
+								<div className='col-lg-2'></div>
+								<div className='col-lg-4'>
+									<b><span style={{ color: 'rgba(0, 0, 0, 0.38)' }}>{this.state.resultsetOperation}</span></b>
+								</div>
+
+								<div className='col-lg-3'>
+									<b><span style={{ color: 'rgba(0, 0, 0, 0.38)' }}>RS Count : {this.state.resultSetCount}</span></b>
+								</div>
+
+								<div className='col-lg-1'>
+									<Button
+										primary={true}
+										style={{ margin: "1em" }}
+										onClick={this.closeResultSet.bind(this)}
+									>
+										Close
+						</Button>
+								</div>
 							</div>
 
-							<div className='col-lg-2'></div>
-							<div className='col-lg-4'>
-								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>{this.state.resultsetOperation}</span></b>
-							</div>
-
-							<div className='col-lg-3'>
-								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>RS Count : {this.state.resultSetCount}</span></b>
-							</div>
-							
-							<div className='col-lg-1'>
-								<Button
-									primary={true}
-									style={{ margin: "1em" }}
-									onClick={this.closeResultSet.bind(this)}
+							<div style={{ overflowY: "scroll" }}>
+								<Grid
+									style={{ height: "40em" }}
+									data={this.state.resultSetList}
+									resizable={true}
+									scrollable="scrollable"
 								>
-									Close
-						</Button>
+									{
+										columnsElement
+									}
+								</Grid>
 							</div>
 						</div>
-
-						<div style={{ overflowY: "scroll" }}>
-							<Grid
-								style={{ height: "40em" }}
-								data={this.state.resultSetList}
-								resizable={true}
-								scrollable="scrollable"
-							>
-								{
-									columnsElement
-								}
-							</Grid>
-						</div>
-					</div>
-				}
+					}
 				</div>
 			</div>
 

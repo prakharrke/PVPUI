@@ -1666,6 +1666,14 @@ export default class WriteBaseline extends Component {
 			alert('Please select baseline excel file')
 			return
 		}
+		if(this.state.testCaseSummary === ''){
+			alert('Please enter test case summary')
+			return
+		}
+		if(this.state.testCaseDescription === ''){
+			alert('Please enter test case Description')
+			return
+		}
 		this.setState({
 			...this.state,
 			isLoading: true

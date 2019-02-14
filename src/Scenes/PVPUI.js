@@ -16,6 +16,7 @@ import axios from 'axios';
 import Connections from './Connections'
 import * as Constants from '../Constants'	
 import Menu from '@material-ui/icons/Menu';
+import StoredProcedureDetails from './StoredProcedureDetails'
 export default class PVPUI extends Component {
 
 	constructor(props) {
@@ -439,6 +440,7 @@ export default class PVPUI extends Component {
 									<PanelBarItem title={'Read Baseline'} route="/readBaseline" />
 									<PanelBarItem title={'Write Baseline'} route="/writeBaseline" />
 									<PanelBarItem title={'Activities Baseline'} route="/activitiesBaseline" />
+									<PanelBarItem title={'Registered Stored Procedures'} route="/storedprocedures" />
 									<PanelBarItem title={'Connections'} route="/connections" />
 									<PanelBarItem title={'Settings'} route="/settings" />
 								</PanelBar>
@@ -490,6 +492,15 @@ export default class PVPUI extends Component {
 									connections={this.state.connections}
 									addConnection={this.addConnection.bind(this)}
 									deleteConnection={this.deleteConnection.bind(this)}
+									/>
+								)
+							}} />
+							<Route path='/storedprocedures' render={props => {
+								return (<StoredProcedureDetails 
+									
+									isLoading={this.isLoading.bind(this)} 
+									isNotLoading={this.isNotLoading.bind(this)}
+									connections={this.state.connections}
 									/>
 								)
 							}} />
