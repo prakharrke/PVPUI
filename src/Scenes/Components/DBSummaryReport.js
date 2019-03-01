@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import {
 	Chart,
 	ChartTitle,
+	ChartTooltip,
 	ChartSeries,
 	ChartSeriesItem,
 	ChartCategoryAxis,
+	ChartSeriesItemTooltip,
 	ChartCategoryAxisItem,
 	Sparkline,
 } from '@progress/kendo-react-charts';
@@ -24,8 +26,14 @@ export default class DBSummaryReport extends Component {
 						<Chart >
 							<ChartTitle text={dataObject.connectionName} />
 
+							<ChartTooltip />
 							<ChartSeries>
-								<ChartSeriesItem type="line" data={dataObject.data} />
+								<ChartSeriesItem type="line" data={dataObject.data}  >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
+								<ChartSeriesItem type="line" data={dataObject.writeData} >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
 
 							</ChartSeries>
 						</Chart>

@@ -336,7 +336,7 @@ export default class MLVGenerator extends Component {
 				objectID: newObjectID,
 				objectName: event.target.value,
 				level: indexOfNewObject,
-				attributes: [{ attributeName: '', columnName: 'ID', attributeValue: '', ID: 'ID' }, { attributeName: '', columnName: 'PID', attributeValue: '', ID: 'PID' }, { attributeName: '', columnName: 'LEV', attributeValue: '', ID: 'LEV' }],
+				attributes: [{ attributeName: 'null', columnName: 'ID', attributeValue: 'null', ID: 'ID' }, { attributeName: 'null', columnName: 'PID', attributeValue: 'null', ID: 'PID' }, { attributeName: 'null', columnName: 'LEV', attributeValue: 'null', ID: 'LEV' }],
 				predicate: "",
 				fetchSize: "",
 				chunkSize: "",
@@ -1273,7 +1273,7 @@ export default class MLVGenerator extends Component {
 				//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 				columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
 				attributeName: event.target.value,
-				attributeValue: `${this.state.selectedObject.objectName}.${event.target.value}`,
+				attributeValue: this.state.attributeListForSelectedObject.includes(event.target.value) ?`${this.state.selectedObject.objectName}.${event.target.value}` : event.target.value,
 				ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
 				customColumnName: false
 			}

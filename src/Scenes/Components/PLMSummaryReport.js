@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import {
 	Chart,
 	ChartTitle,
+	ChartTooltip,
 	ChartSeries,
 	ChartSeriesItem,
 	ChartCategoryAxis,
 	ChartCategoryAxisItem,
+	ChartSeriesItemTooltip,
 	Sparkline,
 } from '@progress/kendo-react-charts';
 export default class PLMSummaryReport extends Component {
@@ -24,9 +26,14 @@ export default class PLMSummaryReport extends Component {
 					<div className="col-lg-2" style={{ margin: "1em" }}>
 						<Chart >
 							<ChartTitle text={dataObject.connectionName} />
-
+							<ChartTooltip />
 							<ChartSeries>
-								<ChartSeriesItem type="line" data={dataObject.data} />
+								<ChartSeriesItem type="line" data={dataObject.data}  >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
+								<ChartSeriesItem type="line" data={dataObject.writeData} >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
 
 							</ChartSeries>
 						</Chart>
@@ -35,11 +42,11 @@ export default class PLMSummaryReport extends Component {
 				)
 			})
 		)
-		return(
+		return (
 			<div className="row">
 				{graphs}
 			</div>
-			)
+		)
 	}
 
 }

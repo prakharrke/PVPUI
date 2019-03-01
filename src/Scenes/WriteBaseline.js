@@ -27,6 +27,8 @@ export default class WriteBaseline extends Component {
 		} else {
 			this.state = {
 				insertState: {},
+				loadedTestCases: [],
+				loadSelectedTestCase: {},
 				blurState: false,
 				writeConnection: { connectionName: '', connectionID: '' },
 				fetchFromAnotherSourceConnection: { connectionName: '', connectionID: '' },
@@ -101,7 +103,7 @@ export default class WriteBaseline extends Component {
 				bulkInsertFlag: false,
 				selectedBaseline: '',
 				newBaselineName: '',
-				resultSetCount : 0
+				resultSetCount: 0
 
 
 			}
@@ -141,7 +143,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLV(operation) {
-		if(operation === 'fetchFromAnotherSource' && this.state.fetchFromAnotherSourceConnection.connectionID === ''){
+		if (operation === 'fetchFromAnotherSource' && this.state.fetchFromAnotherSourceConnection.connectionID === '') {
 			alert('Please select Fetch From Another Source Connection')
 			return
 		}
@@ -842,7 +844,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLVFetchFromAnotherSourceForUpdate(operation) {
-		if(this.state.fetchFromAnotherSourceConnection.connectionID === ''){
+		if (this.state.fetchFromAnotherSourceConnection.connectionID === '') {
 			alert('Select Fetch From Another Source Connection')
 			return
 		}
@@ -1227,7 +1229,7 @@ export default class WriteBaseline extends Component {
 		})
 	}
 	generateMLVFetchFromAnotherSourceForDelete(operation) {
-		if(this.state.fetchFromAnotherSourceConnection.connectionID === ''){
+		if (this.state.fetchFromAnotherSourceConnection.connectionID === '') {
 			alert('Please select Fetch From Another Source Connection')
 			return
 		}
@@ -1650,6 +1652,21 @@ export default class WriteBaseline extends Component {
 		this.setState({
 			selectedBaseline: event.target.value
 		})
+
+		axios.post(constants.url + 'LoadWriteBaseline', 'baselineDetails=' + (encodeURIComponent(JSON.stringify({ baselineName: event.target.value }))), {
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+
+
+		}).then(response => {
+			console.log(response.data.testCases)
+			this.setState({
+				...this.state,
+				loadedTestCases: response.data.testCases
+			})
+		})
+
 	}
 
 	addNewBaseline(event) {
@@ -1666,11 +1683,11 @@ export default class WriteBaseline extends Component {
 			alert('Please select baseline excel file')
 			return
 		}
-		if(this.state.testCaseSummary === ''){
+		if (this.state.testCaseSummary === '') {
 			alert('Please enter test case summary')
 			return
 		}
-		if(this.state.testCaseDescription === ''){
+		if (this.state.testCaseDescription === '') {
 			alert('Please enter test case Description')
 			return
 		}
@@ -1815,7 +1832,7 @@ export default class WriteBaseline extends Component {
 				resultSetList: resultsetList,
 				showResultSet: true,
 				blurState: true,
-				resultSetCount : resultsetList.length
+				resultSetCount: resultsetList.length
 
 			})
 
@@ -1858,6 +1875,229 @@ export default class WriteBaseline extends Component {
 				connectionName: connectionName
 			}
 		})
+	}
+
+	loadSelectedTestCase(event) {
+
+		this.setState({
+			loadSelectedTestCase: event.target.value
+		})
+
+		axios.post(constants.url + 'LoadSelectedWriteTestCase', `testCaseDetails=${JSON.stringify({ baselineName: this.state.selectedBaseline, testCase: event.target.value })}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+			console.log(response.data)
+			this.loadSelectedTestCaseInsert(response.data)
+			this.setState({
+				...this.state,
+				loadSelectedTestCase: event.target.value
+			})
+		})
+
+	}
+
+	loadSelectedTestCaseInsert(testCaseDetails) {
+		var insertMLVArray = testCaseDetails.insertMLV.split('||');
+
+		var insertIDArray = testCaseDetails.insertID.split('||');
+		var insertPIDArray = testCaseDetails.insertPID.split('||');
+		var insertLEVArray = testCaseDetails.insertLEV.split('||');
+		var insertPINColumnArray = testCaseDetails.insertPINColumn.split('||');
+
+		var insertColumnsArray = testCaseDetails.insertColumns.split('||');
+		var insertValuesArray = testCaseDetails.insertValues.split('||');
+
+		var insertRSFlag = testCaseDetails.insertRSFlag;
+		var bulkInsertFlag = testCaseDetails.bulkInsertFlag;
+		var fetchFromAnotherSourceForInsertFlag = testCaseDetails.fetchFromAnotherSourceForInsertFlag;
+
+		var fetchFromAnotherSourceForInsertMLV = testCaseDetails.fetchFromAnotherSourceForInsertMLV;
+		var fetchFromAnotherSourceForInsertFilter = testCaseDetails.fetchFromAnotherSourceForInsertFilter;
+
+		var insertSelectMLV = testCaseDetails.insertSelectMLV;
+		var insertSelectFilter = testCaseDetails.insertSelectFilter;
+
+		var newInsertMLVsArray = new Array();
+		insertMLVArray.map((mlv, index) => {
+
+			var insertMLV = {
+				mlv: mlv.trim(),
+				index: index,
+				ID: insertIDArray[index].trim(),
+				PID: insertPIDArray[index].trim(),
+				LEV: insertLEVArray[index].trim(),
+				PIN: insertPINColumnArray[index].trim(),
+				values: [[]],
+				attributes: mlv != '' ? (mlv.split('attributes=')[1].split(';')[0].split(',')) : new Array()
+			}
+
+			// * SETTING VALUES
+
+			var currentColumns = insertColumnsArray[index].trim();
+			currentColumns = currentColumns.substring(1, currentColumns.length - 1)
+			console.log('current columns ' + currentColumns);
+
+
+			var currentValues = insertValuesArray[index].trim();
+			currentValues = currentValues.substring(1, currentValues.length - 1);
+			console.log('current column values' + currentValues);
+
+			//alert('arrayLength ' + arrayLength)
+			var currentColumnsArray = currentColumns.split(',');
+			var currentColumnLength = currentColumnsArray.length;
+			this.splitValues(currentValues);
+			//var currentValuesArray = currentValues.split(',');
+			var currentValuesArray = this.splitValues(currentValues);
+			var currentValuesLength = currentValuesArray.length;
+
+			var arrayLength = currentValuesLength / currentColumnLength;
+			alert('arrayLength ' + arrayLength)
+
+			var valuesArray = new Array();
+			for (var i = 0; i < arrayLength; i++) {
+				var valueArray = new Array();
+				for (var j = 0; j < currentColumnsArray.length; j++) {
+					//alert(currentColumnsArray[j])
+					var value = {
+						attributeName: currentColumnsArray[j].trim(),
+						value: currentValuesArray[i * currentColumnLength + j]
+					}
+
+					valueArray.push(value)
+				}
+
+				valuesArray.push(valueArray)
+			}
+
+			insertMLV.values = valuesArray;
+
+			newInsertMLVsArray.push(insertMLV)
+
+		})
+
+		this.setState({
+			...this.state,
+			insertMLVs: {
+				...this.state.insertMLVs,
+				insertMLVArray: newInsertMLVsArray
+			},
+			fetchFromAnotherSourceForInsertFlag: fetchFromAnotherSourceForInsertFlag,
+			rsInsertFlag: false,
+			bulkInsertFlag: false,
+			fetchFromAnotherSourceForInsert: {
+				mlv: fetchFromAnotherSourceForInsertMLV.trim(),
+				attributes: fetchFromAnotherSourceForInsertMLV != '' ? (fetchFromAnotherSourceForInsertMLV.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+				filter: fetchFromAnotherSourceForInsertFilter,
+				selectedPlugin: ''
+			},
+
+			fetchMLVForinsert: {
+				mlv: insertSelectMLV,
+				filter: insertSelectFilter,
+				attributes: insertSelectMLV != '' ? (insertSelectMLV.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+				selectedPlugin: ''
+			},
+
+
+		})
+
+
+	}
+
+	loadSelectedTestCaseUpdate(testCaseDetails) {
+
+	}
+
+	loadSelectedTestCaseDelete(testCaseDetails) {
+
+	}
+
+	loadSelectedTestCaseDeleteAll(testCaseDetails) {
+
+	}
+
+	splitValues(values) {
+
+		var quotesClosed = true;
+		var parentQuoteType = '';
+		var valueAdded = true;
+		var valuesArray = new Array();
+		var parentQuoteCount = 0;
+		var newVal = '';
+		var bCount = 0;
+		for (var i = 0; i < values.length; i++) {
+			var character = values[i];
+
+			if (valueAdded) {
+				//alert(character)
+				if (character == '"'){
+					parentQuoteType = '"';
+					//alert('parentQuote ' + parentQuoteType)
+				}else {
+				if (character == "'"){
+
+					parentQuoteType = "'";
+					//alert('parentQuote ' + parentQuoteType)
+				}else
+					parentQuoteType = "";
+			}
+				
+
+				valueAdded = false;
+			}
+
+			if (character != ',')
+				newVal = newVal + character;
+			else{
+				//alert('comma')
+					//alert(character)
+					//alert(parentQuoteCount)
+				if (parentQuoteCount % 2 != 0 || bCount !=0){
+					//alert('comma')
+					//alert(character)
+					//alert(parentQuoteCount)
+					newVal = newVal + character;
+				}
+			}
+			//alert('before char comp')
+			//alert(character)
+			//alert(parentQuoteType)
+			if (character == parentQuoteType && bCount == 0) {
+				//alert('character == parentQuote')
+				if (i > 0) {
+					if (values[i - 1] != '\\')
+						parentQuoteCount++;
+				} else {
+					parentQuoteCount++;
+				}
+			}
+
+			if (character == '(')
+				bCount++;
+			if (character == ')')
+				bCount--;
+
+			if (character === ',' && parentQuoteCount % 2 == 0 && bCount == 0) {
+				valuesArray.push(newVal);
+				newVal = '';
+				valueAdded = true;
+				parentQuoteType = '';
+				parentQuoteCount = 0;
+			}
+
+			if (i == values.length - 1)
+				valuesArray.push(newVal)
+
+
+
+		}
+
+		console.log('NEW VALUES GENERATED !!!!!')
+		console.log(valuesArray)
+		return valuesArray
 	}
 
 	componentWillUnmount() {
@@ -2020,6 +2260,15 @@ export default class WriteBaseline extends Component {
 								onChange={this.selectBaseline.bind(this)}
 								value={this.state.selectedBaseline}
 							/>
+							<DropDownList
+								style={{ margin: "1em", width: "100%" }}
+								data={this.state.loadedTestCases}
+								label="Load Test Case"
+								textField='testCaseLabel'
+								dataItemKey='testCaseNo'
+								onChange={this.loadSelectedTestCase.bind(this)}
+								value={this.state.loadSelectedTestCase}
+							/>
 							<Input
 
 								label="Add a new baseline instead.."
@@ -2031,6 +2280,7 @@ export default class WriteBaseline extends Component {
 
 
 						</div>
+
 
 
 
@@ -2237,13 +2487,13 @@ export default class WriteBaseline extends Component {
 
 							<div className='col-lg-2'></div>
 							<div className='col-lg-4'>
-								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>{this.state.resultsetOperation}</span></b>
+								<b><span style={{ color: 'rgba(0, 0, 0, 0.38)' }}>{this.state.resultsetOperation}</span></b>
 							</div>
 
 							<div className='col-lg-3'>
-								<b><span style={{color : 'rgba(0, 0, 0, 0.38)'}}>RS Count : {this.state.resultSetCount}</span></b>
+								<b><span style={{ color: 'rgba(0, 0, 0, 0.38)' }}>RS Count : {this.state.resultSetCount}</span></b>
 							</div>
-							
+
 							<div className='col-lg-1'>
 								<Button
 									primary={true}

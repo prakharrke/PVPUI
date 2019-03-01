@@ -3,7 +3,9 @@ import {
 	Chart,
 	ChartTitle,
 	ChartSeries,
+	ChartTooltip,
 	ChartSeriesItem,
+	ChartSeriesItemTooltip,
 	ChartCategoryAxis,
 	ChartCategoryAxisItem,
 	Sparkline,
@@ -25,8 +27,14 @@ export default class OthersSummaryReport extends Component {
 						<Chart >
 							<ChartTitle text={dataObject.connectionName} />
 
+							<ChartTooltip />
 							<ChartSeries>
-								<ChartSeriesItem type="line" data={dataObject.data} />
+								<ChartSeriesItem type="line" data={dataObject.data}  >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
+								<ChartSeriesItem type="line" data={dataObject.writeData} >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
 
 							</ChartSeries>
 						</Chart>

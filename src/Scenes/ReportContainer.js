@@ -56,7 +56,7 @@ export default class ReportContainer extends Component {
 		fromDate.setSeconds(0)
 		fromDate.setMilliseconds(0)
 		var categoriesLocal = [];
-		for (var i = 0; i < 7; i++) {
+		for (var i = 0; i <= 7; i++) {
 			var tempDate = new Date(fromDate);
 			var newDate = fromDate.getDate();
 			tempDate.setDate(newDate + i);
@@ -73,7 +73,7 @@ export default class ReportContainer extends Component {
 
 		}).then((response) => {
 
-			//console.log(response.data)
+			console.log(response.data)
 			var graphReportData = response.data;
 			var graphNewData = new Array();
 			var categories = new Array();
@@ -83,8 +83,8 @@ export default class ReportContainer extends Component {
 				var timeStamp = new Date(reportObject.timeStamp);
 				var runHour = timeStamp.getHours();
 				var runDate = new Date();
-
-				if (runHour > 19) {
+	// *  CHANGED HERE FROM 19 TO 8 TO TEST
+				if (runHour > 8) {
 					runDate.setDate(timeStamp.getDate());
 					runDate.setMonth(timeStamp.getMonth());
 					runDate.setFullYear(timeStamp.getFullYear());
@@ -125,9 +125,11 @@ export default class ReportContainer extends Component {
 				object.items.map(runDateObject => {
 
 					var runDate = runDateObject.value
-					var sum = aggregateBy(runDateObject.items, [{ field: 'readFail', aggregate: 'sum' }, { field: 'readPass', aggregate: 'sum' }])
+					var sum = aggregateBy(runDateObject.items, [{ field: 'readFail', aggregate: 'sum' }, { field: 'readPass', aggregate: 'sum' }, { field: 'writeFail', aggregate: 'sum' }, { field: 'writePass', aggregate: 'sum' }])
 					runDateObject.readFailCount = sum.readFail;
 					runDateObject.readPassCount = sum.readPass;
+					runDateObject.writeFailCount = sum.writePass;
+					runDateObject.writePassCount = sum.writePass;
 				})
 			})
 
@@ -138,6 +140,7 @@ export default class ReportContainer extends Component {
 				var temp = {};
 				temp.connectionName = connectionObject.value;
 				temp.data = [];
+				temp.writeData = [];
 				temp.categories = [];
 
 				this.categories.map(runDate => {
@@ -146,10 +149,12 @@ export default class ReportContainer extends Component {
 					if (index === -1) {
 
 						temp.data.push(0)
+						temp.writeData.push(0)
 					}
 					else {
 
 						temp.data.push(connectionObject.items[index].readPassCount.sum)
+						temp.writeData.push(connectionObject.items[index].writePassCount.sum)
 					}
 				})
 
@@ -157,8 +162,8 @@ export default class ReportContainer extends Component {
 
 
 				finalGraphData.push(temp)
-				//console.log('CHECK')
-				//console.log(finalGraphData)
+				console.log('CHECK')
+				console.log(finalGraphData)
 
 			})
 			var PLM = new Array();

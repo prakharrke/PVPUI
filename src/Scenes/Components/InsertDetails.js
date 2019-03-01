@@ -10,8 +10,30 @@ export default class InsertDetails extends Component {
 		this.state = {
 			...this.props.insertState,
 			fetchFromAnotherSource: false,
-			rawData: true,
+			rawData: false,
 
+		}
+	}
+	componentWillUpdate(){
+
+		if(this.props.insertMLVArray.length > 0){
+			var temp = {}
+			var updated = false;
+			for(var i=0;i<this.props.insertMLVArray.length; i++){
+				if(this.state[`attributeGroupIndex_${i}`] != undefined)
+					continue;
+				else{
+					updated = true;
+					temp[`attributeGroupIndex_${i}`] = 0;
+				}
+			}
+
+			if(updated){
+				this.setState({
+					...this.state,
+					...temp
+				})
+			}
 		}
 	}
 	toggleFetchFromAnotherSource(event) {
