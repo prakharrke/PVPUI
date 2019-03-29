@@ -110,7 +110,7 @@ export default class ReportContainer extends Component {
 
 			})
 
-			var groupedGraphData = groupBy(graphNewData, [{ field: "connectionName" }, { field: "runDate" }]);
+			var groupedGraphData = groupBy(graphNewData, [{ field: "pluginName" }, { field: "runDate" }]);
 			//console.log(groupedGraphData)
 			var connectionNamesArray = new Array();
 			groupedGraphData.map(object => {
@@ -125,11 +125,12 @@ export default class ReportContainer extends Component {
 				object.items.map(runDateObject => {
 
 					var runDate = runDateObject.value
-					var sum = aggregateBy(runDateObject.items, [{ field: 'readFail', aggregate: 'sum' }, { field: 'readPass', aggregate: 'sum' }, { field: 'writeFail', aggregate: 'sum' }, { field: 'writePass', aggregate: 'sum' }])
+					var sum = aggregateBy(runDateObject.items, [{ field: 'readFail', aggregate: 'sum' }, { field: 'readPass', aggregate: 'sum' }, { field: 'writeFail', aggregate: 'sum' }, { field: 'writePass', aggregate: 'sum' }, { field: 'activityFail', aggregate: 'sum' }, { field: 'activityPass', aggregate: 'sum' }])
 					runDateObject.readFailCount = sum.readFail;
 					runDateObject.readPassCount = sum.readPass;
 					runDateObject.writeFailCount = sum.writePass;
 					runDateObject.writePassCount = sum.writePass;
+					runDateObject.activityPassCount = sum.activityPass;
 				})
 			})
 
@@ -141,6 +142,7 @@ export default class ReportContainer extends Component {
 				temp.connectionName = connectionObject.value;
 				temp.data = [];
 				temp.writeData = [];
+				temp.activityData = [];
 				temp.categories = [];
 
 				this.categories.map(runDate => {
@@ -150,11 +152,13 @@ export default class ReportContainer extends Component {
 
 						temp.data.push(0)
 						temp.writeData.push(0)
+						temp.activityData.push(0)
 					}
 					else {
 
 						temp.data.push(connectionObject.items[index].readPassCount.sum)
 						temp.writeData.push(connectionObject.items[index].writePassCount.sum)
+						temp.activityData.push(connectionObject.items[index].activityPassCount.sum)
 					}
 				})
 
@@ -287,6 +291,14 @@ export default class ReportContainer extends Component {
 
 						}}><Button primary={true} style={{ color: 'black' }}>Detailed Report</Button></NavLink>
 
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-lg-3" style={{margin : '2em'}}>
+						
+						<h6 style={{color : 'rgb(67, 160, 71)'}}>Activities</h6>
+						<h6 style={{color : 'rgb(33, 150, 243)'}}>CRUD</h6>
+						<h6 style={{color : 'rgb(63, 81, 181)'}}>Read</h6>
 					</div>
 				</div>
 				<div className="row">

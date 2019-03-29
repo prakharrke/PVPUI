@@ -14,11 +14,15 @@ import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { BrowserRouter, Route, Router, HashRouter, Redirect } from 'react-router-dom';
 import axios from 'axios';
 import * as constants from '../Constants'
+import $ from 'jquery';
+import '@progress/kendo-ui';
+import { Notification, Tooltip } from '@progress/kendo-popups-react-wrapper';
 export default class WriteBaseline extends Component {
 	resultSetListIndex = 0;
 	listOfResultSetList = new Array()
 	constructor(props) {
 		super(props);
+		this.showPopUpNotification = this.showPopUpNotification.bind(this);
 		if (Object.keys(this.props.writeBaselineState).length != 0) {
 
 			this.state = {
@@ -28,7 +32,7 @@ export default class WriteBaseline extends Component {
 			this.state = {
 				insertState: {},
 				loadedTestCases: [],
-				loadSelectedTestCase: {},
+				loadSelectedTestCase: {testCaseNo : '', testCaseSummary : ''},
 				blurState: false,
 				writeConnection: { connectionName: '', connectionID: '' },
 				fetchFromAnotherSourceConnection: { connectionName: '', connectionID: '' },
@@ -57,13 +61,23 @@ export default class WriteBaseline extends Component {
 					mlv: '',
 					attributes: [],
 					filter: '',
+					ID : '',
+					PID : '',
+					LEV : '',
+					PIN : '',
 					selectedPlugin: ''
 				},
 				fetchFromAnotherSourceForDelete: {
 					mlv: '',
 					attributes: [],
 					filter: '',
-					selectedPlugin: ''
+					selectedPlugin: '',
+					ID : '',
+					PID : '',
+					LEV : '',
+					PIN : '',
+					MLVLEFTOBJ : '',
+					MLVRIGHTOBJ : ''
 				},
 				insertMLVs: {
 					currentIndex: 0,
@@ -103,7 +117,8 @@ export default class WriteBaseline extends Component {
 				bulkInsertFlag: false,
 				selectedBaseline: '',
 				newBaselineName: '',
-				resultSetCount: 0
+				resultSetCount: 0,
+				overWrite : false
 
 
 			}
@@ -1078,47 +1093,40 @@ export default class WriteBaseline extends Component {
 		})
 
 	}
-	setIDForUpdate(index, value) {
-		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
-		updateMLVArray[index].ID = value
+	setIDForUpdate(value) {
+		
 		this.setState({
 			...this.state,
-			updateMLVs: {
-				...this.state.updateMLVs,
-				updateMLVArray: updateMLVArray
+			fetchFromAnotherSourceForUpdate : {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				ID : value
 			}
 		})
 	}
-	setPIDForUpdate(index, value) {
-		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
-		updateMLVArray[index].PID = value
+	setPIDForUpdate(value) {
 		this.setState({
 			...this.state,
-			updateMLVs: {
-				...this.state.updateMLVs,
-				updateMLVArray: updateMLVArray
+			fetchFromAnotherSourceForUpdate : {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				PID : value
 			}
 		})
 	}
-	setLEVForUpdate(index, value) {
-		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
-		updateMLVArray[index].LEV = value
+	setLEVForUpdate(value) {
 		this.setState({
 			...this.state,
-			updateMLVs: {
-				...this.state.updateMLVs,
-				updateMLVArray: updateMLVArray
+			fetchFromAnotherSourceForUpdate : {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				LEV : value
 			}
 		})
 	}
-	setPINForUpdate(index, value) {
-		var updateMLVArray = this.state.updateMLVs.updateMLVArray;
-		updateMLVArray[index].PIN = value
+	setPINForUpdate(value) {
 		this.setState({
 			...this.state,
-			updateMLVs: {
-				...this.state.updateMLVs,
-				updateMLVArray: updateMLVArray
+			fetchFromAnotherSourceForUpdate : {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				PIN : value
 			}
 		})
 	}
@@ -1296,6 +1304,46 @@ export default class WriteBaseline extends Component {
 			}
 		})
 	}
+
+	setIDForDelete(value){
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDelete : {
+				...this.state.fetchFromAnotherSourceForDelete,
+				ID : value
+			}
+		})
+	}
+
+	setPIDForDelete(value){
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDelete : {
+				...this.state.fetchFromAnotherSourceForDelete,
+				PID : value
+			}
+		})
+	}
+
+	setLEVForDelete(value){
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDelete : {
+				...this.state.fetchFromAnotherSourceForDelete,
+				LEV : value
+			}
+		})
+	}
+	setPINForDelete(value){
+		this.setState({
+			...this.state,
+			fetchFromAnotherSourceForDelete : {
+				...this.state.fetchFromAnotherSourceForDelete,
+				PIN : value
+			}
+		})
+	}
+
 	// * METHOD TO ADD EMPTY DELETE_MLV
 	addDeleteMLV() {
 		var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
@@ -1340,6 +1388,8 @@ export default class WriteBaseline extends Component {
 			operation: 'deleteMLV'
 		})
 	}
+
+
 	saveDeleteMLV(mlv, index) {
 		if (index === undefined) {
 			var deleteMLVArray = this.state.deleteMLVs.deleteMLVArray;
@@ -1663,7 +1713,8 @@ export default class WriteBaseline extends Component {
 			console.log(response.data.testCases)
 			this.setState({
 				...this.state,
-				loadedTestCases: response.data.testCases
+				loadedTestCases: response.data.testCases,
+				newBaselineName : ''
 			})
 		})
 
@@ -1708,14 +1759,16 @@ export default class WriteBaseline extends Component {
 
 		}).then(response => {
 			this.props.isNotLoading();
-			alert(response.data)
+			//alert(response.data)
+			this.showPopUpNotification("Baseline Generated", "success");
 			this.setState({
 				...this.state,
 				isLoading: false
 			})
 		}).catch(error => {
 			this.props.isNotLoading();
-			alert(error)
+			//alert(error)
+			this.showPopUpNotification("Baseline Generation Failed", "error");
 			this.setState({
 				...this.state,
 				isLoading: false
@@ -1758,7 +1811,6 @@ export default class WriteBaseline extends Component {
 			blurState: false
 		})
 	}
-
 	computeResultSet(response) {
 
 
@@ -1772,16 +1824,18 @@ export default class WriteBaseline extends Component {
 			//alert(response.length)
 
 			var parsed = JSON.parse(response);
-
+			console.log(parsed)
 			// columnsNames array to hold decoded keys (columns in resultset)
-
+			var resultsetOperation = JSON.parse(parsed[0]).operation;
+			
+			if(JSON.parse(parsed[0]).columnNames.length > 0){
 			var columnNames = new Array();
 
 
 
 			//var keys = Object.keys(parsed[0]);
 			columnNames = JSON.parse(parsed[0]).columnNames;
-			var resultsetOperation = JSON.parse(parsed[0]).operation;
+			
 			// populating columnNames array by decoding every element of keys array
 
 			/*for (var i = 0; i < keys.length; i++) {
@@ -1825,24 +1879,25 @@ export default class WriteBaseline extends Component {
 			console.log(resultsetList);
 
 			//this.isNotLoading();
+			}
 			this.setState({
 				...this.state,
-				columnNames: JSON.parse(parsed[0]).columnNames,
-				resultsetOperation: resultsetOperation,
-				resultSetList: resultsetList,
+				columnNames: JSON.parse(parsed[0]).columnNames.length > 0 ? JSON.parse(parsed[0]).columnNames: ['defaultColumn'],
+				resultsetOperation:   resultsetOperation ,
+				resultSetList: JSON.parse(parsed[0]).columnNames.length > 0 ? resultsetList : [{defaultColumn : 'Empty resultset'}],
 				showResultSet: true,
 				blurState: true,
-				resultSetCount: resultsetList.length
+				resultSetCount: JSON.parse(parsed[0]).columnNames.length > 0 ? resultsetList.length : 0
 
 			})
 
 		} catch{
 			//this.isNotLoading();
-			alert("Error occurred while executing MLV.")
+			alert("Emtpy result set")
+
 		}
 
 	}
-
 	toggleDialog(event) {
 		if (this.state.showConnectionSelectionDialog) {
 			if (this.state.writeConnection === '') {
@@ -1891,6 +1946,9 @@ export default class WriteBaseline extends Component {
 		}).then(response => {
 			console.log(response.data)
 			this.loadSelectedTestCaseInsert(response.data)
+			this.loadSelectedTestCaseUpdate(response.data)
+			this.loadSelectedTestCaseDelete(response.data)
+			this.loadSelectedTestCaseDeleteAll(response.data)
 			this.setState({
 				...this.state,
 				loadSelectedTestCase: event.target.value
@@ -1902,10 +1960,14 @@ export default class WriteBaseline extends Component {
 	loadSelectedTestCaseInsert(testCaseDetails) {
 		var insertMLVArray = testCaseDetails.insertMLV.split('||');
 
-		var insertIDArray = testCaseDetails.insertID.split('||');
-		var insertPIDArray = testCaseDetails.insertPID.split('||');
-		var insertLEVArray = testCaseDetails.insertLEV.split('||');
-		var insertPINColumnArray = testCaseDetails.insertPINColumn.split('||');
+		
+		var insertIDArray = testCaseDetails.insertID.split('||').length > 0 ? testCaseDetails.insertID.split('||') : new Array() ;
+		
+		var insertPIDArray = testCaseDetails.insertPID.split('||').length > 0 ? testCaseDetails.insertPID.split('||') : new Array() ;
+		
+		var insertLEVArray = testCaseDetails.insertLEV.split('||').length > 0 ? testCaseDetails.insertLEV.split('||') : new Array();
+		
+		var insertPINColumnArray = testCaseDetails.insertPINColumn.split('||').length > 0 ? testCaseDetails.insertPINColumn.split('||') : new Array();
 
 		var insertColumnsArray = testCaseDetails.insertColumns.split('||');
 		var insertValuesArray = testCaseDetails.insertValues.split('||');
@@ -1922,17 +1984,19 @@ export default class WriteBaseline extends Component {
 
 		var newInsertMLVsArray = new Array();
 		insertMLVArray.map((mlv, index) => {
-
+			
 			var insertMLV = {
 				mlv: mlv.trim(),
 				index: index,
-				ID: insertIDArray[index].trim(),
-				PID: insertPIDArray[index].trim(),
-				LEV: insertLEVArray[index].trim(),
-				PIN: insertPINColumnArray[index].trim(),
+				ID: insertIDArray[index] != undefined ? insertIDArray[index] : '',
+				PID: insertPIDArray[index] != undefined ? insertPIDArray[index] : '',
+				LEV: insertLEVArray[index] != undefined ? insertLEVArray[index] : '',
+				PIN: insertPINColumnArray[index] != undefined ? insertPINColumnArray[index] : '',
 				values: [[]],
 				attributes: mlv != '' ? (mlv.split('attributes=')[1].split(';')[0].split(',')) : new Array()
 			}
+			console.log('%%%%%%%%%%')
+			console.log(insertMLV)
 
 			// * SETTING VALUES
 
@@ -1954,9 +2018,12 @@ export default class WriteBaseline extends Component {
 			var currentValuesLength = currentValuesArray.length;
 
 			var arrayLength = currentValuesLength / currentColumnLength;
-			alert('arrayLength ' + arrayLength)
+			//alert('arrayLength ' + arrayLength)
 
 			var valuesArray = new Array();
+			if(arrayLength == 0)
+				valuesArray.push(new Array());
+
 			for (var i = 0; i < arrayLength; i++) {
 				var valueArray = new Array();
 				for (var j = 0; j < currentColumnsArray.length; j++) {
@@ -2009,14 +2076,191 @@ export default class WriteBaseline extends Component {
 
 	loadSelectedTestCaseUpdate(testCaseDetails) {
 
+		var bulkUpdateFlag = testCaseDetails.bulkUpdateFlag;
+		var updateMLVArray = testCaseDetails.updateMLV.split('||');
+		var updateColumnsArray = testCaseDetails.updateColumns.split('||');
+		var updateFilterString = testCaseDetails.updateFilter;
+		var updateFilterArray = new Array();
+		var updateSelectMLV = testCaseDetails.updateSelectMLV;
+		var updateSelectFilter = testCaseDetails.updateSelectFilter;
+		var fetchFromAnotherSourceForUpdateMLV = '';
+		var fetchFromAnotherSourceForUpdateFilter = '';
+		var ID = '';
+		var PID = '';
+		var LEV = '';
+		var PIN = '';
+		var MLVLEFTOBJ = '';
+		var MLVRIGHTOBJ = '';
+
+		if(!bulkUpdateFlag){
+			updateFilterArray = updateFilterString.split('||');
+		}
+		if(bulkUpdateFlag){
+			fetchFromAnotherSourceForUpdateMLV = updateFilterString.split('||')[0];
+			fetchFromAnotherSourceForUpdateFilter = updateFilterString.split('||')[1];
+			ID = updateFilterString.split('||')[2];
+			PID = updateFilterString.split('||')[3];
+			LEV = updateFilterString.split('||')[4];
+			PIN = updateFilterString.split('||')[5];
+		}
+		// * CASE WHEN BULK UPDATE FLAG IS TRUE
+
+
+
+		// * CASE WHEN BULK UPDATE FLAG IS NOT TRUE
+
+		//var updateMLVArray = new Array();
+		var updateMLVs = new Array();
+		updateMLVArray.map((mlv, index)=>{
+			var updateMLV = {
+				mlv: mlv.trim(),
+				index: index,
+				values: [],
+				attributes: mlv != '' ? (mlv.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+				filter : bulkUpdateFlag ? '' : updateFilterArray[index]
+			}
+
+			// * SETTING VALUES
+			var currentColumnValues = updateColumnsArray[index];
+			var columnValuePairArray = new Array();
+			columnValuePairArray = this.splitValues(currentColumnValues);
+			var values = new Array();
+			for(var i=0; i< columnValuePairArray.length; i++){
+				var temp = {
+					attributeName : columnValuePairArray[i].split('=')[0],
+					value : bulkUpdateFlag ? columnValuePairArray[i].split('=')[1].trim().substring(1, columnValuePairArray[i].split('=')[1].trim().length-1) : columnValuePairArray[i].split('=')[1].trim()
+				}
+				values.push(temp)
+			}
+
+			updateMLV.values = values;
+			updateMLVs.push(updateMLV)
+		
+		})
+
+		this.setState({
+			...this.state,
+			updateMLVs : {
+				...this.state.updateMLVs,
+				updateMLVArray : updateMLVs
+			},
+			fetchFromAnotherSourceForUpdate : {
+				...this.state.fetchFromAnotherSourceForUpdate,
+				mlv : fetchFromAnotherSourceForUpdateMLV,
+				attributes : fetchFromAnotherSourceForUpdateMLV != '' ? (fetchFromAnotherSourceForUpdateMLV.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+				filter : fetchFromAnotherSourceForUpdateFilter,
+				ID : ID,
+				PID : PID,
+				LEV : LEV,
+				PIN : PIN
+
+			},
+			fetchFromAnotherSourceForUpdateFlag : bulkUpdateFlag,
+			fetchMLVForUpdate: {
+					...this.state.fetchMLVForUpdate,
+					mlv: updateSelectMLV,
+					filter: updateSelectFilter,
+					attributes: updateSelectMLV != '' ? (updateSelectMLV.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+					
+				}
+		})
+
+		 
 	}
 
 	loadSelectedTestCaseDelete(testCaseDetails) {
+		var bulkDeleteFlag = testCaseDetails.bulkDeleteFlag;
+		var deleteMLVArray = testCaseDetails.deleteMLV.split('||');
+		var deleteFilterString = testCaseDetails.deleteFilter;
+		var deleteSelectMLV = testCaseDetails.deleteSelectMLV;
+		var deleteSelectFilter = testCaseDetails.deleteSelectFilter;
+		var deleteFilterArray = new Array();
+		var fetchFromAnotherSourceForDeleteMLV = '';
+		var fetchFromAnotherSourceForDeleteFilter = '';
+		var ID = '';
+		var PID = '';
+		var LEV = '';
+		var PIN = '';
+
+		if(!bulkDeleteFlag){
+			deleteFilterArray = deleteFilterString.split('||');
+		}
+		if(bulkDeleteFlag){
+			fetchFromAnotherSourceForDeleteMLV = deleteFilterString.split('||')[0];
+			fetchFromAnotherSourceForDeleteFilter = deleteFilterString.split('||')[1];
+			ID = deleteFilterString.split('||')[2];
+			PID = deleteFilterString.split('||')[3];
+			LEV = deleteFilterString.split('||')[4];
+			PIN = deleteFilterString.split('||')[5];
+		}
+
+		var deleteMLVs = new Array();
+
+		deleteMLVArray.map((mlv, index)=>{
+			var temp = {
+				mlv: mlv,
+				index: index,
+				filter: !bulkDeleteFlag ? deleteFilterArray[index] : '',
+				attributes: mlv != '' ? (mlv.split('attributes=')[1].split(';')[0].split(',')) : new Array()
+			}
+		deleteMLVs.push(temp);
+		})
+
+		this.setState({
+			...this.state,
+			deleteMLVs : {
+				...this.state.deleteMLVs,
+				deleteMLVArray : deleteMLVs
+			},
+			fetchFromAnotherSourceForDeleteFlag : bulkDeleteFlag,
+			fetchMLVForDelete: {
+					mlv: deleteSelectMLV,
+					filter: deleteSelectFilter,
+					attributes: deleteSelectMLV != '' ? (deleteSelectMLV.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+					selectedPlugin: ''
+				},
+
+			fetchFromAnotherSourceForDelete: {
+					mlv: fetchFromAnotherSourceForDeleteMLV,
+					attributes: fetchFromAnotherSourceForDeleteMLV != '' ? (fetchFromAnotherSourceForDeleteMLV.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+					filter: fetchFromAnotherSourceForDeleteFilter,
+					selectedPlugin: '',
+					ID : ID,
+					PID : PID,
+					LEV : LEV,
+					PIN : PIN,
+				}
+
+
+		})
 
 	}
 
 	loadSelectedTestCaseDeleteAll(testCaseDetails) {
 
+		var deleteAllMLVArray = testCaseDetails.deleteAllMLV.split('||');
+		var deleteAllMLVFilter = testCaseDetails.deleteAllFilter.split('||');
+
+		var deleteAllMLVs = new Array();
+		deleteAllMLVArray.map((mlv, index)=>{
+
+			var temp = {
+				mlv: mlv,
+				index: index,
+				filter: deleteAllMLVFilter.length > 0 ? deleteAllMLVFilter[index] : '',
+				attributes:mlv != '' ? (mlv.split('attributes=')[1].split(';')[0].split(',')) : new Array(),
+			}
+
+			deleteAllMLVs.push(temp);
+		})
+
+		this.setState({
+			...this.state,
+			deleteAllMLVs: {
+					currentIndex: 0,
+					deleteAllMLVArray: deleteAllMLVs
+				}
+		})
 	}
 
 	splitValues(values) {
@@ -2100,11 +2344,20 @@ export default class WriteBaseline extends Component {
 		return valuesArray
 	}
 
+	toggleOverWrite(event){
+		this.setState({
+			...this.state,
+			overWrite : !this.state.overWrite
+		})
+	}
+
 	componentWillUnmount() {
 		this.props.saveWriteBaselineState(this.state)
 	}
 
-
+	 showPopUpNotification = (message, type) => {
+        this.popUpNotificationWidget.show(message, type);
+    }
 
 
 	render() {
@@ -2112,6 +2365,7 @@ export default class WriteBaseline extends Component {
 		var loadingComponent = this.state.isLoading ? <LoadingPanel /> : ""
 		var fetchFromAnotherSourceConnectionSelectionElement = (
 			<div>
+			 <Notification widgetRef={(widget) => this.popUpNotificationWidget = widget} height= '5em' style={{height : '5em', width : '5em', fontSize : '4em'}}/>
 				{this.state.showConnectionSelectionDialog && <Dialog title={"Please select connections"} onClose={this.toggleDialog.bind(this)} width={800} height={500}>
 					<div className="row justify-content-center" style={{ width: '100%' }}>
 						<div className="col-lg-6">
@@ -2397,6 +2651,10 @@ export default class WriteBaseline extends Component {
 								</TabStripTab>
 								<TabStripTab title="Delete">
 									<DeleteDetails
+										setIDForDelete={this.setIDForDelete.bind(this)}
+										setPIDForDelete={this.setPIDForDelete.bind(this)}
+										setLEVForDelete={this.setLEVForDelete.bind(this)}
+										setPINForDelete={this.setPINForDelete.bind(this)}
 										deleteMLVs={this.state.deleteMLVs}
 										addDeleteMLV={this.addDeleteMLV.bind(this)}
 										generateDeleteMLV={this.generateDeleteMLV.bind(this)}
@@ -2449,7 +2707,15 @@ export default class WriteBaseline extends Component {
 								Execute
 									</Button>
 						</div>
-						<div className="col-lg-9"></div>
+						<div className="col-lg-7"></div>
+						<div className="col-lg-2">
+							{ this.state.loadSelectedTestCase.testCaseNo != '' && 
+								<div><Switch
+									style={{ margin: "2em" }}
+									checked={this.state.overWrite}
+									onChange={this.toggleOverWrite.bind(this)}
+								/>Overwrite Test Case</div>}
+						</div>
 						<div className="col-lg-2 ">
 							<Button
 								className="float-right"

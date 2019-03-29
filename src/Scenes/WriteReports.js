@@ -9,7 +9,7 @@ import { DatePicker } from '@progress/kendo-react-dateinputs';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
 import * as Constants from '../Constants'
-export default class Report extends Component {
+export default class WriteReports extends Component {
 
 	constructor(props) {
 		super(props);
@@ -57,7 +57,7 @@ export default class Report extends Component {
 		fromDate.setMilliseconds(0)
 		console.log(fromDate)
 		console.log(toDate)
-		axios.post(Constants.url + 'FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : connectionName })}`, {
+		axios.post(Constants.url + 'FetchWriteReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : connectionName })}`, {
 			headers: {
 			}
 
@@ -131,7 +131,7 @@ export default class Report extends Component {
 				{loadingComponent}
 				<div className="row justify-content-center">
 					<div className="col-lg-2">
-						<h5>READ REPORT</h5>
+						<h5>CRUD REPORT</h5>
 					</div>
 				</div>
 				<div className="row justify-content-center" style={{ margin: '1em' }}>
@@ -164,7 +164,7 @@ export default class Report extends Component {
 					filterable={true}
 					sortable={true}
 					data={this.state.dataResult}
-					detail={ PluginNameGrid}
+					detail={ PluginNameWrite}
 					expandField="expanded"
 					onExpandChange={this.expandChange.bind(this)}
 					style={{ margin: '1em' }}

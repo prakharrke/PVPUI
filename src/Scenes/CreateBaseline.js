@@ -208,16 +208,18 @@ export default class CreateBaseline extends Component {
 			//alert(response.length)
 
 			var parsed = JSON.parse(response);
-
+			console.log(parsed)
 			// columnsNames array to hold decoded keys (columns in resultset)
-
+			var resultsetOperation = JSON.parse(parsed[0]).operation;
+			
+			if(JSON.parse(parsed[0]).columnNames.length > 0){
 			var columnNames = new Array();
 
 
 
 			//var keys = Object.keys(parsed[0]);
 			columnNames = JSON.parse(parsed[0]).columnNames;
-			var resultsetOperation = JSON.parse(parsed[0]).operation;
+			
 			// populating columnNames array by decoding every element of keys array
 
 			/*for (var i = 0; i < keys.length; i++) {
@@ -261,20 +263,22 @@ export default class CreateBaseline extends Component {
 			console.log(resultsetList);
 
 			//this.isNotLoading();
+			}
 			this.setState({
 				...this.state,
-				columnNames: JSON.parse(parsed[0]).columnNames,
-				resultsetOperation: resultsetOperation,
-				resultSetList: resultsetList,
+				columnNames: JSON.parse(parsed[0]).columnNames.length > 0 ? JSON.parse(parsed[0]).columnNames: ['defaultColumn'],
+				resultsetOperation:   resultsetOperation ,
+				resultSetList: JSON.parse(parsed[0]).columnNames.length > 0 ? resultsetList : [{defaultColumn : 'Empty resultset'}],
 				showResultSet: true,
 				blurState: true,
-				resultSetCount: resultsetList.length
+				resultSetCount: JSON.parse(parsed[0]).columnNames.length > 0 ? resultsetList.length : 0
 
 			})
 
 		} catch{
 			//this.isNotLoading();
-			alert("Error occurred while executing MLV.")
+			alert("Emtpy result set")
+
 		}
 
 	}
@@ -911,6 +915,7 @@ export default class CreateBaseline extends Component {
 															filterExpression={this.state.selectedSuitableAttribute.columnName + " " + filter.value}
 															style={{ width: "100%", textAlign: "center", margin: "1em" }}
 															onChange={this.setFilterValue.bind(this)}
+															value={this.state.filters[this.state.selectedSuitableAttribute.columnName]!=undefined && filter.name != undefined  && this.state.filters[this.state.selectedSuitableAttribute.columnName][this.state.selectedSuitableAttribute.columnName + "_" + filter.name] != undefined?  this.state.filters[this.state.selectedSuitableAttribute.columnName][this.state.selectedSuitableAttribute.columnName + "_" + filter.name].value: ''}
 
 														/>
 													)

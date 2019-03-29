@@ -8,10 +8,10 @@ export default class PluginNameGrid extends Component {
 		super(props);
 		var dataItems = this.props.dataItem.items;
 		var pluginNameList = [];
-		var result = groupBy(dataItems, [{ field: "pluginName" }]);
+		var result = groupBy(dataItems, [{ field: "suiteName" }]);
 		result.map(pluginObject=>{
 			pluginNameList.push({
-				pluginName : pluginObject.value,
+				suiteName : pluginObject.value,
 				items : pluginObject.items,
 				totalRead : pluginObject.items[0].readTotal,
 				readFail : pluginObject.items[0].readFail,
@@ -42,7 +42,7 @@ export default class PluginNameGrid extends Component {
 				
 				expandField="expanded"
 			>
-				<Column field="pluginName" title="Plugin Name" />
+				<Column field="suiteName" title="Suite Name" />
 				<Column field="totalRead" title="Total Count" />
 				<Column field="readPass" title="Pass Count" />
 				<Column field="readFail" title="Fail Count" />

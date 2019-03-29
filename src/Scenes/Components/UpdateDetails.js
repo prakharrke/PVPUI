@@ -68,16 +68,16 @@ export default class UpdateDetails extends Component {
 
 	}
 	setIDForUpdate(event) {
-		this.props.setIDForUpdate(event.target.props.id, event.target.value)
+		this.props.setIDForUpdate( event.target.value)
 	}
 	setPIDForUpdate(event) {
-		this.props.setPIDForUpdate(event.target.props.id, event.target.value)
+		this.props.setPIDForUpdate(event.target.value)
 	}
 	setLEVForUpdate(event) {
-		this.props.setLEVForUpdate(event.target.props.id, event.target.value)
+		this.props.setLEVForUpdate(event.target.value)
 	}
 	setPINForUpdate(event) {
-		this.props.setPINForUpdate(event.target.props.id, event.target.value)
+		this.props.setPINForUpdate( event.target.value)
 	}
 	addFilterForUpdate(event) {
 
@@ -157,49 +157,7 @@ export default class UpdateDetails extends Component {
 						</Button>
 						</div>
 					</div>
-					<div className="row justify-content-center">
-						<div className='col-lg-3'>
-							<DropDownList
-								data={object.attributes}
-								label="ID"
-								id={object.index}
-								style={{ width: '100%', margin: '1em' }}
-								onChange={this.setIDForUpdate.bind(this)}
-								value={object.ID}
-							/>
-						</div>
-						<div className='col-lg-3'>
-							<DropDownList
-								data={object.attributes}
-								label="PID"
-								id={object.index}
-								style={{ width: '100%', margin: '1em' }}
-								onChange={this.setPIDForUpdate.bind(this)}
-								value={object.PID}
-							/>
-						</div>
-						<div className='col-lg-3'>
-							<Input
-								data={object.attributes}
-								label="LEV"
-								id={object.index}
-								style={{ width: '100%', margin: '2em' }}
-								onChange={this.setLEVForUpdate.bind(this)}
-								value={object.LEV}
-							/>
-						</div>
-						<div className='col-lg-3'>
-							<DropDownList
-								data={object.attributes}
-								label="PIN"
-								id={object.index}
-								attributeIndex={index}
-								style={{ width: '100%', margin: '1em' }}
-								onChange={this.setPINForUpdate.bind(this)}
-								value={object.PIN}
-							/>
-						</div>
-					</div>
+
 					<div className="row justify-content-center" style={{ width: "100%" }}>
 						<div className="col-lg-10 justify-content-center panel-wrapper" style={{ maxWidth: "90%", margin: "0 auto" }}>
 
@@ -240,26 +198,26 @@ export default class UpdateDetails extends Component {
 
 															{this.props.fetchFromAnotherSourceForUpdateFlag ? (
 																<DropDownList
-																data={this.props.fetchFromAnotherSourceForUpdate.attributes}
-																label="Value"
-																id={object.index}
-																attributeIndex={index}
-																style={{ width: '100%', margin: '1em' }}
-																onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
-																value={valueObject.value}
-															/>
-															):
+																	data={this.props.fetchFromAnotherSourceForUpdate.attributes}
+																	label="Value"
+																	id={object.index}
+																	attributeIndex={index}
+																	style={{ width: '100%', margin: '1em' }}
+																	onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
+																	value={valueObject.value}
+																/>
+															) :
 
 																(<Input
-															data={object.attributes}
-															label="Value"
-															id={object.index}
-															attributeIndex={index}
-															style={{ width: '100%', margin: '2em' }}
-															onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
-															value={valueObject.value}
-															/>)
-}
+																	data={object.attributes}
+																	label="Value"
+																	id={object.index}
+																	attributeIndex={index}
+																	style={{ width: '100%', margin: '2em' }}
+																	onChange={this.setValueForSelectedAttributeForUpdate.bind(this)}
+																	value={valueObject.value}
+																/>)
+															}
 														</div>
 														<div className='col-lg-1'>
 															<Button
@@ -373,7 +331,7 @@ export default class UpdateDetails extends Component {
 					<div className="row justify-content-center">
 						<div className="col-lg-4">
 							<Button
-							primary={true}
+								primary={true}
 								style={{ margin: "1em" }}
 								onClick={this.toggleFetchFromAnotherSourceForUpdate.bind(this)}
 							>
@@ -411,6 +369,47 @@ export default class UpdateDetails extends Component {
 											>
 
 											</textarea>
+										</div>
+									</div>
+									<div className="row justify-content-center">
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForUpdate.attributes)}
+												label="ID"
+												
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setIDForUpdate.bind(this)}
+												value={this.props.fetchFromAnotherSourceForUpdate.ID}
+											/>
+										</div>
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForUpdate.attributes)}
+												label="PID"
+												
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setPIDForUpdate.bind(this)}
+												value={this.props.fetchFromAnotherSourceForUpdate.PID}
+											/>
+										</div>
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForUpdate.attributes)}
+												label="LEV"
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setLEVForUpdate.bind(this)}
+												value={this.props.fetchFromAnotherSourceForUpdate.LEV}
+											/>
+										</div>
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForUpdate.attributes)}
+												label="PIN"
+												
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setPINForUpdate.bind(this)}
+												value={this.props.fetchFromAnotherSourceForUpdate.PIN}
+											/>
 										</div>
 									</div>
 									<div className="row justify-content-center">

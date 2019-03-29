@@ -873,6 +873,11 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.2.tgz#54c5a964462be3d4d78af631363c18d6fa91ac26"
   integrity sha512-yprFYuno9FtNsSHVlSWd+nRlmGoAbqbeCwOryP6sC/zoCjhpArcRMYp19EvpSUSizJAlsXEwJv+wcWS9XaXdMw==
 
+"@progress/kendo-base-component-react-wrapper@2018.3.1017":
+  version "2018.3.1017"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-base-component-react-wrapper/-/kendo-base-component-react-wrapper-2018.3.1017.tgz#6d631de795d5a3b1c7252a67c51f1bc984693fb7"
+  integrity sha512-EjDgh5i7Hg2jxjhTa3bFHEwOU/Qleyuz4B0OofUlnlezeqDj5IKZOU0EZgEYtCT8FSLf51SHX0VibMXaGe3n3Q==
+
 "@progress/kendo-charts@^1.8.0":
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/@progress/kendo-charts/-/kendo-charts-1.12.2.tgz#7f81137266d0b7454816c0937a119df1b743a1fa"
@@ -908,6 +913,13 @@
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@progress/kendo-popup-common/-/kendo-popup-common-1.6.0.tgz#aabe9af0e1eff03ba618dd6d0dad56ba7d4463be"
   integrity sha512-b560fcHaLrTmuap6POKpheoIQMJYbea+p7rKX2GOGZrxT2AGNxyWIHoi2nISxSbziCW2MB0R9LqAxAFXu4qymQ==
+
+"@progress/kendo-popups-react-wrapper@^2018.3.1017":
+  version "2018.3.1017"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-popups-react-wrapper/-/kendo-popups-react-wrapper-2018.3.1017.tgz#7e6e6721998efb7c57b731bf57236ddc1839ebc8"
+  integrity sha512-Q89jWs2MiJ+GGbWjSL6CLTpSyQ01ZHi7Xyj4BDQXm/9x8X84lcRA0Gm1newJKhj0oxBFqD7iFHxhXvGdB0HujQ==
+  dependencies:
+    "@progress/kendo-base-component-react-wrapper" "2018.3.1017"
 
 "@progress/kendo-react-animation@2.4.0":
   version "2.4.0"
@@ -1057,6 +1069,13 @@
   version "2.61.0"
   resolved "https://registry.yarnpkg.com/@progress/kendo-theme-default/-/kendo-theme-default-2.61.0.tgz#432cb9d7568b332fb14909395636ce5550b8440c"
   integrity sha512-GNyPtff/BuATb1Rsqu6065e4UcOR2oXgbhaj2jNQqGrvTPvTRaVIr/DVibJLTxqHFGjZJVHtxbzRZGZejoM5BA==
+
+"@progress/kendo-ui@^2019.1.307":
+  version "2019.1.307"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-ui/-/kendo-ui-2019.1.307.tgz#17cc6d4f0efbf225f1aa5685c9075f46b580f12f"
+  integrity sha512-ZG91Z6jlY5y0zRPWMwrEx8uf9yOGn/zzFfu0nxhYVfqnTDjId2Z/p1tSI96FLMsZmlPk52Rh5ZCF5kn1OEJBog==
+  dependencies:
+    jquery "<=3"
 
 "@svgr/core@^2.4.1":
   version "2.4.1"
@@ -5896,6 +5915,11 @@ joi@^11.1.1:
     hoek "4.x.x"
     isemail "3.x.x"
     topo "2.x.x"
+
+jquery@<=3:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
+  integrity sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==
 
 js-base64@^2.1.8:
   version "2.4.9"

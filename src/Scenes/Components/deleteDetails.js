@@ -73,6 +73,24 @@ export default class DeleteDetails extends Component {
 		this.props.copyInsertMLVToDelete(event.target.id)
 	}
 
+	setIDForDelete(event){
+		var ID = event.target.value;
+		this.props.setIDForDelete(ID)
+	}
+
+	setPIDForDelete(event){
+		var PID = event.target.value;
+		this.props.setPIDForDelete(PID);
+
+	}
+	setLEVForDelete(event){
+		var LEV = event.target.value;
+		this.props.setLEVForDelete(LEV);
+	}
+	setPINForDelete(event){
+		var PIN = event.target.value;
+		this.props.setPINForDelete(PIN)
+	}
 	render() {
 		var deleteMLVArrayElement = this.props.deleteMLVs.deleteMLVArray.map((object, index) => {
 
@@ -250,6 +268,44 @@ export default class DeleteDetails extends Component {
 											>
 
 											</textarea>
+										</div>
+									</div>
+											<div className="row justify-content-center">
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForDelete.attributes)}
+												label="ID"
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setIDForDelete.bind(this)}
+												value={this.props.fetchFromAnotherSourceForDelete.ID}
+											/>
+										</div>
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForDelete.attributes)}
+												label="PID"
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setPIDForDelete.bind(this)}
+												value={this.props.fetchFromAnotherSourceForDelete.PID}
+											/>
+										</div>
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForDelete.attributes)}
+												label="LEV"
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setLEVForDelete.bind(this)}
+												value={this.props.fetchFromAnotherSourceForDelete.LEV}
+											/>
+										</div>
+										<div className='col-lg-3'>
+											<DropDownList
+												data={[''].concat(this.props.fetchFromAnotherSourceForDelete.attributes)}
+												label="PIN"
+												style={{ width: '100%', margin: '1em' }}
+												onChange={this.setPINForDelete.bind(this)}
+												value={this.props.fetchFromAnotherSourceForDelete.PIN}
+											/>
 										</div>
 									</div>
 									<div className="row justify-content-center">

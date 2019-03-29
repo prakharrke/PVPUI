@@ -35,6 +35,9 @@ export default class OthersSummaryReport extends Component {
 								<ChartSeriesItem type="line" data={dataObject.writeData} >
 									<ChartSeriesItemTooltip background="blue" />
 								</ChartSeriesItem>
+								<ChartSeriesItem type="line" data={dataObject.activityData} >
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
 
 							</ChartSeries>
 						</Chart>

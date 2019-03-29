@@ -9,6 +9,7 @@ import { BrowserRouter, Route, Router, HashRouter, Redirect, Switch } from 'reac
 import { Link, NavLink } from 'react-router-dom';
 import { PanelBar, PanelBarItem } from '@progress/kendo-react-layout';
 import WriteBaseline from './WriteBaseline'
+import ModelComparator from './ModelComparator'
 import ActivitiesBaseline from './ActivitiesBaseline'
 import Settings from './Settings'
 import '../css/transition.css';
@@ -293,7 +294,55 @@ export default class PVPUI extends Component {
 		this.isLoading()
 		//var index = event.target.getAttribute('index');
 		
-		axios.post(Constants.url + 'CreateModelNew',  `connectionDetails=${JSON.stringify({...this.state.connections[index]})}`, {
+		axios.post(Constants.url + 'CreateModelNew',  `connectionDetails=${encodeURIComponent(JSON.stringify({...this.state.connections[index], createNewModel : false}))}`, {
+			headers: {
+				
+			}
+
+
+		}).then(response => {
+			this.isNotLoading()
+			var connections = this.state.connections;
+			connections[index].objectList = response.data.objectList
+			connections[index].connectionCreated = response.data.connectionCreated
+			this.setState({
+				connections: connections
+
+			})
+		}).catch(e => {
+			this.isNotLoading()
+			alert(e)
+		})
+
+
+	}
+		reloadModel(index) {
+
+		console.log(index)
+		if(this.state.connections[index].connectionName === ''){
+			alert('Please choose connection')
+			return
+		}
+		if(this.state.connections[index].connectionID === ''){
+			alert('Please set connection ID')
+			return
+		}
+		var connectionID = this.state.connections[index].connectionID;
+		var exit = false
+		this.state.connections.map((connection, connIndex)=>{
+
+			if(connection.connectionID === connectionID && index != connIndex){
+				alert('ConnectionID needs to be unique')
+				exit = true
+			}
+		})
+		if(exit){
+			return
+		}
+		this.isLoading()
+		//var index = event.target.getAttribute('index');
+		
+		axios.post(Constants.url + 'CreateModelNew',  `connectionDetails=${encodeURIComponent(JSON.stringify({...this.state.connections[index], createNewModel : true}))}`, {
 			headers: {
 				
 			}
@@ -435,11 +484,12 @@ export default class PVPUI extends Component {
 									expandMode={'single'}
 									onSelect={this.onSelect.bind(this)}
 
-								>
+								>	<PanelBarItem title={'Model Comparator'} route="/modelcomparator" />
 									<PanelBarItem title={'MLV Generator'} route="/mlvGenerator" />
 									<PanelBarItem title={'Read Baseline'} route="/readBaseline" />
 									<PanelBarItem title={'Write Baseline'} route="/writeBaseline" />
 									<PanelBarItem title={'Activities Baseline'} route="/activitiesBaseline" />
+									
 									<PanelBarItem title={'Registered Stored Procedures'} route="/storedprocedures" />
 									<PanelBarItem title={'Connections'} route="/connections" />
 									<PanelBarItem title={'Settings'} route="/settings" />
@@ -487,6 +537,7 @@ export default class PVPUI extends Component {
 									isNotLoading={this.isNotLoading.bind(this)}
 									testConnection={this.testConnection.bind(this)}
 									createModel={this.createModel.bind(this)}
+									reloadModel={this.reloadModel.bind(this)}
 									setConnectionID={this.setConnectionID.bind(this)}
 									setConnectionName={this.setConnectionName.bind(this)} 
 									connections={this.state.connections}
@@ -497,6 +548,15 @@ export default class PVPUI extends Component {
 							}} />
 							<Route path='/storedprocedures' render={props => {
 								return (<StoredProcedureDetails 
+									
+									isLoading={this.isLoading.bind(this)} 
+									isNotLoading={this.isNotLoading.bind(this)}
+									connections={this.state.connections}
+									/>
+								)
+							}} />
+							<Route path='/modelcomparator' render={props => {
+								return (<ModelComparator 
 									
 									isLoading={this.isLoading.bind(this)} 
 									isNotLoading={this.isNotLoading.bind(this)}

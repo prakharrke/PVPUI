@@ -379,7 +379,7 @@ export default class MLVGenerator extends Component {
 				parentTo: [],
 
 				hideLevel: false,
-				connectionID: this.state.selectedConnectionID,
+				connectionID: this.state.selectedConnection.connectionID,
 				ifExists: {
 
 					attributes: [],
@@ -1273,7 +1273,7 @@ export default class MLVGenerator extends Component {
 				//columnName: helper.generateColumnName(`level_${this.state[selectedObject.objectID].level}_${selectedObject.objectName}_${event.target.value}_${attributesLength}`),
 				columnName: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
 				attributeName: event.target.value,
-				attributeValue: this.state.attributeListForSelectedObject.includes(event.target.value) ?`${this.state.selectedObject.objectName}.${event.target.value}` : event.target.value,
+				attributeValue: this.state.attributeListForSelectedObject.includes(event.target.value) ? `${this.state.selectedObject.objectName}.${event.target.value}` : event.target.value,
 				ID: helper.generateColumnName(`${event.target.value}_${this.state.columnCount + 1}`),
 				customColumnName: false
 			}
@@ -2495,11 +2495,11 @@ export default class MLVGenerator extends Component {
 		})
 	}
 
-	deleteIfExistsActionParameter(event){
+	deleteIfExistsActionParameter(event) {
 		var index = event.target.getAttribute('index')
 		var actionParameters = this.state[this.state.selectedObject.objectID].ifExists.actionParameters;
 		actionParameters.splice(index, 1)
-			this.setState({
+		this.setState({
 			...this.state,
 			[this.state.selectedObject.objectID]: {
 				...this.state[this.state.selectedObject.objectID],
@@ -3389,23 +3389,23 @@ export default class MLVGenerator extends Component {
 																this.state[this.state.selectedObject.objectID].ifExists.actionParameters.map((action, index) => {
 																	return (
 																		<div>
-																		<Input
+																			<Input
 
-																			//value={action.attributeName}
-																			label={action.columnName}
-																			style={{ width: "80%", textAlign: "center", margin: '1em' }}
+																				//value={action.attributeName}
+																				label={action.columnName}
+																				style={{ width: "80%", textAlign: "center", margin: '1em' }}
 
 
-																		/>
-																		<Button
-																			primary={true}
-																			index={index}
-																			style={{ margin: "1em" }}
-																			onClick={this.deleteIfExistsActionParameter.bind(this)}>
-																			Remove
+																			/>
+																			<Button
+																				primary={true}
+																				index={index}
+																				style={{ margin: "1em" }}
+																				onClick={this.deleteIfExistsActionParameter.bind(this)}>
+																				Remove
 																		</Button>
 																		</div>
-																)
+																	)
 																})
 															}
 														</div>
@@ -4013,6 +4013,7 @@ export default class MLVGenerator extends Component {
 						objectList: this.state.selectedConnection.objectList
 					})
 					// * ADDIND SOURCE OBJECT TO STATE 
+					var connectionID = this.state.selectedConnection.connectionID;
 					mlvState = {
 						...mlvState,
 						[objectID]: {
@@ -4065,7 +4066,15 @@ export default class MLVGenerator extends Component {
 							parentTo: [],
 
 							hideLevel: false,
-							connectionID: this.state.selectedConnectionID,
+							connectionID: connectionID,
+							ifExists: {
+
+								attributes: [],
+								eqAction: { procedureName: '', procedureSignature: '' },
+								isStoredProcedure: false,
+								actionParameters: []
+							},
+							onError: ''
 
 
 						}
@@ -4292,11 +4301,7 @@ export default class MLVGenerator extends Component {
 							attributes: attributeValuesArray,
 							delimiter: delimiter,
 							predicate: predicate,
-							ifExists: {
-								attributes: [],
-								eqAction: ''
-							},
-							onError: ''
+							
 
 						}
 					}

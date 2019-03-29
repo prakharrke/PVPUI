@@ -31,7 +31,10 @@ export default class PLMSummaryReport extends Component {
 								<ChartSeriesItem type="line" data={dataObject.data}  >
 									<ChartSeriesItemTooltip background="blue" />
 								</ChartSeriesItem>
-								<ChartSeriesItem type="line" data={dataObject.writeData} >
+								<ChartSeriesItem type="line" data={dataObject.writeData} style={{fill : '#d66520'}}>
+									<ChartSeriesItemTooltip background="blue" />
+								</ChartSeriesItem>
+								<ChartSeriesItem type="line" data={dataObject.activityData} >
 									<ChartSeriesItemTooltip background="blue" />
 								</ChartSeriesItem>
 

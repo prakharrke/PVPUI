@@ -16,7 +16,8 @@ export default class TestCaseNoGrid extends Component {
 				testCaseNo: testCaseObject.value,
 				items : testCaseObject.items,
 				testResult: testCaseObject.items[0].testResult,
-				excelName : testCaseObject.items[0].excelName
+				excelName : testCaseObject.items[0].excelName,
+				resultSheetName : testCaseObject.items[0].resultSheet
 			})
 
 		})
@@ -43,6 +44,7 @@ export default class TestCaseNoGrid extends Component {
 				<Column field="testCaseNo" title="Test Case No" />
 				<Column field="testResult" title="Test Result" />
 				<Column field="excelName" title="Baseline Name" />
+				<Column field="resultSheetName" title="Result sheet Name" />
 				
 
 

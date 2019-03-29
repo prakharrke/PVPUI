@@ -10,7 +10,7 @@ export default class InsertDetails extends Component {
 		this.state = {
 			...this.props.insertState,
 			fetchFromAnotherSource: false,
-			rawData: false,
+			rawData: true,
 
 		}
 	}
@@ -303,7 +303,7 @@ export default class InsertDetails extends Component {
 					<div className="row justify-content-center">
 						<div className="col-lg-3">
 							<DropDownList
-								data={object.attributes}
+								data={[''].concat(object.attributes)}
 								label="ID"
 								id={object.index}
 								style={{ width: '100%', margin: '1em' }}
@@ -314,7 +314,7 @@ export default class InsertDetails extends Component {
 						</div>
 						<div className="col-lg-3">
 							<DropDownList
-								data={object.attributes}
+								data={[''].concat(object.attributes)}
 								label="PID"
 								id={object.index}
 								style={{ width: '100%', margin: '1em' }}
@@ -325,7 +325,7 @@ export default class InsertDetails extends Component {
 						<div className="col-lg-3">
 
 							<DropDownList
-								data={object.attributes}
+								data={[''].concat(object.attributes)}
 								label="LEV"
 								id={object.index}
 								style={{ width: '100%', margin: '1em' }}
@@ -335,7 +335,7 @@ export default class InsertDetails extends Component {
 						</div>
 						<div className="col-lg-3">
 							<DropDownList
-								data={object.attributes}
+								data={[''].concat(object.attributes)}
 								label="PIN"
 								id={object.index}
 								style={{ width: '100%', margin: '1em' }}
@@ -360,7 +360,7 @@ export default class InsertDetails extends Component {
 						</div>
 
 					</div>
-					{this.state.rawData ?
+					{!this.state.rawData ?
 						(
 
 							<div className="row justify-content-center" style={{ width: "100%" }}>

@@ -9,8 +9,12 @@ import Create from '@material-ui/icons/Create';
 import Block from '@material-ui/icons/Block';
 import Star from '@material-ui/icons/Star';
 import Done from '@material-ui/icons/Done';
+import Rotate from '@material-ui/icons/RotateRight';
 import AddCircleOutline from '@material-ui/icons/AddCircleOutline';
 import * as Constants from '../Constants'
+import { Notification, Tooltip } from '@progress/kendo-popups-react-wrapper';
+import $ from 'jquery';
+import '@progress/kendo-ui';
 export default class Connections extends Component {
 
 	constructor(props) {
@@ -41,6 +45,13 @@ export default class Connections extends Component {
 
 
 	}
+
+	reloadModel(event){
+		event.preventDefault();
+		var index = event.target.id;
+		
+		this.props.reloadModel(index)
+	}
 	setConnectionName(event) {
 		
 		var connections = new Array();
@@ -70,6 +81,7 @@ export default class Connections extends Component {
 			<div className="col-lg-11">
 				<div className="row">
 					<div className="col-lg-1">
+					<Tooltip content="Add New Connection">
 						<Button
 							primary={true}
 
@@ -78,6 +90,7 @@ export default class Connections extends Component {
 						>
 							<span  className="k-icon  k-i-plus-outline"></span>
 						</Button>
+						</Tooltip>
 					</div>
 
 				</div>
@@ -109,6 +122,7 @@ export default class Connections extends Component {
 									/>
 								</div>
 								<div className="col-lg-4 d-flex align-items-baseline">
+								<Tooltip content="Delete Connection">
 									<Button
 										className="float-right"
 										primary={true}
@@ -119,6 +133,8 @@ export default class Connections extends Component {
 									>
 										<span id={index} className="k-icon k-i-delete k-i-trash"></span>
 									</Button>
+									</Tooltip>
+									<Tooltip content="Create Model">
 									<Button
 										className="float-right"
 										primary={true}
@@ -128,6 +144,19 @@ export default class Connections extends Component {
 									>
 										<span id={index} className="k-icon k-i-pencil"></span>
 									</Button>
+									</Tooltip>
+									<Tooltip content="Refresh Model">
+									<Button
+										className="float-right"
+										primary={true}
+										id={index}
+										style={{ margin: '1em' }}
+										onClick={this.reloadModel.bind(this)}
+									>
+										<span id={index} className=" k-icon k-i-reload k-i-refresh"></span>
+									</Button>
+									</Tooltip>
+									<Tooltip content="Test Connection">
 									<Button
 										className="float-right"
 										primary={true}
@@ -137,16 +166,23 @@ export default class Connections extends Component {
 									>
 										<span id={index} className=" k-icon k-i-star k-i-bookmark "></span>
 									</Button>
+									</Tooltip>
 								</div>
 								<div className='col-lg-1 d-flex align-items-baseline'>
+								<Tooltip content={connection.connectionCreated ? "Model Created" : "Model Not Created"}>
 									{
 										connection.connectionCreated ? (
-
+											
 											<Done className="float-right" style={{marginTop: '1em'}}/>
-
-										) : (<Block className="float-right" style={{marginTop: '1em'}}/>)
+											
+										) : (
+										
+										<Block className="float-right" style={{marginTop: '1em'}}/>
+										
+										)
 
 									}
+									</Tooltip>
 								</div>
 							</div>
 
