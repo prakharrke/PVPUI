@@ -9,6 +9,7 @@ import ALMSummaryReport from './Components/ALMSummaryReport'
 import DBSummaryReport from './Components/DBSummaryReport'
 import OthersSummaryReport from './Components/OthersSummaryReport'
 import ERPSummaryReport from './Components/ERPSummaryReport'
+import { Input, NumericTextBox, Switch } from '@progress/kendo-react-inputs';
 import * as Constants from '../Constants';
 import 'hammerjs';
 import {
@@ -27,12 +28,15 @@ export default class ReportContainer extends Component {
 		this.state = {
 			currentDate: new Date(),
 			graphData: [],
-			selected : 0,
-			PLM : [],
-			ALM : [],
-			DB : [],
-			ERP : [],
-			others : []
+			selected: 0,
+			PLM: [],
+			ALM: [],
+			DB: [],
+			ERP: [],
+			others: [],
+			showReadLine: true,
+			showCrudLine: true,
+			showActivitiesLine: true
 
 		}
 
@@ -43,7 +47,7 @@ export default class ReportContainer extends Component {
 	componentWillMount() {
 		//alert(new Date(1545317576622))
 		var toDate = new Date(this.state.currentDate);
-		toDate.setDate(this.state.currentDate.getDate());
+		toDate.setDate(this.state.currentDate.getDate() + 1);
 		toDate.setHours(7)
 		toDate.setMinutes(0)
 		toDate.setSeconds(0)
@@ -83,7 +87,7 @@ export default class ReportContainer extends Component {
 				var timeStamp = new Date(reportObject.timeStamp);
 				var runHour = timeStamp.getHours();
 				var runDate = new Date();
-	// *  CHANGED HERE FROM 19 TO 8 TO TEST
+				// *  CHANGED HERE FROM 19 TO 8 TO TEST
 				if (runHour > 8) {
 					runDate.setDate(timeStamp.getDate());
 					runDate.setMonth(timeStamp.getMonth());
@@ -117,7 +121,7 @@ export default class ReportContainer extends Component {
 				connectionNamesArray.push(object.value)
 			})
 
-			this.props.holdConnectionNamesArray(connectionNamesArray);
+			//this.props.holdConnectionNamesArray(connectionNamesArray);
 
 			groupedGraphData.map(object => {
 				var connectionName = object.value;
@@ -232,11 +236,11 @@ export default class ReportContainer extends Component {
 
 			this.setState({
 				graphData: finalGraphData,
-				PLM : PLM,
-				ALM : ALM,
-				DB : DB,
-				ERP :ERP,
-				others : others
+				PLM: PLM,
+				ALM: ALM,
+				DB: DB,
+				ERP: ERP,
+				others: others
 
 			})
 		}).catch(e => {
@@ -247,6 +251,32 @@ export default class ReportContainer extends Component {
 
 	handleSelect = (e) => {
 		this.setState({ selected: e.selected })
+	}
+
+	toggleCrudLine(event) {
+
+		this.setState({
+			...this.state,
+			showCrudLine: !this.state.showCrudLine
+		})
+
+	}
+
+	toggleReadLine(event) {
+
+		this.setState({
+			...this.state,
+			showReadLine: !this.state.showReadLine
+		})
+
+	}
+
+	toggleActivitiesLine(event) {
+
+		this.setState({
+			...this.state,
+			showActivitiesLine: !this.state.showActivitiesLine
+		})
 	}
 
 	render() {
@@ -283,48 +313,80 @@ export default class ReportContainer extends Component {
 		)*/
 		return (
 			<div>
-				<div className="row justify-content-center" style={{ marginTop: '1em' }}>
-					<div className="col-lg-2"><h5>Read Report</h5></div>
-					<div className="col-lg-2">
-						<NavLink to={{
-							pathname: `/reports/details`,
-
-						}}><Button primary={true} style={{ color: 'black' }}>Detailed Report</Button></NavLink>
-
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-lg-3" style={{margin : '2em'}}>
-						
-						<h6 style={{color : 'rgb(67, 160, 71)'}}>Activities</h6>
-						<h6 style={{color : 'rgb(33, 150, 243)'}}>CRUD</h6>
-						<h6 style={{color : 'rgb(63, 81, 181)'}}>Read</h6>
-					</div>
-				</div>
-				<div className="row">
-				<div className="col-lg-12">
-					<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
-						<TabStripTab title="PLM">
-							<PLMSummaryReport PLM={this.state.PLM} />
-						</TabStripTab>
-						<TabStripTab title="ALM">
-						<ALMSummaryReport ALM={this.state.ALM} />
-						</TabStripTab>
-						<TabStripTab title="DB">
-						<DBSummaryReport DB={this.state.DB} />
-						</TabStripTab>
-						<TabStripTab title="ERP">
-				 		<ERPSummaryReport ERP={this.state.ERP} />
-				 	</TabStripTab>
-				 	<TabStripTab title="Others">
-				 		<OthersSummaryReport others={this.state.others} />
-				 	</TabStripTab>
-				 
-				 
-
-					</TabStrip>
+				<div className="row d-flex justify-content-center" style={{ marginTop: '1em' }}>
+					<div className="col-lg-4">
+						<Switch
+							style={{ margin: "1em" }}
+							checked={this.state.showReadLine}
+							onChange={this.toggleReadLine.bind(this)}
+						/><code style={{ margin: "1em", color: 'rgb(63, 81, 181)' }} >READ</code>
+						<Switch
+							style={{ margin: "1em" }}
+							checked={this.state.showCrudLine}
+							onChange={this.toggleCrudLine.bind(this)}
+						/><code style={{ margin: "1em", color: 'rgb(33, 150, 243)' }}>CRUD</code>
+						<Switch
+							style={{ margin: "1em" }}
+							checked={this.state.showActivitiesLine}
+							onChange={this.toggleActivitiesLine.bind(this)}
+						/><code style={{ margin: "1em", color: 'rgb(67, 160, 71)' }}>ACTIVITIES</code>
 					</div>
 					
+				</div>
+				{/*<div className="row">
+									<div className="col-lg-3" style={{margin : '2em'}}>
+										
+										<h6 style={{color : 'rgb(67, 160, 71)'}}>Activities</h6>
+										<h6 style={{color : 'rgb(33, 150, 243)'}}>CRUD</h6>
+										<h6 style={{color : 'rgb(63, 81, 181)'}}>Read</h6>
+									</div>
+								</div>*/}
+				<div className="row">
+					<div className="col-lg-12">
+						<TabStrip selected={this.state.selected} onSelect={this.handleSelect.bind(this)}>
+							<TabStripTab title="PLM">
+								<PLMSummaryReport
+									PLM={this.state.PLM}
+									showReadLine={this.state.showReadLine}
+									showCrudLine={this.state.showCrudLine}
+									showActivitiesLine={this.state.showActivitiesLine}
+								/>
+							</TabStripTab>
+							<TabStripTab title="ALM">
+								<ALMSummaryReport
+									ALM={this.state.ALM}
+									showReadLine={this.state.showReadLine}
+									showCrudLine={this.state.showCrudLine}
+									showActivitiesLine={this.state.showActivitiesLine}
+								/>
+							</TabStripTab>
+							<TabStripTab title="DB">
+								<DBSummaryReport DB={this.state.DB}
+									showReadLine={this.state.showReadLine}
+									showCrudLine={this.state.showCrudLine}
+									showActivitiesLine={this.state.showActivitiesLine}
+								/>
+							</TabStripTab>
+							<TabStripTab title="ERP">
+								<ERPSummaryReport ERP={this.state.ERP}
+									showReadLine={this.state.showReadLine}
+									showCrudLine={this.state.showCrudLine}
+									showActivitiesLine={this.state.showActivitiesLine}
+								/>
+							</TabStripTab>
+							<TabStripTab title="Others">
+								<OthersSummaryReport others={this.state.others}
+									showReadLine={this.state.showReadLine}
+									showCrudLine={this.state.showCrudLine}
+									showActivitiesLine={this.state.showActivitiesLine}
+								/>
+							</TabStripTab>
+
+
+
+						</TabStrip>
+					</div>
+
 				</div>
 			</div>
 		)

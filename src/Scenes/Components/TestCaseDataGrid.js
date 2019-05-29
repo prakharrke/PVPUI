@@ -25,11 +25,11 @@ export default class TestCaseDataGrid extends Component{
 				data={this.state.data}
 				expandField="expanded"
 			>
-				<Column field="baselineCellID" title="Baseline Cell ID" />
-				<Column field="baselineCellData" title="Baseline Cell Data" />
-				<Column field="newCellID" title="New Cell ID" />
-				<Column field="newCellData" title="New Cell Data" />
-				<Column field="errorDesc" title="Error Desc" />
+				<Column field="baselineCellID" title="Baseline Cell ID"  width="300px"/>
+				<Column field="baselineCellData" title="Baseline Cell Data" width="300px" />
+				<Column field="newCellID" title="New Cell ID"  width="300px"/>
+				<Column field="newCellData" title="New Cell Data" width="300px" />
+				<Column field="errorDesc" title="Error Desc"/>
 				
 				
 

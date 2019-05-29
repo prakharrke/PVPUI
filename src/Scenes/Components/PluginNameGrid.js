@@ -3,6 +3,8 @@ import axios from 'axios';
 import { groupBy, process } from '@progress/kendo-data-query';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import TestCaseNoGrid from './TestCaseNoGrid'
+import ReadReportCell from './ReadReportCell'
+import DownloadLogs from './DownloadLogs'
 export default class PluginNameGrid extends Component {
 	constructor(props){
 		super(props);
@@ -15,7 +17,9 @@ export default class PluginNameGrid extends Component {
 				items : pluginObject.items,
 				totalRead : pluginObject.items[0].readTotal,
 				readFail : pluginObject.items[0].readFail,
-				readPass : pluginObject.items[0].readPass
+				readPass : pluginObject.items[0].readPass,
+				hostIP : pluginObject.items[0].hostIP,
+				currentRunTime : pluginObject.items[0].currentRunTime
 			})
 		})
 
@@ -45,9 +49,10 @@ export default class PluginNameGrid extends Component {
 				<Column field="suiteName" title="Suite Name" />
 				<Column field="totalRead" title="Total Count" />
 				<Column field="readPass" title="Pass Count" />
-				<Column field="readFail" title="Fail Count" />
-				
-
+				<Column field="readFail" title="Fail Count" cell={ReadReportCell}/>
+				<Column field="hostIP" title="Host IP" />
+				<Column field="currentRunTime" title="Current Run Time" />
+				<Column  title="Download Logs" cell={DownloadLogs} />
 			</Grid>
 			)
 	}

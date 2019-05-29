@@ -12,8 +12,12 @@ import * as Constants from './Constants'
 
 class App extends Component {
 	componentWillMount(){
-
-		Constants.url = 'http://localhost:' + '9090' + '/PVPUI/'
+    console.log('%%%%%');
+    console.log(window.location)
+    var urlString = window.location.href;
+    
+    
+		Constants.url = 'http://localhost:' + '7070' + '/PVPUI/'
 		//Constants.url = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + '/PVPUI/'
     console.log("LOCATION PORT " + Constants.url)
     console.log("LOCATION PORT " + window.location.hostname)

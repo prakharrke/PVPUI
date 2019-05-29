@@ -9,6 +9,7 @@ import { DatePicker } from '@progress/kendo-react-dateinputs';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
 import * as Constants from '../Constants'
+import {  Switch } from '@progress/kendo-react-inputs';
 export default class Report extends Component {
 
 	constructor(props) {
@@ -29,7 +30,8 @@ export default class Report extends Component {
 			minDate: minDateForCalender,
 			maxDate: maxDateForCalender,
 			reportDate: currentDate,
-			connectionName : ''
+			connectionName : '',
+			connectionNames : []
 
 
 
@@ -37,7 +39,37 @@ export default class Report extends Component {
 	}
 
 	componentWillMount() {
-		//this.fetchReportData(this.state.reportDate);
+		var toDate = new Date();
+		toDate.setHours(7)
+		toDate.setMinutes(0)
+		toDate.setSeconds(0)
+		toDate.setMilliseconds(0)
+		var fromDate = new Date(toDate);
+		var prevDate = fromDate.getDate() - 1;
+		fromDate.setDate(prevDate);
+		fromDate.setHours(19)
+		fromDate.setMinutes(0)
+		fromDate.setSeconds(0)
+		fromDate.setMilliseconds(0)
+		console.log(fromDate)
+		console.log(toDate)
+
+		axios.post(Constants.url + 'GetPluginsForDetailedReport', `dateDetails=${encodeURIComponent(JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), operationType : 'Read' }))}`, {
+			headers: {
+			}
+
+
+		}).then(response=>{
+			console.log(response.data)
+			this.setState({
+				...this.state,
+				connectionNames : response.data
+			})
+		}).catch(e=>{
+			alert(e);
+		})
+
+
 	}
 
 
@@ -63,7 +95,54 @@ export default class Report extends Component {
 
 
 		}).then(response => {
-			const result = groupBy(response.data, [{ field: "pluginName" }]);
+			const result = groupBy(response.data, [{ field: "pluginName"  }]);
+			console.log(result)
+			var connectionData = []
+			result.map(connectionObject => {
+				connectionData.push({
+					pluginName: connectionObject.value,
+					items: connectionObject.items,
+
+				})
+			})
+			this.isNotLoading();
+			this.setState({
+				resultSet: response.data,
+				dataResult: connectionData
+			})
+
+			//console.log(result)
+
+		}).catch()
+
+	}
+
+	// * FETCH REPORT DATA ON DATE CHANGE
+
+		fetchReportDataOnDateChange(reportDate) {
+		this.isLoading();
+		var toDate = new Date(reportDate)
+		toDate.setHours(7)
+		toDate.setMinutes(0)
+		toDate.setSeconds(0)
+		toDate.setMilliseconds(0)
+		var fromDate = new Date(toDate);
+		var prevDate = fromDate.getDate() - 1;
+		fromDate.setDate(prevDate);
+		fromDate.setHours(19)
+		fromDate.setMinutes(0)
+		fromDate.setSeconds(0)
+		fromDate.setMilliseconds(0)
+		console.log(fromDate)
+		console.log(toDate)
+		axios.post(Constants.url + 'FetchReport', `reportDetails=${JSON.stringify({ fromDate: fromDate.getTime(), toDate: toDate.getTime(), connectionName : this.state.connectionName })}`, {
+			headers: {
+			}
+
+
+		}).then(response => {
+			const result = groupBy(response.data, [{ field: "pluginName"  }]);
+			console.log(result)
 			var connectionData = []
 			result.map(connectionObject => {
 				connectionData.push({
@@ -85,7 +164,11 @@ export default class Report extends Component {
 	}
 
 	changeReportDate(event) {
-		//this.fetchReportData(event.target.value);
+		if(this.state.connectionName === ''){
+			alert('Please select Plugin Name')
+			return
+		}
+		this.fetchReportDataOnDateChange(event.target.value)
 		this.setState({
 			reportDate: event.target.value
 		})
@@ -149,7 +232,7 @@ export default class Report extends Component {
 						<DropDownList
 
 							defaultValue="Connection Name"
-							data={this.props.connectionNames}
+							data={this.state.connectionNames}
 							value={this.state.connectionName}
 							style={{ width: "100%", textAlign: "center", marginTop: "1em", marginBottom: "1em" }}
 							onChange={this.setConnectionName.bind(this)}
@@ -171,6 +254,7 @@ export default class Report extends Component {
 
 				>
 					<Column field="pluginName" title="Plugin Name" />
+					
 
 				</Grid>
 			</div>

@@ -6,6 +6,8 @@ import ReportContainer from './Scenes/ReportContainer'
 
 import DetailedReportContainer from './Scenes/DetailedReportContainer'
 import ParseMLV from './Scenes/parseMLV'
+import ParentReportContainer from './Scenes/ParentReportContainer'
+
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
 
@@ -61,8 +63,8 @@ export default class Routes extends Component {
 
 				<Switch>
 				<Route path="/parseMLV" component={ParseMLV}/>
-				<Route  path='/reports/details' render = {props=>{return (<DetailedReportContainer connectionNames={this.state.connectionNames}/>)}} />
-				<Route path='/reports' render = {props=>{return (<ReportContainer holdConnectionNamesArray={this.holdConnectionNamesArray.bind(this)}/>)}} />
+				
+				<Route path='/reports' component = {ParentReportContainer} />
 				<Route  path='/login' render={props=>{return (<LoginForm authenticateUser={this.authenticateUser.bind(this)} isUserAuthenticated={this.state.isUserAuthenticated} />)}} />
 				<PrivateRoute isAuthenticated={this.state.isUserAuthenticated} path='/' component = {PVPUI}/>
 				</Switch>

@@ -730,7 +730,7 @@ export default class CreateBaseline extends Component {
 												primary={true}
 												style={{ margin: '1em' }}
 												onClick={this.generateMLV.bind(this)}
-											>Genrate</Button>
+											>Generate</Button>
 										</div>
 										<div className="col-lg-10">
 

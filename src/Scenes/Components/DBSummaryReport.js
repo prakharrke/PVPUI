@@ -28,13 +28,13 @@ export default class DBSummaryReport extends Component {
 
 							<ChartTooltip />
 							<ChartSeries>
-								<ChartSeriesItem type="line" data={dataObject.data}  >
+								<ChartSeriesItem type="line" data={dataObject.data}  color={'rgb(63, 81, 181)'} >
 									<ChartSeriesItemTooltip background="blue" />
 								</ChartSeriesItem>
-								<ChartSeriesItem type="line" data={dataObject.writeData} >
+								<ChartSeriesItem type="line" data={dataObject.writeData} color={'rgb(33, 150, 243)'}>
 									<ChartSeriesItemTooltip background="blue" />
 								</ChartSeriesItem>
-								<ChartSeriesItem type="line" data={dataObject.activityData} >
+								<ChartSeriesItem type="line" data={dataObject.activityData} color={'rgb(67, 160, 71)'}>
 									<ChartSeriesItemTooltip background="blue" />
 								</ChartSeriesItem>
 

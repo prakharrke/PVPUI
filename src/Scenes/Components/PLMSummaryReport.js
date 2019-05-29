@@ -28,15 +28,21 @@ export default class PLMSummaryReport extends Component {
 							<ChartTitle text={dataObject.connectionName} />
 							<ChartTooltip />
 							<ChartSeries>
-								<ChartSeriesItem type="line" data={dataObject.data}  >
-									<ChartSeriesItemTooltip background="blue" />
-								</ChartSeriesItem>
-								<ChartSeriesItem type="line" data={dataObject.writeData} style={{fill : '#d66520'}}>
-									<ChartSeriesItemTooltip background="blue" />
-								</ChartSeriesItem>
-								<ChartSeriesItem type="line" data={dataObject.activityData} >
-									<ChartSeriesItemTooltip background="blue" />
-								</ChartSeriesItem>
+								{this.props.showReadLine &&
+									<ChartSeriesItem type="line" data={dataObject.data} color={'rgb(63, 81, 181)'} >
+										<ChartSeriesItemTooltip background="blue" />
+									</ChartSeriesItem>
+								}
+								{this.props.showCrudLine &&
+									<ChartSeriesItem type="line" data={dataObject.writeData} style={{ fill: '#d66520' }} color={'rgb(33, 150, 243)'}>
+										<ChartSeriesItemTooltip background="blue" />
+									</ChartSeriesItem>
+								}
+								{this.props.showActivitiesLine &&
+									<ChartSeriesItem type="line" data={dataObject.activityData} color={'rgb(67, 160, 71)'} >
+										<ChartSeriesItemTooltip background="blue" />
+									</ChartSeriesItem>
+								}
 
 							</ChartSeries>
 						</Chart>

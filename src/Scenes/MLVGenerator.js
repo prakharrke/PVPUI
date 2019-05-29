@@ -2443,7 +2443,7 @@ export default class MLVGenerator extends Component {
 		ifExistsAttributes.splice(event.target.getAttribute('index'), 1);
 		var eqAction = this.state[this.state.selectedObject.objectID].ifExists.eqAction;
 		if (ifExistsAttributes.length === 0)
-			eqAction = 'SELECT EQACTION'
+			eqAction = { procedureName: '', procedureSignature: '' }
 		this.setState({
 			...this.state,
 			[this.state.selectedObject.objectID]: {
@@ -2452,7 +2452,7 @@ export default class MLVGenerator extends Component {
 				ifExists: {
 					...this.state[this.state.selectedObject.objectID].ifExists,
 					attributes: ifExistsAttributes,
-					eqAction: eqAction
+					eqAction: {...eqAction}
 				}
 			}
 		})
@@ -3873,10 +3873,13 @@ export default class MLVGenerator extends Component {
 								{
 									this.state.gridView.columns.map(column => {
 										return (
+
 											<Column
 												field={column}
 												title={column}
 												width="500px"
+												editable={true}
+												
 											/>
 										)
 									})
