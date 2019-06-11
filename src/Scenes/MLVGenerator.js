@@ -3858,17 +3858,17 @@ export default class MLVGenerator extends Component {
 								<Column
 									field="Source"
 									title="Source"
-									width="500px"
+									width="70%"
 								/>
 								<Column
 									field="Level"
 									title="Level"
-									width="500px"
+									width="15%"
 								/>
 								<Column
 									field="relation"
 									title="Relation"
-									width="500px"
+									width="15%"
 								/>
 								{
 									this.state.gridView.columns.map(column => {
