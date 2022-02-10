@@ -23,7 +23,7 @@
     "@progress/kendo-ui": "^2019.1.307",
     "axios": "^0.18.0",
     "hammerjs": "^2.0.8",
-    "node-sass": "^4.10.0",
+    "node-sass": "^7.0.0",
     "react": "^16.6.3",
     "react-addons-css-transition-group": "^15.6.2",
     "react-dom": "^16.6.3",
